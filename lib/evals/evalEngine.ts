@@ -1,11 +1,54 @@
 import type {
   EvalReport,
+  RetrievalQualityMetrics,
   CitationValidationResult,
   RetrievedSource,
   FinalAnswerResult,
   HallucinationRiskResult,
 } from "@/lib/types";
 import { legalCorpus } from "@/lib/data/legalCorpus";
+
+function averageOf(nums: number[]): number {
+  if (nums.length === 0) return 0;
+  return nums.reduce((a, b) => a + b, 0) / nums.length;
+}
+
+function retrievalCoverageScore(sources: RetrievedSource[]): number {
+  if (sources.length === 0) return 0.1;
+
+  const method = sources[0]?.retrievalMethod;
+  const topScore = sources[0]?.finalScore ?? sources[0]?.relevanceScore ?? 0;
+  const count = sources.length;
+
+  // Phase 2: stronger coverage calculation using hybrid scores
+  if (method === "hybrid_rag" && count >= 3 && topScore >= 0.6) return 0.85;
+  if (method === "hybrid_rag" && count >= 2) return 0.70;
+  if (method === "hybrid_rag") return 0.55;
+  if (method === "keyword_fallback" && count >= 3 && topScore >= 0.4) return 0.55;
+  if (method === "keyword_fallback" && count >= 2) return 0.40;
+  if (method === "memory_fallback") return 0.20;
+
+  // Legacy: fraction of corpus (Phase 1 fallback)
+  return parseFloat((sources.length / legalCorpus.length).toFixed(3));
+}
+
+function buildRetrievalQuality(sources: RetrievedSource[]): RetrievalQualityMetrics {
+  const method = sources[0]?.retrievalMethod ?? "unknown";
+  const vectorSearchUsed = sources.some((s) => (s.vectorScore ?? 0) > 0);
+  const fallbackUsed = method !== "hybrid_rag";
+  const hybridScores = sources.map((s) => s.hybridScore ?? s.relevanceScore);
+  const avgHybrid = parseFloat(averageOf(hybridScores).toFixed(3));
+  const topScore = sources[0]?.finalScore ?? sources[0]?.relevanceScore ?? 0;
+
+  return {
+    retrievalMethod: method,
+    vectorSearchUsed,
+    fallbackUsed,
+    averageHybridScore: avgHybrid,
+    topSourceScore: parseFloat(topScore.toFixed(3)),
+    sourceCount: sources.length,
+  };
+}
 
 export function runEvalEngine(
   citationValidation: CitationValidationResult,
@@ -25,15 +68,11 @@ export function runEvalEngine(
     (validCitations / Math.max(1, finalAnswer.citations.length)).toFixed(3)
   );
 
-  // Use the dedicated hallucination risk agent's output
   const hallucinationRiskScore = hallucinationRisk.riskScore;
   const hallucinationRiskLevel = hallucinationRisk.riskLevel;
 
-  // Retrieval coverage: retrieved sources as fraction of corpus
-  const retrievalCoverage = parseFloat(
-    (retrievedSources.length / legalCorpus.length).toFixed(3)
-  );
-
+  // Phase 2: stronger retrieval coverage
+  const retrievalCoverage = parseFloat(retrievalCoverageScore(retrievedSources).toFixed(3));
   const finalAnswerConfidence = finalAnswer.confidenceScore;
 
   // Overall reliability: weighted composite
@@ -55,5 +94,6 @@ export function runEvalEngine(
     finalAnswerConfidence,
     overallReliability,
     passFail: overallReliability >= 0.6 ? "pass" : "fail",
+    retrievalQuality: buildRetrievalQuality(retrievedSources),
   };
 }

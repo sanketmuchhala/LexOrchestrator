@@ -4,6 +4,7 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type {
   LegalChunkFromDB,
+  LegalChunkWithSimilarity,
   RunSummary,
   RunDetail,
   AgentTraceRecord,
@@ -125,8 +126,15 @@ export async function insertRetrievalResults(
     run_id: runId,
     chunk_id: chunkMap.get(s.citationId) ?? null,
     citation_id: s.citationId,
-    score: s.relevanceScore,
+    score: s.finalScore ?? s.relevanceScore,  // finalScore preferred, falls back to relevanceScore
     reason: s.reason ?? null,
+    // Phase 2: hybrid RAG columns (null if not present — migration adds these as nullable)
+    retrieval_method: s.retrievalMethod ?? null,
+    keyword_score: s.keywordScore ?? null,
+    vector_score: s.vectorScore ?? null,
+    hybrid_score: s.hybridScore ?? null,
+    rerank_score: s.rerankScore ?? null,
+    rank_position: s.rankPosition ?? null,
   }));
 
   const { error } = await client.from("retrieval_results").insert(rows);
@@ -235,6 +243,36 @@ export async function getRunById(id: string): Promise<RunDetail | null> {
 }
 
 // ─── Corpus Search ────────────────────────────────────────────────────────────
+
+// Phase 2: vector similarity search via pgvector RPC
+export async function vectorSearchLegalChunks(
+  queryEmbedding: number[],
+  matchCount: number = 8
+): Promise<LegalChunkWithSimilarity[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client.rpc("match_legal_chunks", {
+    query_embedding: queryEmbedding,
+    match_count: matchCount,
+  });
+
+  if (error) {
+    console.warn("[DB] vectorSearchLegalChunks RPC failed:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    id: row.id as string,
+    document_id: row.document_id as string,
+    citation_id: row.citation_id as string,
+    chunk_text: row.chunk_text as string,
+    keywords: (row.keywords as string[]) ?? [],
+    jurisdiction: row.jurisdiction as string | null,
+    practice_area: row.practice_area as string | null,
+    similarity: row.similarity as number,
+  }));
+}
 
 export async function searchLegalChunksFromDB(keyTerms: string[]): Promise<LegalChunkFromDB[]> {
   const client = getClient();

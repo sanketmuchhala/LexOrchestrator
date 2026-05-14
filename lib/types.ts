@@ -22,8 +22,16 @@ export interface RetrievedSource {
   docType: string;
   jurisdiction: string;
   keywords: string[];
-  relevanceScore: number;
+  relevanceScore: number;  // = finalScore for backward compat
   reason?: string;
+  // Phase 2: hybrid RAG scoring
+  keywordScore?: number;
+  vectorScore?: number;
+  hybridScore?: number;
+  rerankScore?: number;
+  finalScore?: number;
+  rankPosition?: number;
+  retrievalMethod?: "hybrid_rag" | "keyword_fallback" | "memory_fallback";
 }
 
 export interface RetrievalResult {
@@ -82,6 +90,16 @@ export interface FinalAnswerResult {
 
 // ─── Eval Engine ─────────────────────────────────────────────────────────────
 
+// Phase 2: retrieval quality summary included in eval payload
+export interface RetrievalQualityMetrics {
+  retrievalMethod: string;
+  vectorSearchUsed: boolean;
+  fallbackUsed: boolean;
+  averageHybridScore: number;
+  topSourceScore: number;
+  sourceCount: number;
+}
+
 export interface EvalReport {
   groundednessScore: number;
   citationAccuracyScore: number;
@@ -91,6 +109,7 @@ export interface EvalReport {
   finalAnswerConfidence: number;
   overallReliability: number;
   passFail: "pass" | "fail";                      // pass if overallReliability >= 0.6
+  retrievalQuality?: RetrievalQualityMetrics;     // Phase 2: hybrid RAG metrics
 }
 
 // ─── Execution Trace ─────────────────────────────────────────────────────────
@@ -130,6 +149,11 @@ export interface LegalChunkFromDB {
   practice_area: string | null;
   document_title?: string;
   disclaimer?: string;
+}
+
+// Phase 2: vector search result with cosine similarity score
+export interface LegalChunkWithSimilarity extends LegalChunkFromDB {
+  similarity: number;
 }
 
 export interface RunSummary {

@@ -24,8 +24,11 @@ interface Tool<TInput, TOutput> {
 }
 
 interface SearchInput {
+  query: string;
   keyTerms: string[];
   legalIssue: string;
+  jurisdiction?: string;
+  practiceArea?: string;
 }
 
 interface ValidateInput {
@@ -51,12 +54,15 @@ interface PersistTraceInput {
 
 const searchLegalCorpusTool: Tool<SearchInput, RetrievedSource[]> = {
   name: "searchLegalCorpus",
-  description: "Retrieves relevant legal corpus chunks from the database or in-memory fallback using keyword scoring.",
+  description: "Hybrid RAG retrieval — pgvector cosine similarity + keyword overlap scoring. Falls back to keyword-only or in-memory if embeddings unavailable.",
   inputSchema: {
+    query: { type: "string" },
     keyTerms: { type: "array", items: { type: "string" } },
     legalIssue: { type: "string" },
+    jurisdiction: { type: "string" },
+    practiceArea: { type: "string" },
   },
-  execute: async ({ keyTerms, legalIssue }) => searchLegalCorpus(keyTerms, legalIssue),
+  execute: async (input) => searchLegalCorpus(input),
 };
 
 const validateCitationSupportTool: Tool<ValidateInput, CitationValidationResult> = {

@@ -1,6 +1,6 @@
 # LexOrchestrator
 
-**Multi-Agent Litigation Reliability Engine — Phase 1**
+**Multi-Agent Litigation Reliability Engine — Phase 2**
 
 LexOrchestrator is a full-stack multi-agent AI system for legal research reliability. It routes legal queries through a sequential agent pipeline — intake classification, RAG retrieval, citation validation, adversarial review, hallucination risk scoring, and eval reporting — before producing a final cited answer.
 
@@ -10,12 +10,14 @@ This is a prototype for litigation AI reliability architecture. It is not a prod
 
 ---
 
-## What Is Real in Phase 1
+## What Is Real in Phase 2
 
 | Capability | Status |
 |-----------|--------|
 | Supabase/Postgres persistence (runs, traces, citations, eval scores) | ✅ Real |
-| DB-backed retrieval with in-memory fallback | ✅ Real |
+| **pgvector hybrid RAG** (cosine similarity + keyword + jurisdiction boost) | ✅ Real (Phase 2) |
+| **Embedding backfill script** (`npm run embed:legal`) | ✅ Real (Phase 2) |
+| **Retrieval quality metrics** in eval report (method, vectorSearchUsed, avgHybridScore) | ✅ Real (Phase 2) |
 | OpenAI-compatible LLM calls (intake, citation validation, adversarial review, synthesis) | ✅ Real (with mock fallback) |
 | Deterministic hallucination risk scoring | ✅ Real |
 | Tool registry (MCP-inspired, 4 tools) | ✅ Real |
@@ -23,8 +25,74 @@ This is a prototype for litigation AI reliability architecture. It is not a prod
 | Run history API (`GET /api/runs`, `GET /api/runs/[id]`) | ✅ Real |
 | Eval report with groundedness, citation accuracy, reliability score, pass/fail | ✅ Real |
 | Auth / user accounts | ❌ Future |
-| pgvector semantic search | ❌ Future |
+| Pinecone / external vector store | ❌ Future |
 | Document upload | ❌ Future |
+
+---
+
+## Phase 2: Hybrid RAG Architecture
+
+### Retrieval Pipeline
+
+```
+Query → generateQueryEmbedding → vectorSearchLegalChunks (pgvector RPC)
+                                          ↓
+Query → keyTerms → searchLegalChunksFromDB → keyword scoring
+                                          ↓
+                               Merge candidates by citation_id
+                                          ↓
+                  hybridScore = keyword(0.35) + vector(0.45) + jurisdiction(0.10) + practiceArea(0.10)
+                                          ↓
+                               Reranker: exact term bonus (+0.05/match)
+                                          ↓
+                               Top 5 by rerankScore → RetrievedSource[]
+```
+
+**Fallback chain:**
+1. `hybrid_rag` — pgvector similarity + keyword (requires embeddings in DB)
+2. `keyword_fallback` — keyword scoring only (if vector search fails or no embeddings)
+3. `memory_fallback` — in-memory corpus (if Supabase unavailable)
+
+### Scoring Weights
+
+| Signal | Weight |
+|--------|--------|
+| Vector cosine similarity | 0.45 |
+| Keyword overlap (TF-style) | 0.35 |
+| Jurisdiction match boost | 0.10 |
+| Practice area match boost | 0.10 |
+| Exact term rerank bonus | +0.05 per term (capped at 0.15) |
+
+### Per-Source Score Fields (in API response)
+
+```json
+{
+  "citationId": "SAMPLE-003",
+  "vectorScore": 0.847,
+  "keywordScore": 0.612,
+  "hybridScore": 0.748,
+  "rerankScore": 0.798,
+  "finalScore": 0.798,
+  "rankPosition": 1,
+  "retrievalMethod": "hybrid_rag",
+  "reason": "Vector: 85% | Keyword: 61% | Hybrid: 75% | Final: 80%"
+}
+```
+
+### Retrieval Quality in Eval Report
+
+```json
+{
+  "retrievalQuality": {
+    "retrievalMethod": "hybrid_rag",
+    "vectorSearchUsed": true,
+    "fallbackUsed": false,
+    "averageHybridScore": 0.683,
+    "topSourceScore": 0.798,
+    "sourceCount": 5
+  }
+}
+```
 
 ---
 
@@ -71,7 +139,11 @@ Seven tables in Supabase/Postgres:
 | `citation_validations` | Per-claim support status (verified/partial/unsupported) |
 | `eval_reports` | Reliability metrics — groundedness, citation accuracy, pass/fail |
 
-Apply schema: paste `supabase/migrations/001_lexorchestrator_phase1.sql` into the Supabase SQL Editor.
+Apply migrations in order:
+1. Paste `supabase/migrations/001_lexorchestrator_phase1.sql` into the Supabase SQL Editor
+2. Paste `supabase/migrations/002_hybrid_rag_pgvector.sql` to enable pgvector and hybrid RAG
+
+> **Note on HNSW index:** Requires pgvector ≥ 0.5.0 (available on Supabase hosted). If it fails, see the IVFFlat alternative commented out in the migration file.
 
 ---
 
@@ -88,11 +160,15 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...
 # LLM (optional — falls back to deterministic mock if absent)
 OPENAI_API_KEY=sk-...
 LLM_MODEL=gpt-4o-mini
+
+# Embeddings — Phase 2 (optional — falls back to hash-based vectors if absent)
+EMBEDDING_MODEL=text-embedding-3-small
 ```
 
 **Fallback behavior when keys are missing:**
 - No `SUPABASE_*`: app runs, pipeline completes, returns `persisted: false`
-- No `OPENAI_API_KEY`: agents use deterministic mock outputs, full pipeline still works
+- No `OPENAI_API_KEY`: agents use deterministic mock outputs, retrieval uses hash-based embeddings (not semantically meaningful), full pipeline still works
+- No embeddings in DB: retrieval falls back to `keyword_fallback`, `evalReport.retrievalQuality.vectorSearchUsed = false`
 
 ---
 
@@ -115,9 +191,10 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Apply Database Migration
+### Apply Database Migrations
 
-Paste the contents of `supabase/migrations/001_lexorchestrator_phase1.sql` into your Supabase project's SQL Editor and run it.
+1. Paste `supabase/migrations/001_lexorchestrator_phase1.sql` into Supabase SQL Editor
+2. Paste `supabase/migrations/002_hybrid_rag_pgvector.sql` to enable pgvector + hybrid RAG
 
 ### Seed Legal Corpus
 
@@ -125,7 +202,15 @@ Paste the contents of `supabase/migrations/001_lexorchestrator_phase1.sql` into 
 npm run seed:legal
 ```
 
-This idempotently seeds 12 sample educational chunks into `legal_documents` and `legal_chunks`.
+Seeds 12 sample educational chunks into `legal_documents` and `legal_chunks`. Idempotent.
+
+### Generate Embeddings (Phase 2)
+
+```bash
+npm run embed:legal
+```
+
+Backfills pgvector embeddings for all chunks where `embedding IS NULL`. Requires `OPENAI_API_KEY`. Safe to re-run — skips already-embedded rows. After this, queries use `hybrid_rag` retrieval instead of `keyword_fallback`.
 
 ---
 
@@ -144,12 +229,12 @@ Runs the full 7-agent pipeline. Returns a `Phase1OrchestratorResult`.
   "runId": "uuid",
   "query": "...",
   "intake": { "legalIssue", "jurisdiction", "riskLevel", "keyTerms", ... },
-  "retrievedSources": [{ "citationId", "title", "text", "relevanceScore", ... }],
+  "retrievedSources": [{ "citationId", "title", "text", "relevanceScore", "keywordScore", "vectorScore", "hybridScore", "rerankScore", "finalScore", "rankPosition", "retrievalMethod", "reason" }],
   "citationValidation": { "claims": [{ "claim", "citationId", "supportStatus", "supportScore", "explanation" }], "overallScore", ... },
   "hallucinationRisk": { "riskScore", "riskLevel", "factors", "unsupportedCitationCount" },
   "adversarialReview": { "weaknesses", "missingAuthority", "counterarguments", "overallRisk", "summary" },
   "finalAnswer": { "answer", "citations", "confidenceScore", "riskFlags", "unresolvedQuestions" },
-  "evalReport": { "groundednessScore", "citationAccuracyScore", "hallucinationRiskScore", "retrievalCoverage", "finalAnswerConfidence", "overallReliability", "passFail" },
+  "evalReport": { "groundednessScore", "citationAccuracyScore", "hallucinationRiskScore", "retrievalCoverage", "finalAnswerConfidence", "overallReliability", "passFail", "retrievalQuality": { "retrievalMethod", "vectorSearchUsed", "fallbackUsed", "averageHybridScore", "topSourceScore", "sourceCount" } },
   "executionTrace": [{ "agent", "durationMs", "status" }],
   "persisted": true,
   "modelUsed": "gpt-4o-mini"

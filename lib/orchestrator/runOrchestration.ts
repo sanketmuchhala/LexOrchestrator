@@ -46,19 +46,23 @@ export async function runOrchestration(query: string): Promise<Phase1Orchestrato
       payload: intake,
     });
 
-    // 3. Retrieval Agent (via tool registry → DB-backed with fallback)
+    // 3. Retrieval Agent (via tool registry → hybrid RAG with fallback chain)
     const { result: sources, durationMs: t2 } = await time(() =>
-      callTool<{ keyTerms: string[]; legalIssue: string }, RetrievedSource[]>("searchLegalCorpus", {
+      callTool<{ query: string; keyTerms: string[]; legalIssue: string; jurisdiction?: string; practiceArea?: string }, RetrievedSource[]>("searchLegalCorpus", {
+        query,
         keyTerms: intake.keyTerms,
         legalIssue: intake.legalIssue,
+        jurisdiction: intake.jurisdiction !== "General / Multi-Jurisdiction" ? intake.jurisdiction : undefined,
+        practiceArea: intake.legalIssue,
       })
     );
+    const retrievalMethod = sources[0]?.retrievalMethod ?? "keyword_fallback";
     trace.push({ agent: "Retrieval Agent", durationMs: t2, status: "complete" });
     await callTool("persistRunTrace", {
       runId, stepIndex: 1, agentName: "Retrieval Agent",
-      inputSummary: `Key terms: ${intake.keyTerms.slice(0, 6).join(", ")}`,
-      outputSummary: `Retrieved ${sources.length} source(s). Top: ${sources[0]?.title ?? "none"} (${Math.round((sources[0]?.relevanceScore ?? 0) * 100)}%)`,
-      payload: { sources: sources.map((s) => ({ id: s.citationId, title: s.title, score: s.relevanceScore })) },
+      inputSummary: `Query embedding + key terms: ${intake.keyTerms.slice(0, 6).join(", ")}`,
+      outputSummary: `[${retrievalMethod}] Retrieved ${sources.length} source(s). Top: "${sources[0]?.title ?? "none"}" (${Math.round((sources[0]?.finalScore ?? sources[0]?.relevanceScore ?? 0) * 100)}%)`,
+      payload: { sources: sources.map((s) => ({ citationId: s.citationId, title: s.title, vectorScore: s.vectorScore, keywordScore: s.keywordScore, finalScore: s.finalScore, method: s.retrievalMethod })), retrievalMethod },
     });
     await insertRetrievalResults(runId, sources);
 
