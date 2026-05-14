@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        mono: ["'Fira Code'", "Menlo", "Monaco", "Consolas", "monospace"],
+        mono: ["Menlo", "Monaco", "Consolas", "monospace"],
       },
       animation: {
         "fade-in": "fadeIn 0.4s ease-out forwards",

@@ -1,10 +1,10 @@
 "use client";
 
-import type { OrchestratorResult } from "@/lib/types";
+import type { Phase1OrchestratorResult } from "@/lib/types";
 import AgentCard from "./AgentCard";
 
 interface AgentTimelineProps {
-  result: OrchestratorResult;
+  result: Phase1OrchestratorResult;
 }
 
 export default function AgentTimeline({ result }: AgentTimelineProps) {
