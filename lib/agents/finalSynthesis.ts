@@ -5,86 +5,99 @@ import type {
   CitationValidationResult,
   AdversarialReviewResult,
 } from "@/lib/types";
+import { generateStructuredOutput } from "@/lib/llm/llmClient";
 
-function buildAnswerBody(
+function deterministicAnswer(
   intake: IntakeResult,
   sources: RetrievedSource[],
   citationValidation: CitationValidationResult
 ): string {
   if (sources.length === 0) {
-    return `Based on the available corpus, the legal issue of "${intake.queryClassification}" in ${intake.jurisdiction} does not map strongly to retrieved authorities. A comprehensive research memorandum would require expansion of the document set to provide reliable guidance.`;
+    return `Based on the available corpus, the legal issue of "${intake.queryClassification}" in ${intake.jurisdiction} does not map strongly to retrieved authorities. A comprehensive research memorandum would require expanding the document set.`;
   }
-
   const topSources = sources.slice(0, 3);
-  const citedIds = topSources.map((s) => `[${s.id}]`).join(", ");
-
+  const strongClaims = citationValidation.claims.filter((c) => c.supportStatus === "verified" && c.citationId).slice(0, 2);
+  const claimSentences = strongClaims.map((c) => `${c.claim} [${c.citationId}]`).join(" ");
+  const sourceSummaries = topSources.map((s) => `**${s.title}** (${s.citationId ?? s.id}): ${s.text.slice(0, 160)}...`).join("\n\n");
   const issueIntros: Record<IntakeResult["legalIssue"], string> = {
-    contract: `Under the governing contract law framework applicable to ${intake.jurisdiction}, the following analysis addresses the identified dispute.`,
-    tort: `In the context of a tort action in ${intake.jurisdiction}, the following elements and authorities are relevant.`,
-    evidence: `The admissibility and reliability of evidence in ${intake.jurisdiction} is governed by the following standards.`,
-    procedure: `Civil procedural rules applicable in ${intake.jurisdiction} establish the following framework for the issue presented.`,
-    discovery: `Discovery obligations and protections in ${intake.jurisdiction} are governed by the following principles.`,
-    general: `The following legal authorities are relevant to the research question presented.`,
+    contract: `Under governing contract law in ${intake.jurisdiction}:`, tort: `In a tort action in ${intake.jurisdiction}:`,
+    evidence: `Regarding evidentiary standards in ${intake.jurisdiction}:`, procedure: `Under civil procedure rules in ${intake.jurisdiction}:`,
+    discovery: `Discovery obligations in ${intake.jurisdiction}:`, general: `Relevant legal authorities for this research question:`,
   };
-
-  const strongClaims = citationValidation.claims
-    .filter((c) => c.supportStrength === "strong" && c.supportingCitationId)
-    .slice(0, 2);
-
-  const claimSentences = strongClaims
-    .map((c) => `${c.claim} [${c.supportingCitationId}]`)
-    .join(" ");
-
-  const sourceSummaries = topSources
-    .map((s) => `**${s.title}** (${s.id}): ${s.text.slice(0, 150)}...`)
-    .join("\n\n");
-
-  return [
-    issueIntros[intake.legalIssue],
-    "",
-    claimSentences || `The retrieved authorities address the core issues: ${citedIds}.`,
-    "",
-    "**Retrieved Authorities:**",
-    sourceSummaries,
-    "",
-    `*Note: This analysis is grounded in ${topSources.length} retrieved sample corpus entries. Confidence reflects citation support at ${Math.round(citationValidation.overallScore * 100)}%.*`,
-  ].join("\n");
+  return [issueIntros[intake.legalIssue], "", claimSentences || `See: ${topSources.map((s) => s.citationId ?? s.id).join(", ")}.`, "", "**Retrieved Authorities:**", sourceSummaries, "", `*Citation support: ${Math.round(citationValidation.overallScore * 100)}%. Sample corpus only — not real legal authority.*`].join("\n");
 }
 
-export function runFinalSynthesis(
+interface LLMFinalAnswerResponse {
+  legalStyleAnswer: string;
+  citationsUsed: string[];
+  confidence: number;
+  unresolvedQuestions: string[];
+  riskFlags: string[];
+}
+
+export async function runFinalSynthesisAgent(
   intake: IntakeResult,
   sources: RetrievedSource[],
   citationValidation: CitationValidationResult,
   adversarialReview: AdversarialReviewResult
-): FinalAnswerResult {
+): Promise<FinalAnswerResult> {
   const adversarialRiskFactor = { low: 0.1, medium: 0.25, high: 0.45 }[adversarialReview.overallRisk];
-  const confidenceScore = parseFloat(
-    Math.max(0.1, (citationValidation.overallScore * 0.6 + (1 - adversarialRiskFactor) * 0.4)).toFixed(3)
-  );
-
-  const citations = [
-    ...new Set(
-      citationValidation.claims
-        .filter((c) => c.supportingCitationId)
-        .map((c) => c.supportingCitationId as string)
-    ),
-  ];
-
-  const riskFlags: string[] = [
+  const confidenceScore = parseFloat(Math.max(0.1, citationValidation.overallScore * 0.6 + (1 - adversarialRiskFactor) * 0.4).toFixed(3));
+  const deterministicCitations = [...new Set(citationValidation.claims.filter((c) => c.citationId).map((c) => c.citationId as string))];
+  const deterministicRiskFlags = [
     ...citationValidation.flags,
     ...(adversarialReview.overallRisk === "high" ? ["HIGH adversarial risk — significant counterarguments identified."] : []),
     ...(adversarialReview.overallRisk === "medium" ? ["MODERATE adversarial risk — opposing counsel has viable challenges."] : []),
   ];
 
-  const unresolvedQuestions = adversarialReview.missingAuthority.map(
-    (ma) => `Missing authority: ${ma}`
-  );
+  const fallback: FinalAnswerResult = {
+    answer: deterministicAnswer(intake, sources, citationValidation),
+    citations: deterministicCitations,
+    confidenceScore,
+    riskFlags: deterministicRiskFlags,
+    unresolvedQuestions: adversarialReview.missingAuthority.map((ma) => `Missing authority: ${ma}`),
+  };
+
+  const sourceSummaries = sources.slice(0, 4).map((s) => `[${s.citationId ?? s.id}] ${s.title}: ${s.text.slice(0, 250)}`).join("\n\n");
+
+  const result = await generateStructuredOutput<LLMFinalAnswerResponse>({
+    system: `You are a legal research AI producing a final legal analysis. Write a clear, well-structured response that:
+1. Answers the legal question using only the provided retrieved sources
+2. Cites sources inline using their citation IDs (e.g. [SAMPLE-003])
+3. Acknowledges limitations from the adversarial review
+4. Does NOT claim to provide legal advice or real legal authority
+
+Return JSON with these exact keys:
+- legalStyleAnswer: the main legal analysis text (2–4 paragraphs)
+- citationsUsed: array of citation IDs referenced in the answer
+- confidence: number 0–1 reflecting overall confidence
+- unresolvedQuestions: array of strings naming unresolved legal questions or missing authority
+- riskFlags: array of strings naming risk factors or caveats
+
+Return JSON only.`,
+    prompt: `Query: ${intake.queryClassification}
+Issue: ${intake.queryClassification} | Jurisdiction: ${intake.jurisdiction}
+Citation support: ${Math.round(citationValidation.overallScore * 100)}%
+Adversarial risk: ${adversarialReview.overallRisk.toUpperCase()}
+
+Retrieved sources:\n${sourceSummaries || "No sources retrieved."}
+
+Key weaknesses identified:\n${adversarialReview.weaknesses.slice(0, 2).join("\n")}`,
+    schemaName: "FinalAnswer",
+    fallback: {
+      legalStyleAnswer: fallback.answer,
+      citationsUsed: fallback.citations,
+      confidence: fallback.confidenceScore,
+      unresolvedQuestions: fallback.unresolvedQuestions,
+      riskFlags: fallback.riskFlags,
+    },
+  });
 
   return {
-    answer: buildAnswerBody(intake, sources, citationValidation),
-    citations,
-    confidenceScore,
-    riskFlags,
-    unresolvedQuestions,
+    answer: result.legalStyleAnswer ?? fallback.answer,
+    citations: Array.isArray(result.citationsUsed) ? result.citationsUsed : fallback.citations,
+    confidenceScore: typeof result.confidence === "number" ? parseFloat(result.confidence.toFixed(3)) : confidenceScore,
+    riskFlags: Array.isArray(result.riskFlags) ? result.riskFlags : fallback.riskFlags,
+    unresolvedQuestions: Array.isArray(result.unresolvedQuestions) ? result.unresolvedQuestions : fallback.unresolvedQuestions,
   };
 }

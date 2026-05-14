@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { runOrchestrationPipeline } from "@/lib/orchestrator/pipeline";
+import { runOrchestration } from "@/lib/orchestrator/runOrchestration";
 
 export async function POST(req: NextRequest) {
   let body: { query?: string };
@@ -11,18 +11,20 @@ export async function POST(req: NextRequest) {
 
   const query = body?.query?.trim();
   if (!query || query.length < 5) {
-    return NextResponse.json(
-      { error: "Query must be at least 5 characters." },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Query must be at least 5 characters." }, { status: 400 });
   }
-  if (query.length > 1000) {
-    return NextResponse.json(
-      { error: "Query must be under 1000 characters." },
-      { status: 400 }
-    );
+  if (query.length > 1200) {
+    return NextResponse.json({ error: "Query must be under 1200 characters." }, { status: 400 });
   }
 
-  const result = runOrchestrationPipeline(query);
-  return NextResponse.json(result);
+  try {
+    const result = await runOrchestration(query);
+    return NextResponse.json(result);
+  } catch (err) {
+    console.error("[/api/orchestrate] Pipeline error:", err);
+    return NextResponse.json(
+      { error: "Orchestration pipeline failed. Check server logs." },
+      { status: 500 }
+    );
+  }
 }

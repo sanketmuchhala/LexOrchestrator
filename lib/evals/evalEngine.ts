@@ -3,34 +3,33 @@ import type {
   CitationValidationResult,
   RetrievedSource,
   FinalAnswerResult,
+  HallucinationRiskResult,
 } from "@/lib/types";
 import { legalCorpus } from "@/lib/data/legalCorpus";
 
 export function runEvalEngine(
   citationValidation: CitationValidationResult,
   retrievedSources: RetrievedSource[],
-  finalAnswer: FinalAnswerResult
+  finalAnswer: FinalAnswerResult,
+  hallucinationRisk: HallucinationRiskResult
 ): EvalReport {
-  // Groundedness: fraction of claims that have at least weak support
+  // Groundedness: fraction of claims with at least partial support
   const groundednessScore = parseFloat(
     (citationValidation.supportedCount / Math.max(1, citationValidation.claims.length)).toFixed(3)
   );
 
-  // Citation accuracy: fraction of cited IDs that exist in the retrieved source set
-  const retrievedIds = new Set(retrievedSources.map((s) => s.id));
-  const citedInAnswer = finalAnswer.citations;
-  const validCitations = citedInAnswer.filter((id) => retrievedIds.has(id)).length;
+  // Citation accuracy: fraction of cited IDs present in retrieved source set
+  const retrievedIds = new Set(retrievedSources.map((s) => s.citationId ?? s.id));
+  const validCitations = finalAnswer.citations.filter((id) => retrievedIds.has(id)).length;
   const citationAccuracyScore = parseFloat(
-    (validCitations / Math.max(1, citedInAnswer.length)).toFixed(3)
+    (validCitations / Math.max(1, finalAnswer.citations.length)).toFixed(3)
   );
 
-  // Hallucination risk: based on unsupported claim count
-  let hallucinationRisk: EvalReport["hallucinationRisk"];
-  if (citationValidation.unsupportedCount >= 2) hallucinationRisk = "high";
-  else if (citationValidation.unsupportedCount === 1) hallucinationRisk = "medium";
-  else hallucinationRisk = "low";
+  // Use the dedicated hallucination risk agent's output
+  const hallucinationRiskScore = hallucinationRisk.riskScore;
+  const hallucinationRiskLevel = hallucinationRisk.riskLevel;
 
-  // Retrieval coverage: relevant sources found as fraction of total corpus
+  // Retrieval coverage: retrieved sources as fraction of corpus
   const retrievalCoverage = parseFloat(
     (retrievedSources.length / legalCorpus.length).toFixed(3)
   );
@@ -42,7 +41,7 @@ export function runEvalEngine(
     (
       groundednessScore * 0.35 +
       citationAccuracyScore * 0.25 +
-      (1 - (hallucinationRisk === "high" ? 0.8 : hallucinationRisk === "medium" ? 0.4 : 0.1)) * 0.2 +
+      (1 - hallucinationRiskScore) * 0.2 +
       finalAnswerConfidence * 0.2
     ).toFixed(3)
   );
@@ -50,9 +49,11 @@ export function runEvalEngine(
   return {
     groundednessScore,
     citationAccuracyScore,
-    hallucinationRisk,
+    hallucinationRisk: hallucinationRiskLevel,
+    hallucinationRiskScore,
     retrievalCoverage,
     finalAnswerConfidence,
     overallReliability,
+    passFail: overallReliability >= 0.6 ? "pass" : "fail",
   };
 }

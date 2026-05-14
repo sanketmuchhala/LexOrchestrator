@@ -1,5 +1,7 @@
 // Shared TypeScript interfaces for the LexOrchestrator multi-agent pipeline
 
+// ─── Intake Agent ────────────────────────────────────────────────────────────
+
 export interface IntakeResult {
   legalIssue: "contract" | "tort" | "evidence" | "procedure" | "discovery" | "general";
   jurisdiction: string;
@@ -10,14 +12,18 @@ export interface IntakeResult {
   confidence: number;
 }
 
+// ─── Retrieval Agent ─────────────────────────────────────────────────────────
+
 export interface RetrievedSource {
-  id: string;
+  id: string;          // DB uuid or citation_id for in-memory fallback
+  citationId: string;  // SAMPLE-001 etc.
   title: string;
   text: string;
   docType: string;
   jurisdiction: string;
   keywords: string[];
   relevanceScore: number;
+  reason?: string;
 }
 
 export interface RetrievalResult {
@@ -27,11 +33,14 @@ export interface RetrievalResult {
   totalSearched: number;
 }
 
+// ─── Citation Validator ──────────────────────────────────────────────────────
+
 export interface ValidatedClaim {
   claim: string;
-  supportingCitationId: string | null;
-  supportStrength: "strong" | "weak" | "unsupported";
-  flag: string | null;
+  citationId: string | null;
+  supportStatus: "verified" | "partial" | "unsupported";
+  supportScore: number;
+  explanation: string;
 }
 
 export interface CitationValidationResult {
@@ -42,6 +51,17 @@ export interface CitationValidationResult {
   unsupportedCount: number;
 }
 
+// ─── Hallucination Risk Agent ────────────────────────────────────────────────
+
+export interface HallucinationRiskResult {
+  riskScore: number;       // 0–1 numeric
+  riskLevel: "low" | "medium" | "high";
+  factors: string[];
+  unsupportedCitationCount: number;
+}
+
+// ─── Adversarial Review Agent ─────────────────────────────────────────────────
+
 export interface AdversarialReviewResult {
   weaknesses: string[];
   missingAuthority: string[];
@@ -49,6 +69,8 @@ export interface AdversarialReviewResult {
   overallRisk: "low" | "medium" | "high";
   summary: string;
 }
+
+// ─── Final Synthesis Agent ───────────────────────────────────────────────────
 
 export interface FinalAnswerResult {
   answer: string;
@@ -58,14 +80,20 @@ export interface FinalAnswerResult {
   unresolvedQuestions: string[];
 }
 
+// ─── Eval Engine ─────────────────────────────────────────────────────────────
+
 export interface EvalReport {
   groundednessScore: number;
   citationAccuracyScore: number;
-  hallucinationRisk: "low" | "medium" | "high";
+  hallucinationRisk: "low" | "medium" | "high";  // categorical display
+  hallucinationRiskScore: number;                 // numeric 0–1 for DB
   retrievalCoverage: number;
   finalAnswerConfidence: number;
   overallReliability: number;
+  passFail: "pass" | "fail";                      // pass if overallReliability >= 0.6
 }
+
+// ─── Execution Trace ─────────────────────────────────────────────────────────
 
 export interface ExecutionStep {
   agent: string;
@@ -73,16 +101,98 @@ export interface ExecutionStep {
   status: "complete" | "error";
 }
 
-export interface OrchestratorResult {
+// ─── Phase 1 Full Result ─────────────────────────────────────────────────────
+
+export interface Phase1OrchestratorResult {
+  runId: string;
   query: string;
   intake: IntakeResult;
   retrievedSources: RetrievedSource[];
   citationValidation: CitationValidationResult;
+  hallucinationRisk: HallucinationRiskResult;
   adversarialReview: AdversarialReviewResult;
   finalAnswer: FinalAnswerResult;
   evalReport: EvalReport;
   executionTrace: ExecutionStep[];
+  persisted: boolean;
+  modelUsed: string;
 }
+
+// ─── DB Types ─────────────────────────────────────────────────────────────────
+
+export interface LegalChunkFromDB {
+  id: string;
+  document_id: string;
+  citation_id: string;
+  chunk_text: string;
+  keywords: string[];
+  jurisdiction: string | null;
+  practice_area: string | null;
+  document_title?: string;
+  disclaimer?: string;
+}
+
+export interface RunSummary {
+  id: string;
+  query: string;
+  status: string;
+  model: string | null;
+  confidence: number | null;
+  hallucination_risk: number | null;
+  created_at: string;
+}
+
+export interface RunDetail {
+  run: RunSummary;
+  traces: AgentTraceRecord[];
+  retrievalResults: RetrievalResultRecord[];
+  citationValidations: CitationValidationRecord[];
+  evalReport: EvalReportRecord | null;
+}
+
+export interface AgentTraceRecord {
+  id: string;
+  step_index: number;
+  agent_name: string;
+  input_summary: string | null;
+  output_summary: string | null;
+  status: string | null;
+  risk_flag: string | null;
+  payload: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface RetrievalResultRecord {
+  id: string;
+  citation_id: string;
+  score: number;
+  reason: string | null;
+  created_at: string;
+}
+
+export interface CitationValidationRecord {
+  id: string;
+  claim: string;
+  citation_id: string | null;
+  support_status: string;
+  support_score: number;
+  explanation: string | null;
+  created_at: string;
+}
+
+export interface EvalReportRecord {
+  id: string;
+  groundedness_score: number;
+  citation_accuracy_score: number;
+  retrieval_coverage_score: number;
+  hallucination_risk_score: number;
+  final_reliability_score: number;
+  pass_fail_status: string;
+  payload: Record<string, unknown>;
+  created_at: string;
+}
+
+// ─── Corpus (in-memory fallback) ─────────────────────────────────────────────
 
 export interface CorpusEntry {
   id: string;
