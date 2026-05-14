@@ -1,57 +1,34 @@
-import type { RetrievalResult, RetrievedSource, IntakeResult } from "@/lib/types";
+import type { RetrievalResult, IntakeResult } from "@/lib/types";
+import { searchLegalCorpus, coverageAssessment } from "@/lib/retrieval/searchLegalCorpus";
 import { legalCorpus } from "@/lib/data/legalCorpus";
 
-const TOP_K = 4;
-const RELEVANCE_THRESHOLD = 0.15;
+export async function runRetrievalAgent(intake: IntakeResult, query: string): Promise<RetrievalResult> {
+  const sources = await searchLegalCorpus({
+    query,
+    keyTerms: intake.keyTerms,
+    legalIssue: intake.legalIssue,
+    jurisdiction: intake.jurisdiction !== "General / Multi-Jurisdiction" ? intake.jurisdiction : undefined,
+    practiceArea: intake.legalIssue,
+  });
 
-function scoreSnippet(keyTerms: string[], keywords: string[], text: string): number {
-  const textLower = text.toLowerCase();
-  const keywordHits = keywords.filter((kw) => keyTerms.some((kt) => kw.includes(kt) || kt.includes(kw))).length;
-  const textHits = keyTerms.filter((kt) => textLower.includes(kt)).length;
+  const aboveThreshold = sources.filter((s) => s.relevanceScore > 0.3).length;
+  const method = sources[0]?.retrievalMethod ?? "keyword_fallback";
+  const vectorUsed = sources.some((s) => (s.vectorScore ?? 0) > 0);
 
-  // Weighted: keyword index match + in-text match, normalized by query size
-  const kwScore = keyTerms.length > 0 ? keywordHits / keyTerms.length : 0;
-  const textScore = keyTerms.length > 0 ? textHits / keyTerms.length : 0;
-  return Math.min(1, kwScore * 0.6 + textScore * 0.4);
-}
+  const strategyLabel = method === "hybrid_rag"
+    ? `Hybrid RAG — pgvector cosine similarity (0.45) + keyword overlap (0.35) + jurisdiction/practice-area boost (0.20)`
+    : method === "keyword_fallback"
+    ? `Keyword fallback — TF-style token overlap scoring (vector search unavailable or no embeddings)`
+    : `In-memory fallback — static corpus, keyword scoring only`;
 
-export function runRetrievalAgent(intake: IntakeResult): RetrievalResult {
-  const { keyTerms } = intake;
-
-  const scored = legalCorpus
-    .map((entry) => ({
-      ...entry,
-      relevanceScore: parseFloat(scoreSnippet(keyTerms, entry.keywords, entry.text).toFixed(3)),
-    }))
-    .filter((e) => e.relevanceScore >= RELEVANCE_THRESHOLD)
-    .sort((a, b) => b.relevanceScore - a.relevanceScore)
-    .slice(0, TOP_K);
-
-  const aboveThreshold = scored.filter((s) => s.relevanceScore > 0.3).length;
-
-  let coverageAssessment: string;
-  if (aboveThreshold >= 3) {
-    coverageAssessment = `Strong retrieval coverage — ${aboveThreshold} highly relevant authorities found across the corpus.`;
-  } else if (aboveThreshold >= 1) {
-    coverageAssessment = `Partial coverage — ${aboveThreshold} relevant authorit${aboveThreshold === 1 ? "y" : "ies"} found; supplemental research may be needed.`;
-  } else {
-    coverageAssessment = "Limited coverage — query terms did not strongly match the available corpus. Consider broadening the query or expanding the document set.";
-  }
-
-  const sources: RetrievedSource[] = scored.map((s) => ({
-    id: s.id,
-    title: s.title,
-    text: s.text,
-    docType: s.docType,
-    jurisdiction: s.jurisdiction,
-    keywords: s.keywords,
-    relevanceScore: s.relevanceScore,
-  }));
+  const warnings: string[] = [];
+  if (!vectorUsed) warnings.push("Vector search not used — run embed:legal to backfill embeddings for hybrid RAG.");
+  if (sources.length < 2) warnings.push("Thin retrieval — fewer than 2 sources returned; answer quality may be reduced.");
 
   return {
     sources,
-    retrievalStrategy: "Keyword overlap scoring with in-text frequency weighting (TF-style, no external vector DB)",
-    coverageAssessment,
+    retrievalStrategy: strategyLabel + (warnings.length > 0 ? ` | Warnings: ${warnings.join(" ")}` : ""),
+    coverageAssessment: coverageAssessment(aboveThreshold),
     totalSearched: legalCorpus.length,
   };
 }
