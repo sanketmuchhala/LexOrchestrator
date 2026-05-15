@@ -3,7 +3,7 @@
  * Run with: npm run seed:legal
  *
  * Requires: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local
- * Uses upsert on citation_id — safe to re-run.
+ * Uses upsert on citation_id - safe to re-run.
  *
  * DISCLAIMER: All content below is SAMPLE EDUCATIONAL MATERIAL only.
  * Not real legal authority. Do not rely on this for legal advice.
@@ -27,7 +27,7 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
   auth: { persistSession: false },
 });
 
-const DISCLAIMER = "Sample educational content only — not real legal authority. Do not rely on this for legal advice.";
+const DISCLAIMER = "Sample educational content only - not real legal authority. Do not rely on this for legal advice.";
 
 interface SeedEntry {
   citationId: string;
@@ -49,7 +49,7 @@ const corpus: SeedEntry[] = [
   },
   {
     citationId: "SAMPLE-002",
-    title: "Negligence — Duty of Care Standard",
+    title: "Negligence - Duty of Care Standard",
     practiceArea: "tort",
     jurisdiction: "General / Multi-Jurisdiction",
     chunkText: "To establish a negligence claim, a plaintiff must prove: (1) the defendant owed a duty of care; (2) the defendant breached that duty by failing to act as a reasonably prudent person; (3) the breach was the actual and proximate cause of the injury; and (4) the plaintiff suffered actual, cognizable damages. The reasonable person standard is an objective measure applied to the facts.",
@@ -73,7 +73,7 @@ const corpus: SeedEntry[] = [
   },
   {
     citationId: "SAMPLE-005",
-    title: "Discovery — Proportionality Obligation",
+    title: "Discovery - Proportionality Obligation",
     practiceArea: "discovery",
     jurisdiction: "Federal",
     chunkText: "Discovery requests must be proportional to the needs of the case, considering: the importance of the issues, the amount in controversy, the parties' relative access to information, the parties' resources, the importance of the discovery, and whether burden or expense outweighs likely benefit. Courts may limit discovery that is cumulative, duplicative, or obtainable from more convenient sources.",
@@ -89,7 +89,7 @@ const corpus: SeedEntry[] = [
   },
   {
     citationId: "SAMPLE-007",
-    title: "Motion to Dismiss — Plausibility Pleading Standard",
+    title: "Motion to Dismiss - Plausibility Pleading Standard",
     practiceArea: "procedure",
     jurisdiction: "Federal",
     chunkText: "To survive a motion to dismiss, a complaint must contain sufficient factual matter, accepted as true, to state a claim for relief that is plausible on its face. A claim is plausible when the plaintiff pleads factual content allowing the court to draw the reasonable inference of liability. Threadbare recitals of elements supported by mere conclusory statements do not suffice.",
@@ -97,7 +97,7 @@ const corpus: SeedEntry[] = [
   },
   {
     citationId: "SAMPLE-008",
-    title: "Judicial Discretion — Abuse of Discretion Review Standard",
+    title: "Judicial Discretion - Abuse of Discretion Review Standard",
     practiceArea: "procedure",
     jurisdiction: "General / Multi-Jurisdiction",
     chunkText: "An appellate court reviews evidentiary and procedural rulings for abuse of discretion. A trial court abuses its discretion when it makes an error of law, applies the wrong legal standard, relies on clearly erroneous facts, or reaches a conclusion outside the range of permissible conclusions. Deference is warranted because the trial court is best positioned to assess proceedings and credibility.",
@@ -105,7 +105,7 @@ const corpus: SeedEntry[] = [
   },
   {
     citationId: "SAMPLE-009",
-    title: "Contract Breach — Consequential vs. Direct Damages",
+    title: "Contract Breach - Consequential vs. Direct Damages",
     practiceArea: "contract",
     jurisdiction: "General / Multi-Jurisdiction",
     chunkText: "Damages for breach of contract are divided into direct (general) damages, which flow naturally from the breach, and consequential (special) damages, which are foreseeable at the time of contracting. Consequential damages require the breaching party to have had reason to know of special circumstances at contracting. Courts apply the Hadley v. Baxendale foreseeability limitation. Plaintiffs have a duty to mitigate damages.",
@@ -113,7 +113,7 @@ const corpus: SeedEntry[] = [
   },
   {
     citationId: "SAMPLE-010",
-    title: "Negligence — Proximate Cause and Foreseeability",
+    title: "Negligence - Proximate Cause and Foreseeability",
     practiceArea: "tort",
     jurisdiction: "General / Multi-Jurisdiction",
     chunkText: "Proximate cause requires that the plaintiff's injury be a foreseeable result of the defendant's negligent conduct. A defendant is not liable for harm outside the scope of risk that made the conduct negligent. The superseding intervening cause doctrine may break the chain of causation where an unforeseeable independent act of a third party produces the harm.",
@@ -121,7 +121,7 @@ const corpus: SeedEntry[] = [
   },
   {
     citationId: "SAMPLE-011",
-    title: "Frye Standard — General Acceptance Test",
+    title: "Frye Standard - General Acceptance Test",
     practiceArea: "evidence",
     jurisdiction: "State (Various)",
     chunkText: "Under the Frye general acceptance test, expert scientific testimony is admissible only if the underlying scientific methodology has gained general acceptance in the relevant scientific community. This standard, still applied in some state jurisdictions, focuses on community consensus rather than individual reliability. Courts assess whether the technique is generally accepted as reliable by recognized experts.",
@@ -129,7 +129,7 @@ const corpus: SeedEntry[] = [
   },
   {
     citationId: "SAMPLE-012",
-    title: "Discovery — Attorney-Client Privilege",
+    title: "Discovery - Attorney-Client Privilege",
     practiceArea: "discovery",
     jurisdiction: "General / Multi-Jurisdiction",
     chunkText: "The attorney-client privilege protects confidential communications between a client and attorney made for the purpose of obtaining or providing legal advice. To invoke it, the party must show: (1) an attorney-client relationship; (2) a confidential communication; and (3) the purpose was legal advice, not business advice. Privilege is narrowly construed. The burden of establishing it rests on the asserting party. Waiver may occur through disclosure.",
@@ -184,7 +184,7 @@ async function seed() {
       console.error(`  ✗ Failed to upsert chunk ${entry.citationId}:`, chunkError.message);
       errors++;
     } else {
-      console.log(`  ✓ ${entry.citationId} — ${entry.title}`);
+      console.log(`  ✓ ${entry.citationId} - ${entry.title}`);
       seeded++;
     }
   }

@@ -3,7 +3,7 @@
  * Run with: npm run embed:legal
  *
  * Requires: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY in .env.local
- * Safe to re-run — skips already-embedded rows.
+ * Safe to re-run - skips already-embedded rows.
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -24,7 +24,7 @@ if (!supabaseUrl || !serviceRoleKey) {
 }
 
 if (!openaiKey) {
-  console.error("Missing OPENAI_API_KEY in .env.local — real embeddings require an API key.");
+  console.error("Missing OPENAI_API_KEY in .env.local - real embeddings require an API key.");
   console.error("The app will still work using the deterministic hash fallback, but semantic search will not be accurate.");
   process.exit(1);
 }
@@ -92,7 +92,7 @@ async function embed() {
     const embedding = await generateEmbedding(embedText);
 
     if (!embedding) {
-      console.error(`  ✗ ${chunk.citation_id} — embedding failed`);
+      console.error(`  ✗ ${chunk.citation_id} - embedding failed`);
       errors++;
       continue;
     }
@@ -107,10 +107,10 @@ async function embed() {
       .eq("id", chunk.id);
 
     if (updateError) {
-      console.error(`  ✗ ${chunk.citation_id} — DB update failed:`, updateError.message);
+      console.error(`  ✗ ${chunk.citation_id} - DB update failed:`, updateError.message);
       errors++;
     } else {
-      console.log(`  ✓ ${chunk.citation_id} — ${embedding.length}-dim embedding stored`);
+      console.log(`  ✓ ${chunk.citation_id} - ${embedding.length}-dim embedding stored`);
       embedded++;
     }
 

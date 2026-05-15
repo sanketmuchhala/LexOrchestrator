@@ -1,4 +1,4 @@
-// Server-only Supabase client — never import this from client components.
+// Server-only Supabase client - never import this from client components.
 // Uses SUPABASE_SERVICE_ROLE_KEY which must never be exposed to the browser.
 
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
@@ -128,7 +128,7 @@ export async function insertRetrievalResults(
     citation_id: s.citationId,
     score: s.finalScore ?? s.relevanceScore,  // finalScore preferred, falls back to relevanceScore
     reason: s.reason ?? null,
-    // Phase 2: hybrid RAG columns (null if not present — migration adds these as nullable)
+    // Phase 2: hybrid RAG columns (null if not present - migration adds these as nullable)
     retrieval_method: s.retrievalMethod ?? null,
     keyword_score: s.keywordScore ?? null,
     vector_score: s.vectorScore ?? null,

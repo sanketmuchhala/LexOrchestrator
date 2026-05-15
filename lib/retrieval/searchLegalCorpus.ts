@@ -1,4 +1,4 @@
-// Hybrid RAG retrieval — pgvector similarity + keyword scoring + deterministic reranking.
+// Hybrid RAG retrieval - pgvector similarity + keyword scoring + deterministic reranking.
 // Fallback chain: hybrid_rag → keyword_fallback → memory_fallback
 // All paths produce the same RetrievedSource shape.
 
@@ -42,9 +42,9 @@ function practiceAreaBoost(chunkArea: string | null, legalIssue: string): number
 }
 
 export function coverageAssessment(count: number): string {
-  if (count >= 3) return `Strong retrieval — ${count} highly relevant authorities found.`;
-  if (count >= 1) return `Partial coverage — ${count} relevant authorit${count === 1 ? "y" : "ies"} found; supplemental research advisable.`;
-  return "Limited coverage — consider broadening the query or expanding the corpus.";
+  if (count >= 3) return `Strong retrieval - ${count} highly relevant authorities found.`;
+  if (count >= 1) return `Partial coverage - ${count} relevant authorit${count === 1 ? "y" : "ies"} found; supplemental research advisable.`;
+  return "Limited coverage - consider broadening the query or expanding the corpus.";
 }
 
 // ─── Candidate merging ────────────────────────────────────────────────────────
@@ -153,7 +153,7 @@ export async function searchLegalCorpus(input: RetrievalInput): Promise<Retrieve
     vectorSearchSucceeded = vectorChunks.length > 0;
   }
 
-  // Step 2: Keyword candidates from DB (always — supplements vector results)
+  // Step 2: Keyword candidates from DB (always - supplements vector results)
   const keywordChunks = await searchLegalChunksFromDB(keyTerms);
 
   // Step 3: If both DB paths empty, fall back to in-memory corpus

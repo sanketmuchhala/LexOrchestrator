@@ -30,7 +30,7 @@ const ADVERSARIAL_PLAYBOOKS: Record<
     ],
     missingAuthority: [
       "Cases establishing the scope of duty in analogous factual contexts.",
-      "Expert testimony or evidence on causation — particularly for non-obvious injury mechanisms.",
+      "Expert testimony or evidence on causation - particularly for non-obvious injury mechanisms.",
       "Jurisdiction-specific rules on joint and several liability.",
     ],
     counterarguments: [
@@ -53,7 +53,7 @@ const ADVERSARIAL_PLAYBOOKS: Record<
     counterarguments: [
       "Opposing party may challenge the expert's qualifications as insufficient in the specific sub-discipline.",
       "Daubert challenge: the methodology may not be peer-reviewed or may have an unacceptable known error rate.",
-      "Argument that the expert's opinion is mere ipse dixit — unsupported by sufficient facts in this record.",
+      "Argument that the expert's opinion is mere ipse dixit - unsupported by sufficient facts in this record.",
     ],
   },
   procedure: {

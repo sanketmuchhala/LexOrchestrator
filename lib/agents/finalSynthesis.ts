@@ -24,7 +24,7 @@ function deterministicAnswer(
     evidence: `Regarding evidentiary standards in ${intake.jurisdiction}:`, procedure: `Under civil procedure rules in ${intake.jurisdiction}:`,
     discovery: `Discovery obligations in ${intake.jurisdiction}:`, general: `Relevant legal authorities for this research question:`,
   };
-  return [issueIntros[intake.legalIssue], "", claimSentences || `See: ${topSources.map((s) => s.citationId ?? s.id).join(", ")}.`, "", "**Retrieved Authorities:**", sourceSummaries, "", `*Citation support: ${Math.round(citationValidation.overallScore * 100)}%. Sample corpus only — not real legal authority.*`].join("\n");
+  return [issueIntros[intake.legalIssue], "", claimSentences || `See: ${topSources.map((s) => s.citationId ?? s.id).join(", ")}.`, "", "**Retrieved Authorities:**", sourceSummaries, "", `*Citation support: ${Math.round(citationValidation.overallScore * 100)}%. Sample corpus only - not real legal authority.*`].join("\n");
 }
 
 interface LLMFinalAnswerResponse {
@@ -46,8 +46,8 @@ export async function runFinalSynthesisAgent(
   const deterministicCitations = [...new Set(citationValidation.claims.filter((c) => c.citationId).map((c) => c.citationId as string))];
   const deterministicRiskFlags = [
     ...citationValidation.flags,
-    ...(adversarialReview.overallRisk === "high" ? ["HIGH adversarial risk — significant counterarguments identified."] : []),
-    ...(adversarialReview.overallRisk === "medium" ? ["MODERATE adversarial risk — opposing counsel has viable challenges."] : []),
+    ...(adversarialReview.overallRisk === "high" ? ["HIGH adversarial risk - significant counterarguments identified."] : []),
+    ...(adversarialReview.overallRisk === "medium" ? ["MODERATE adversarial risk - opposing counsel has viable challenges."] : []),
   ];
 
   const fallback: FinalAnswerResult = {

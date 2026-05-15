@@ -17,7 +17,7 @@ function getClient(): OpenAI | null {
   return _client;
 }
 
-// FNV-1a 32-bit hash — produces deterministic numbers from text for the fallback
+// FNV-1a 32-bit hash - produces deterministic numbers from text for the fallback
 function fnv1a(str: string, seed = 0x811c9dc5): number {
   let hash = seed;
   for (let i = 0; i < str.length; i++) {
@@ -28,7 +28,7 @@ function fnv1a(str: string, seed = 0x811c9dc5): number {
 }
 
 // Deterministic 1536-dim unit vector derived from text hash.
-// Not semantically meaningful — used only when no API key is present.
+// Not semantically meaningful - used only when no API key is present.
 function deterministicEmbedding(text: string): number[] {
   const vec: number[] = new Array(EMBEDDING_DIMS);
   let sumSq = 0;
@@ -49,7 +49,7 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
 
   if (!client) {
     if (!_warnedFallback) {
-      console.warn("[Embedding] OPENAI_API_KEY not set — using deterministic hash fallback (not semantically meaningful).");
+      console.warn("[Embedding] OPENAI_API_KEY not set - using deterministic hash fallback (not semantically meaningful).");
       _warnedFallback = true;
     }
     return deterministicEmbedding(text);
@@ -67,7 +67,7 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
   }
 }
 
-// For query embeddings — same as generateEmbedding but semantically scoped for retrieval
+// For query embeddings - same as generateEmbedding but semantically scoped for retrieval
 export async function generateQueryEmbedding(query: string): Promise<number[] | null> {
   return generateEmbedding(query);
 }

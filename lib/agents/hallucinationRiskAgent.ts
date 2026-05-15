@@ -21,26 +21,26 @@ export function runHallucinationRiskAgent(
   const retrievalCoverage = sources.length / 12; // relative to corpus size
   if (retrievalCoverage < 0.25) {
     riskScore += 0.25;
-    factors.push(`Low retrieval coverage (${sources.length} sources) — thin evidentiary base.`);
+    factors.push(`Low retrieval coverage (${sources.length} sources) - thin evidentiary base.`);
   } else if (retrievalCoverage < 0.15) {
     riskScore += 0.15;
-    factors.push("Minimal retrieval coverage — answer relies on very limited sources.");
+    factors.push("Minimal retrieval coverage - answer relies on very limited sources.");
   }
 
   // Tertiary signal: adversarial risk level (weight 0.25)
   if (adversarialReview.overallRisk === "high") {
     riskScore += 0.25;
-    factors.push("High adversarial risk — multiple viable counterarguments identified.");
+    factors.push("High adversarial risk - multiple viable counterarguments identified.");
   } else if (adversarialReview.overallRisk === "medium") {
     riskScore += 0.1;
-    factors.push("Moderate adversarial risk — some counterarguments require authority.");
+    factors.push("Moderate adversarial risk - some counterarguments require authority.");
   }
 
   // Partial support penalty: claims with only weak/partial support inflate uncertainty
   const partialCount = citationValidation.claims.filter((c) => c.supportStatus === "partial").length;
   if (partialCount > 1) {
     riskScore += (partialCount / totalClaims) * 0.1;
-    factors.push(`${partialCount} claim(s) only partially supported — may require stronger authority.`);
+    factors.push(`${partialCount} claim(s) only partially supported - may require stronger authority.`);
   }
 
   riskScore = Math.min(1, parseFloat(riskScore.toFixed(3)));
@@ -51,7 +51,7 @@ export function runHallucinationRiskAgent(
   else riskLevel = "low";
 
   if (factors.length === 0) {
-    factors.push("All claims supported by retrieved sources — hallucination risk is low.");
+    factors.push("All claims supported by retrieved sources - hallucination risk is low.");
   }
 
   return {

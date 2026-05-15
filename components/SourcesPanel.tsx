@@ -67,7 +67,7 @@ export default function SourcesPanel({ sources }: SourcesPanelProps) {
       )}
 
       <p className="text-xs text-slate-600 border-t border-slate-800 pt-3">
-        ⚠ Sample educational content only — not real legal authority.
+        ⚠ Sample educational content only - not real legal authority.
       </p>
     </div>
   );

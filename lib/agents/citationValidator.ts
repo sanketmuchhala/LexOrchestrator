@@ -56,10 +56,10 @@ function deterministicValidate(claims: string[], sources: RetrievedSource[]): Va
     }
     const supportStatus: ValidatedClaim["supportStatus"] = bestScore >= 0.4 ? "verified" : bestScore >= 0.15 ? "partial" : "unsupported";
     const explanation = supportStatus === "verified"
-      ? `Strongly supported by ${bestId} — keyword overlap confirms alignment.`
+      ? `Strongly supported by ${bestId} - keyword overlap confirms alignment.`
       : supportStatus === "partial"
-      ? `Partially supported by ${bestId} — additional authority advisable.`
-      : "No retrieved source adequately supports this claim — hallucination risk elevated.";
+      ? `Partially supported by ${bestId} - additional authority advisable.`
+      : "No retrieved source adequately supports this claim - hallucination risk elevated.";
     return { claim, citationId: bestId, supportStatus, supportScore: parseFloat(bestScore.toFixed(3)), explanation };
   });
 }
@@ -106,8 +106,8 @@ Return a JSON object with a "validations" key containing an array of these objec
 
   const flags: string[] = [];
   if (unsupportedCount > 0) flags.push(`${unsupportedCount} claim(s) lack retrieved source support.`);
-  if (sources.length < 2) flags.push("Thin retrieval — fewer than 2 sources; citation accuracy may be low.");
-  if (overallScore < 0.5) flags.push("Overall citation support below threshold — response reliability is reduced.");
+  if (sources.length < 2) flags.push("Thin retrieval - fewer than 2 sources; citation accuracy may be low.");
+  if (overallScore < 0.5) flags.push("Overall citation support below threshold - response reliability is reduced.");
 
   return { claims, overallScore, flags, supportedCount, unsupportedCount };
 }

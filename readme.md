@@ -1,8 +1,8 @@
 # LexOrchestrator
 
-**Multi-Agent Litigation Reliability Engine — Phase 2**
+**Multi-Agent Litigation Reliability Engine - Phase 2**
 
-LexOrchestrator is a full-stack multi-agent AI system for legal research reliability. It routes legal queries through a sequential agent pipeline — intake classification, RAG retrieval, citation validation, adversarial review, hallucination risk scoring, and eval reporting — before producing a final cited answer.
+LexOrchestrator is a full-stack multi-agent AI system for legal research reliability. It routes legal queries through a sequential agent pipeline - intake classification, RAG retrieval, citation validation, adversarial review, hallucination risk scoring, and eval reporting - before producing a final cited answer.
 
 This is a prototype for litigation AI reliability architecture. It is not a production legal service and does not provide legal advice.
 
@@ -49,9 +49,9 @@ Query → keyTerms → searchLegalChunksFromDB → keyword scoring
 ```
 
 **Fallback chain:**
-1. `hybrid_rag` — pgvector similarity + keyword (requires embeddings in DB)
-2. `keyword_fallback` — keyword scoring only (if vector search fails or no embeddings)
-3. `memory_fallback` — in-memory corpus (if Supabase unavailable)
+1. `hybrid_rag` - pgvector similarity + keyword (requires embeddings in DB)
+2. `keyword_fallback` - keyword scoring only (if vector search fails or no embeddings)
+3. `memory_fallback` - in-memory corpus (if Supabase unavailable)
 
 ### Scoring Weights
 
@@ -133,11 +133,11 @@ Seven tables in Supabase/Postgres:
 |-------|---------|
 | `legal_documents` | Parent records for corpus entries |
 | `legal_chunks` | Searchable text units with `citation_id` (SAMPLE-XXX) |
-| `orchestration_runs` | One row per query — status, confidence, hallucination risk |
-| `agent_traces` | One row per agent step per run — input/output summaries, payloads |
+| `orchestration_runs` | One row per query - status, confidence, hallucination risk |
+| `agent_traces` | One row per agent step per run - input/output summaries, payloads |
 | `retrieval_results` | Which chunks were retrieved for each run |
 | `citation_validations` | Per-claim support status (verified/partial/unsupported) |
-| `eval_reports` | Reliability metrics — groundedness, citation accuracy, pass/fail |
+| `eval_reports` | Reliability metrics - groundedness, citation accuracy, pass/fail |
 
 Apply migrations in order:
 1. Paste `supabase/migrations/001_lexorchestrator_phase1.sql` into the Supabase SQL Editor
@@ -157,11 +157,11 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
-# LLM (optional — falls back to deterministic mock if absent)
+# LLM (optional - falls back to deterministic mock if absent)
 OPENAI_API_KEY=sk-...
 LLM_MODEL=gpt-4o-mini
 
-# Embeddings — Phase 2 (optional — falls back to hash-based vectors if absent)
+# Embeddings - Phase 2 (optional - falls back to hash-based vectors if absent)
 EMBEDDING_MODEL=text-embedding-3-small
 ```
 
@@ -210,7 +210,7 @@ Seeds 12 sample educational chunks into `legal_documents` and `legal_chunks`. Id
 npm run embed:legal
 ```
 
-Backfills pgvector embeddings for all chunks where `embedding IS NULL`. Requires `OPENAI_API_KEY`. Safe to re-run — skips already-embedded rows. After this, queries use `hybrid_rag` retrieval instead of `keyword_fallback`.
+Backfills pgvector embeddings for all chunks where `embedding IS NULL`. Requires `OPENAI_API_KEY`. Safe to re-run - skips already-embedded rows. After this, queries use `hybrid_rag` retrieval instead of `keyword_fallback`.
 
 ---
 
@@ -276,24 +276,24 @@ With keys configured:
 - Adversarial (GPT): Daubert/Frye circuit split, ipse dixit risk
 - Hallucination Risk: score ≤ 0.2 (low)
 - Synthesis (GPT): cited 3-paragraph analysis
-- Eval: `pass` — high groundedness, low hallucination risk
+- Eval: `pass` - high groundedness, low hallucination risk
 - All persisted to Supabase
 
 ---
 
 ## Future Roadmap
 
-- [ ] **pgvector semantic retrieval** — replace keyword scoring with cosine similarity
-- [ ] **Pinecone integration** — external vector store for large corpora
-- [ ] **Real citation parser** — validate against Westlaw/Lexis APIs
-- [ ] **Judge simulation agent** — 8th agent modeling court disposition
-- [ ] **Streaming via SSE** — real-time per-agent reveal in the UI
-- [ ] **MCP server** — expose tool registry as a real MCP endpoint
-- [ ] **Eval dataset** — labeled queries with ground-truth citation outcomes
-- [ ] **Document upload** — user-supplied briefs as retrieval corpus
-- [ ] **Clio / iManage integration** — connect to practice management systems
-- [ ] **Multi-user auth** — Supabase RLS for user-scoped runs
-- [ ] **Confidence calibration** — fine-tune weights against expert-labeled data
+- [ ] **pgvector semantic retrieval** - replace keyword scoring with cosine similarity
+- [ ] **Pinecone integration** - external vector store for large corpora
+- [ ] **Real citation parser** - validate against Westlaw/Lexis APIs
+- [ ] **Judge simulation agent** - 8th agent modeling court disposition
+- [ ] **Streaming via SSE** - real-time per-agent reveal in the UI
+- [ ] **MCP server** - expose tool registry as a real MCP endpoint
+- [ ] **Eval dataset** - labeled queries with ground-truth citation outcomes
+- [ ] **Document upload** - user-supplied briefs as retrieval corpus
+- [ ] **Clio / iManage integration** - connect to practice management systems
+- [ ] **Multi-user auth** - Supabase RLS for user-scoped runs
+- [ ] **Confidence calibration** - fine-tune weights against expert-labeled data
 
 ---
 
@@ -308,9 +308,9 @@ scripts/
 app/
   layout.tsx / page.tsx / globals.css
   api/
-    orchestrate/route.ts             POST — runs full pipeline
-    runs/route.ts                    GET — recent run list
-    runs/[id]/route.ts               GET — run detail
+    orchestrate/route.ts             POST - runs full pipeline
+    runs/route.ts                    GET - recent run list
+    runs/[id]/route.ts               GET - run detail
 lib/
   types.ts                           All shared interfaces
   db/supabaseServer.ts               Server-only Supabase client + helpers

@@ -17,7 +17,7 @@ export const legalCorpus: CorpusEntry[] = [
   },
   {
     id: "SAMPLE-002",
-    title: "Negligence — Duty of Care Standard",
+    title: "Negligence - Duty of Care Standard",
     text: "To establish a negligence claim, a plaintiff must prove: (1) the defendant owed a duty of care to the plaintiff; (2) the defendant breached that duty by failing to act as a reasonably prudent person would under the circumstances; (3) the breach was the actual and proximate cause of the plaintiff's injury; and (4) the plaintiff suffered actual, cognizable damages. The reasonable person standard is an objective measure applied to the facts.",
     docType: "Legal Treatise (Sample)",
     jurisdiction: "General / Multi-Jurisdiction",
@@ -57,7 +57,7 @@ export const legalCorpus: CorpusEntry[] = [
   },
   {
     id: "SAMPLE-007",
-    title: "Motion to Dismiss — Plausibility Pleading Standard",
+    title: "Motion to Dismiss - Plausibility Pleading Standard",
     text: "To survive a motion to dismiss under the federal pleading standard, a complaint must contain sufficient factual matter, accepted as true, to state a claim for relief that is plausible on its face. A claim is facially plausible when the plaintiff pleads factual content that allows the court to draw the reasonable inference that the defendant is liable for the misconduct alleged. Threadbare recitals of the elements of a cause of action, supported by mere conclusory statements, do not suffice.",
     docType: "Procedural Rule (Sample)",
     jurisdiction: "Federal",
@@ -65,7 +65,7 @@ export const legalCorpus: CorpusEntry[] = [
   },
   {
     id: "SAMPLE-008",
-    title: "Abuse of Discretion — Appellate Review Standard",
+    title: "Abuse of Discretion - Appellate Review Standard",
     text: "An appellate court reviews a trial court's evidentiary and procedural rulings for abuse of discretion. A trial court abuses its discretion when it makes an error of law, applies the wrong legal standard, relies on clearly erroneous facts, or reaches a conclusion outside the range of permissible conclusions. Deference to the trial court is warranted because it is in the best position to assess the dynamics of the proceedings and the credibility of witnesses.",
     docType: "Appellate Standard (Sample)",
     jurisdiction: "General / Multi-Jurisdiction",
@@ -73,7 +73,7 @@ export const legalCorpus: CorpusEntry[] = [
   },
   {
     id: "SAMPLE-009",
-    title: "Contract Breach — Consequential vs. Direct Damages",
+    title: "Contract Breach - Consequential vs. Direct Damages",
     text: "Damages for breach of contract are divided into direct (general) damages, which flow naturally from the breach, and consequential (special) damages, which are foreseeable at the time of contracting. Consequential damages require the breaching party to have had reason to know of the special circumstances at the time of contract formation. Courts apply the Hadley v. Baxendale foreseeability limitation to prevent disproportionate liability. Plaintiffs have a duty to mitigate damages.",
     docType: "Legal Treatise (Sample)",
     jurisdiction: "General / Multi-Jurisdiction",
@@ -81,7 +81,7 @@ export const legalCorpus: CorpusEntry[] = [
   },
   {
     id: "SAMPLE-010",
-    title: "Negligence — Proximate Cause and Foreseeability",
+    title: "Negligence - Proximate Cause and Foreseeability",
     text: "Proximate cause requires that the plaintiff's injury be a foreseeable result of the defendant's negligent conduct. A defendant is not liable for harm that is outside the scope of the risk that made the conduct negligent. The superseding intervening cause doctrine may break the chain of causation where an unforeseeable independent act of a third party produces the harm. Foreseeability is assessed from the perspective of a reasonable person at the time of the alleged negligent act.",
     docType: "Legal Treatise (Sample)",
     jurisdiction: "General / Multi-Jurisdiction",
@@ -89,7 +89,7 @@ export const legalCorpus: CorpusEntry[] = [
   },
   {
     id: "SAMPLE-011",
-    title: "Frye Standard — General Acceptance Test",
+    title: "Frye Standard - General Acceptance Test",
     text: "Under the Frye general acceptance test, expert scientific testimony is admissible only if the underlying scientific methodology has gained general acceptance in the relevant scientific community. This standard, still applied in some state jurisdictions, focuses on community consensus rather than individual reliability. Courts applying Frye assess whether the technique used by the expert is generally accepted as reliable by recognized experts in the field.",
     docType: "Evidentiary Standard (Sample)",
     jurisdiction: "State (Various)",
@@ -97,7 +97,7 @@ export const legalCorpus: CorpusEntry[] = [
   },
   {
     id: "SAMPLE-012",
-    title: "Discovery — Attorney-Client Privilege Assertions",
+    title: "Discovery - Attorney-Client Privilege Assertions",
     text: "The attorney-client privilege protects confidential communications between a client and their attorney made for the purpose of obtaining or providing legal advice. To invoke the privilege, the party must demonstrate: (1) an attorney-client relationship existed; (2) the communication was confidential; and (3) the communication was for the purpose of legal advice, not business advice. Privilege is narrowly construed, and the burden of establishing it rests with the party asserting it. Waiver may occur through disclosure to third parties.",
     docType: "Privilege Rule (Sample)",
     jurisdiction: "General / Multi-Jurisdiction",
