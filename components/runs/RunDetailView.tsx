@@ -1,103 +1,68 @@
+"use client";
+
 import type { ReactNode } from "react";
 import type { RunDetail } from "@/lib/types";
 import { asRecord, normalizedScore, text } from "@/lib/utils/display";
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
 
-function Label({ children }: { children: ReactNode }) {
+function SectionTitle({ n, children }: { n: string; children: string }) {
   return (
-    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
-      {children}
-    </p>
-  );
-}
-
-function SectionHeader({ children }: { children: string }) {
-  return (
-    <div className="flex items-center gap-3 border-b border-white/8 pb-2 mb-4">
-      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+    <div className="mb-6 flex items-center gap-4">
+      <span
+        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.2em" }}
+      >
+        § {n}
+      </span>
+      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <span
+        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#737373", letterSpacing: "0.24em" }}
+        className="uppercase"
+      >
         {children}
       </span>
-      <div className="flex-1 border-t border-white/5" />
     </div>
   );
 }
 
-function StatusTag({ status }: { status: string }) {
+function StatusBadge({ status }: { status: string }) {
   const s = status.toLowerCase();
-  const styles =
-    s === "verified" || s === "pass" || s === "complete" || s === "completed"
-      ? "text-emerald-400 border-emerald-400/30 bg-emerald-400/5"
-      : s === "partial" || s === "medium" || s === "running"
-      ? "text-amber-400 border-amber-400/30 bg-amber-400/5"
+  const cls =
+    s === "verified" || s === "pass" || s === "complete" || s === "completed" || s === "low"
+      ? "badge-pass"
+      : s === "partial" || s === "medium"
+      ? "badge-warn"
       : s === "unsupported" || s === "fail" || s === "error" || s === "high"
-      ? "text-red-400 border-red-400/30 bg-red-400/5"
-      : "text-zinc-400 border-zinc-700 bg-black";
-
-  return (
-    <span className={`inline-block rounded border px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] ${styles}`}>
-      {status.toUpperCase()}
-    </span>
-  );
-}
-
-function ScoreBar({ value, invert = false }: { value: number; invert?: boolean }) {
-  const effective = invert ? 1 - value : value;
-  const color =
-    effective >= 0.7 ? "bg-emerald-400" : effective >= 0.4 ? "bg-amber-400" : "bg-red-400";
-  return (
-    <div className="h-px w-full bg-white/8 mt-1.5">
-      <div className={`h-px ${color}`} style={{ width: `${Math.round(effective * 100)}%` }} />
-    </div>
-  );
+      ? "badge-fail"
+      : "badge-neutral";
+  return <span className={`badge ${cls}`}>{status.toUpperCase()}</span>;
 }
 
 function MetricCell({
-  label,
-  value,
-  invert,
-  isRisk,
+  label, value, invert, bottomTag,
 }: {
-  label: string;
-  value: number;
-  invert?: boolean;
-  isRisk?: boolean;
+  label: string; value: number; invert?: boolean; bottomTag?: ReactNode;
 }) {
   const pct = Math.round(value * 100);
   const effective = invert ? 1 - value : value;
-  const color =
-    effective >= 0.7 ? "text-emerald-400" : effective >= 0.4 ? "text-amber-400" : "text-red-400";
-
+  const color = effective >= 0.7 ? "#34d399" : effective >= 0.4 ? "#fbbf24" : "#f87171";
   return (
-    <div className="flex-1 border-r border-white/8 last:border-r-0 px-4 py-4">
-      <Label>{label}</Label>
-      <div className="mt-2 flex items-baseline gap-1">
-        <span className={`font-mono text-2xl font-bold tabular-nums ${color}`}>{pct}</span>
-        <span className="font-mono text-sm text-zinc-600">%</span>
-        {isRisk && pct <= 20 && (
-          <span className="ml-1 font-mono text-[10px] text-emerald-400">LOW</span>
-        )}
-        {isRisk && pct > 50 && (
-          <span className="ml-1 font-mono text-[10px] text-red-400">HIGH</span>
-        )}
-      </div>
-      <ScoreBar value={value} invert={invert} />
-    </div>
-  );
-}
-
-function SourceBadge({ citationId, sourceType }: { citationId: string; sourceType?: string }) {
-  const isPrimary = sourceType === "primary" || citationId.startsWith("CONST-");
-  return (
-    <span
-      className={`inline-block rounded border px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] ${
-        isPrimary
-          ? "border-blue-400/40 bg-blue-400/8 text-blue-400"
-          : "border-zinc-700 bg-black text-zinc-500"
-      }`}
+    <div
+      className="flex-1 px-5 py-5"
+      style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
     >
-      {isPrimary ? "CONSTITUTION" : "SAMPLE"}
-    </span>
+      <p className="label mb-3">{label}</p>
+      <div className="flex items-baseline gap-1">
+        <span
+          className="tabular-nums"
+          style={{ fontFamily: "var(--font-mono)", fontSize: "26px", fontWeight: 700, color, lineHeight: 1 }}
+        >
+          {pct}
+        </span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>%</span>
+      </div>
+      {bottomTag && <div className="mt-2">{bottomTag}</div>}
+    </div>
   );
 }
 
@@ -105,77 +70,106 @@ function SourceBadge({ citationId, sourceType }: { citationId: string; sourceTyp
 
 export default function RunDetailView({ detail }: { detail: RunDetail }) {
   const { run, traces, retrievalResults, citationValidations, evalReport } = detail;
-
   const payload = asRecord(evalReport?.payload);
 
-  const groundedness = normalizedScore(payload.groundednessScore ?? payload.groundedness_score, 0);
-  const citationAccuracy = normalizedScore(
-    payload.citationAccuracyScore ?? payload.citation_accuracy_score,
-    0
-  );
-  const retrievalCoverage = normalizedScore(
-    payload.retrievalCoverage ?? payload.retrieval_coverage_score,
-    0
-  );
-  const halRisk = normalizedScore(run.hallucination_risk ?? payload.hallucinationRiskScore, 0);
-  const confidence = normalizedScore(
-    run.confidence ?? payload.finalAnswerConfidence,
-    0
-  );
-  const reliability = normalizedScore(
-    evalReport?.final_reliability_score ?? payload.overallReliability,
-    0
-  );
-  const passFail = text(
-    evalReport?.pass_fail_status ?? (reliability >= 0.6 ? "pass" : "fail"),
-    "unknown"
-  );
+  const groundedness    = normalizedScore(payload.groundednessScore  ?? payload.groundedness_score, 0);
+  const citationAcc     = normalizedScore(payload.citationAccuracyScore ?? payload.citation_accuracy_score, 0);
+  const retrieval       = normalizedScore(payload.retrievalCoverage  ?? payload.retrieval_coverage_score, 0);
+  const halRisk         = normalizedScore(run.hallucination_risk ?? payload.hallucinationRiskScore, 0);
+  const confidence      = normalizedScore(run.confidence ?? payload.finalAnswerConfidence, 0);
+  const reliability     = normalizedScore(evalReport?.final_reliability_score ?? payload.overallReliability, 0);
+  const passFail        = text(evalReport?.pass_fail_status ?? (reliability >= 0.6 ? "pass" : "fail"), "unknown");
 
-  const answerText = text(
-    payload.answer ?? payload.legalStyleAnswer ?? payload.finalAnswer,
-    ""
-  );
-  const citations = Array.isArray(payload.citations)
-    ? (payload.citations as string[])
-    : Array.isArray(payload.citationsUsed)
-    ? (payload.citationsUsed as string[])
-    : [];
+  const answerText = text(payload.answer ?? payload.legalStyleAnswer ?? payload.finalAnswer, "");
+  const answerParas = answerText ? answerText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
+  const citations = (
+    Array.isArray(payload.citations) ? payload.citations :
+    Array.isArray(payload.citationsUsed) ? payload.citationsUsed : []
+  ) as string[];
 
   return (
-    <div className="space-y-px">
+    <div className="space-y-12 appear">
 
-      {/* ── 1. Metrics Strip ── */}
-      <div className="rounded-lg border border-white/8 bg-black overflow-hidden">
-        <div className="border-b border-white/8 px-4 py-2 flex items-center justify-between">
-          <Label>Reliability Metrics</Label>
-          <StatusTag status={passFail} />
+      {/* ── § 01  Reliability Metrics ── */}
+      <section>
+        <SectionTitle n="01">Reliability Metrics</SectionTitle>
+        <div
+          style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          {/* Score row */}
+          <div className="flex" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <MetricCell label="Groundedness"     value={groundedness}  />
+            <MetricCell label="Citation Acc."    value={citationAcc}   />
+            <MetricCell label="Retrieval Cov."   value={retrieval}     />
+            <MetricCell
+              label="Hallucination Risk"
+              value={halRisk}
+              invert
+              bottomTag={
+                <span className={`badge ${halRisk <= 0.2 ? "badge-pass" : halRisk <= 0.5 ? "badge-warn" : "badge-fail"}`}>
+                  {halRisk <= 0.2 ? "LOW" : halRisk <= 0.5 ? "MED" : "HIGH"}
+                </span>
+              }
+            />
+            <MetricCell label="Confidence"       value={confidence}    />
+            <MetricCell
+              label="Overall Reliability"
+              value={reliability}
+              bottomTag={<span className={`badge ${passFail === "pass" ? "badge-pass" : "badge-fail"}`}>{passFail.toUpperCase()}</span>}
+            />
+          </div>
+          {/* Run metadata bar */}
+          <div
+            className="flex flex-wrap items-center gap-x-8 gap-y-1 px-5 py-3"
+            style={{ background: "#0a0a0a" }}
+          >
+            <span className="label">Run</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+              {run.id.slice(0, 16)}...
+            </span>
+            {run.model && <>
+              <span className="label">Model</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+                {run.model}
+              </span>
+            </>}
+            <span className="label">Time</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+              {new Date(run.created_at).toISOString().replace("T", " ").slice(0, 19)} UTC
+            </span>
+          </div>
         </div>
-        <div className="flex divide-x divide-white/8">
-          <MetricCell label="Groundedness" value={groundedness} />
-          <MetricCell label="Citation Accuracy" value={citationAccuracy} />
-          <MetricCell label="Retrieval Coverage" value={retrievalCoverage} />
-          <MetricCell label="Hallucination Risk" value={halRisk} invert isRisk />
-          <MetricCell label="Answer Confidence" value={confidence} />
-          <MetricCell label="Overall Reliability" value={reliability} />
-        </div>
-      </div>
+      </section>
 
-      {/* ── 2. Final Answer ── */}
-      <div className="rounded-lg border border-white/8 bg-black p-5">
-        <SectionHeader>Final Legal Analysis</SectionHeader>
-        {answerText ? (
-          <div className="space-y-4">
-            <p className="font-mono text-sm leading-7 text-zinc-200 whitespace-pre-wrap">
-              {answerText}
-            </p>
+      {/* ── § 02  Final Legal Analysis ── */}
+      <section>
+        <SectionTitle n="02">Final Legal Analysis</SectionTitle>
+        {answerParas.length > 0 ? (
+          <div>
+            <div className="space-y-5">
+              {answerParas.map((para, i) => (
+                <p
+                  key={i}
+                  style={{
+                    fontFamily: "var(--font-serif), Georgia, serif",
+                    fontSize: "17px",
+                    lineHeight: "1.85",
+                    color: "#d4d4d4",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  {para}
+                </p>
+              ))}
+            </div>
             {citations.length > 0 && (
-              <div className="border-t border-white/8 pt-4">
-                <Label>Citations</Label>
-                <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-8" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.25rem" }}>
+                <p className="label mb-3">Citations Used</p>
+                <div className="flex flex-wrap gap-2">
                   {citations.map((c) => (
                     <span
                       key={c}
-                      className="rounded border border-blue-400/30 bg-blue-400/5 px-2 py-0.5 font-mono text-[11px] text-blue-400"
+                      className={`badge ${String(c).startsWith("CONST-") ? "badge-const" : "badge-blue"}`}
                     >
                       {c}
                     </span>
@@ -185,186 +179,229 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
             )}
           </div>
         ) : (
-          <p className="font-mono text-sm text-zinc-600">No final answer recorded for this run.</p>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+            No final answer recorded for this run.
+          </p>
         )}
-      </div>
+      </section>
 
-      {/* ── 3. Agent Execution Trace ── */}
-      <div className="rounded-lg border border-white/8 bg-black p-5">
-        <SectionHeader>Agent Execution Trace</SectionHeader>
+      {/* ── § 03  Agent Execution Timeline ── */}
+      <section>
+        <SectionTitle n="03">Agent Execution Timeline</SectionTitle>
         {traces.length === 0 ? (
-          <p className="font-mono text-sm text-zinc-600">No trace data recorded.</p>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>No trace data recorded.</p>
         ) : (
-          <div className="space-y-px">
-            {/* Table header */}
-            <div className="hidden grid-cols-[40px_160px_90px_1fr_1fr] gap-4 px-3 py-2 lg:grid">
-              <Label>Step</Label>
-              <Label>Agent</Label>
-              <Label>Status</Label>
-              <Label>Input</Label>
-              <Label>Output</Label>
-            </div>
-            {traces.map((trace) => (
-              <div
-                key={trace.id}
-                className="grid gap-4 rounded border border-white/5 bg-zinc-950 px-3 py-3 text-sm lg:grid-cols-[40px_160px_90px_1fr_1fr]"
-              >
-                <span className="font-mono text-xs font-bold text-zinc-600">
-                  {String(trace.step_index + 1).padStart(2, "0")}
-                </span>
-                <span className="font-mono text-xs font-semibold text-zinc-200">
-                  {trace.agent_name}
-                </span>
-                <StatusTag status={trace.status ?? "complete"} />
-                <p className="text-xs leading-5 text-zinc-500">
-                  {trace.input_summary ?? "-"}
-                </p>
-                <p className="text-xs leading-5 text-zinc-300">
-                  {trace.output_summary ?? "-"}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── 4. Citation Validation ── */}
-      <div className="rounded-lg border border-white/8 bg-black p-5">
-        <SectionHeader>Citation Validation</SectionHeader>
-        {citationValidations.length === 0 ? (
-          <p className="font-mono text-sm text-zinc-600">No citation validation data.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/8">
-                  <th className="pb-2 pr-4 text-left">
-                    <Label>Claim</Label>
-                  </th>
-                  <th className="pb-2 pr-4 text-left">
-                    <Label>Citation</Label>
-                  </th>
-                  <th className="pb-2 pr-4 text-left">
-                    <Label>Status</Label>
-                  </th>
-                  <th className="pb-2 text-right">
-                    <Label>Score</Label>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {citationValidations.map((cv) => (
-                  <tr key={cv.id} className="align-top">
-                    <td className="py-2.5 pr-4 text-xs leading-5 text-zinc-300 max-w-xs">
-                      {cv.claim}
-                    </td>
-                    <td className="py-2.5 pr-4">
-                      <span className="font-mono text-[11px] text-blue-400">
-                        {cv.citation_id ?? "none"}
-                      </span>
-                    </td>
-                    <td className="py-2.5 pr-4">
-                      <StatusTag status={cv.support_status} />
-                    </td>
-                    <td className="py-2.5 text-right font-mono text-xs tabular-nums text-zinc-400">
-                      {Math.round(normalizedScore(cv.support_score) * 100)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* ── 5. Retrieved Sources ── */}
-      <div className="rounded-lg border border-white/8 bg-black p-5">
-        <SectionHeader>Retrieved Sources</SectionHeader>
-        {retrievalResults.length === 0 ? (
-          <p className="font-mono text-sm text-zinc-600">No retrieval data recorded.</p>
-        ) : (
-          <div className="space-y-px">
-            {retrievalResults.map((rr, idx) => {
-              const isPrimary = rr.citation_id.startsWith("CONST-");
-              const score = normalizedScore(rr.final_score, 0);
-              const scoreColor =
-                score >= 0.7
-                  ? "text-emerald-400"
-                  : score >= 0.4
-                  ? "text-amber-400"
-                  : "text-zinc-500";
-
+          <div>
+            {traces.map((trace, idx) => {
+              const s = (trace.status ?? "complete").toLowerCase();
+              const isDone = s === "complete" || s === "completed";
+              const isFail = s === "error" || s === "failed";
+              const borderColor = isDone ? "#34d399" : isFail ? "#f87171" : "#404040";
+              const numColor   = isDone ? "#34d399" : isFail ? "#f87171" : "#737373";
+              const isLast = idx === traces.length - 1;
               return (
                 <div
-                  key={rr.id}
-                  className={`flex items-start gap-4 rounded border px-4 py-3 ${
-                    isPrimary
-                      ? "border-blue-400/20 bg-blue-400/3"
-                      : "border-white/5 bg-zinc-950"
-                  }`}
+                  key={trace.id}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "2.5rem 12rem 1fr",
+                    gap: "1.25rem",
+                    padding: "1rem 0",
+                    borderLeft: `2px solid ${borderColor}`,
+                    paddingLeft: "1.25rem",
+                    borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
+                    marginBottom: isLast ? 0 : undefined,
+                  }}
                 >
-                  <span className="mt-0.5 w-5 shrink-0 font-mono text-[10px] font-bold text-zinc-700">
-                    {String(idx + 1).padStart(2, "0")}
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      color: numColor,
+                      alignSelf: "start",
+                      paddingTop: "2px",
+                    }}
+                  >
+                    {isDone ? "OK" : String(trace.step_index + 1).padStart(2, "0")}
                   </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-semibold text-blue-400">
-                        {rr.citation_id}
-                      </span>
-                      <SourceBadge
-                        citationId={rr.citation_id}
-                        sourceType={isPrimary ? "primary" : "sample"}
-                      />
-                    </div>
-                    {rr.reason && (
-                      <p className="mt-1 text-xs leading-5 text-zinc-500">{rr.reason}</p>
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        color: isDone ? "#737373" : "#f4f4f4",
+                        textDecoration: isDone ? "line-through" : "none",
+                      }}
+                    >
+                      {trace.agent_name}
+                    </p>
+                    {trace.status && (
+                      <div className="mt-1">
+                        <StatusBadge status={trace.status} />
+                      </div>
                     )}
                   </div>
-                  <div className="shrink-0 text-right">
-                    <span className={`font-mono text-sm font-bold tabular-nums ${scoreColor}`}>
-                      {Math.round(score * 100)}%
-                    </span>
-                    <ScoreBar value={score} />
+                  <div>
+                    {trace.output_summary && (
+                      <p
+                        style={{
+                          fontFamily: "var(--font-serif), Georgia, serif",
+                          fontSize: "13px",
+                          lineHeight: "1.65",
+                          color: isDone ? "#737373" : "#a3a3a3",
+                        }}
+                      >
+                        {trace.output_summary}
+                      </p>
+                    )}
+                    {trace.risk_flag && (
+                      <p
+                        className="mt-1"
+                        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#f87171" }}
+                      >
+                        FLAG: {trace.risk_flag}
+                      </p>
+                    )}
                   </div>
                 </div>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* ── 6. Eval Metadata Footer ── */}
-      <div className="rounded-lg border border-white/5 bg-zinc-950 px-4 py-3">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
-          <div className="flex items-center gap-2">
-            <Label>Run ID</Label>
-            <span className="font-mono text-[11px] text-zinc-500">{run.id}</span>
+      {/* ── § 04  Citation Validation ── */}
+      <section>
+        <SectionTitle n="04">Citation Validation</SectionTitle>
+        {citationValidations.length === 0 ? (
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>No citation validation data.</p>
+        ) : (
+          <table className="w-full border-collapse">
+            <thead>
+              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                <th className="pb-3 pr-6 text-left"><span className="label">Claim</span></th>
+                <th className="pb-3 pr-6 text-left"><span className="label">Citation</span></th>
+                <th className="pb-3 pr-6 text-left"><span className="label">Status</span></th>
+                <th className="pb-3 text-right"><span className="label">Support</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {citationValidations.map((cv, i) => (
+                <tr
+                  key={cv.id}
+                  style={{ borderBottom: i < citationValidations.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
+                  className="align-top"
+                >
+                  <td className="py-3.5 pr-6" style={{ maxWidth: "26rem" }}>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-serif), Georgia, serif",
+                        fontSize: "14px",
+                        lineHeight: "1.65",
+                        color: "#d4d4d4",
+                      }}
+                    >
+                      {cv.claim}
+                    </p>
+                  </td>
+                  <td className="py-3.5 pr-6">
+                    <span
+                      style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#60a5fa" }}
+                    >
+                      {cv.citation_id ?? "none"}
+                    </span>
+                  </td>
+                  <td className="py-3.5 pr-6">
+                    <StatusBadge status={cv.support_status} />
+                  </td>
+                  <td className="py-3.5 text-right tabular-nums" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#737373" }}>
+                    {Math.round(normalizedScore(cv.support_score) * 100)}%
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      {/* ── § 05  Retrieved Sources ── */}
+      <section>
+        <SectionTitle n="05">Retrieved Sources</SectionTitle>
+        {retrievalResults.length === 0 ? (
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>No retrieval data recorded.</p>
+        ) : (
+          <div>
+            {retrievalResults.map((rr, idx) => {
+              const isPrimary = rr.citation_id.startsWith("CONST-");
+              const score = normalizedScore(rr.final_score, 0);
+              const scoreColor = score >= 0.7 ? "#34d399" : score >= 0.4 ? "#fbbf24" : "#737373";
+              return (
+                <div
+                  key={rr.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "1.25rem",
+                    padding: "0.875rem 0",
+                    borderBottom: idx < retrievalResults.length - 1
+                      ? "1px solid rgba(255,255,255,0.04)"
+                      : "none",
+                    borderLeft: isPrimary ? "2px solid rgba(96,165,250,0.4)" : "2px solid transparent",
+                    paddingLeft: isPrimary ? "1rem" : "0",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      color: "#404040",
+                      minWidth: "1.5rem",
+                      paddingTop: "2px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 600, color: "#60a5fa" }}>
+                        {rr.citation_id}
+                      </span>
+                      <span className={`badge ${isPrimary ? "badge-const" : "badge-neutral"}`}>
+                        {isPrimary ? "CONSTITUTION" : "CORPUS"}
+                      </span>
+                    </div>
+                    {rr.reason && (
+                      <p
+                        className="mt-1"
+                        style={{
+                          fontFamily: "var(--font-serif), Georgia, serif",
+                          fontSize: "13px",
+                          lineHeight: "1.6",
+                          color: "#737373",
+                        }}
+                      >
+                        {rr.reason}
+                      </p>
+                    )}
+                  </div>
+                  <div style={{ flexShrink: 0, textAlign: "right", minWidth: "3.5rem" }}>
+                    <span
+                      className="tabular-nums"
+                      style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: 700, color: scoreColor }}
+                    >
+                      {Math.round(score * 100)}%
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="flex items-center gap-2">
-            <Label>Timestamp</Label>
-            <span className="font-mono text-[11px] text-zinc-500">
-              {new Date(run.created_at).toISOString().replace("T", " ").slice(0, 19)} UTC
-            </span>
-          </div>
-          {run.model && (
-            <div className="flex items-center gap-2">
-              <Label>Model</Label>
-              <span className="font-mono text-[11px] text-zinc-500">{run.model}</span>
-            </div>
-          )}
-          {evalReport && (
-            <div className="flex items-center gap-2">
-              <Label>Eval ID</Label>
-              <span className="font-mono text-[11px] text-zinc-500">
-                {evalReport.id.slice(0, 8)}
-              </span>
-            </div>
-          )}
-          <div className="ml-auto">
-            <StatusTag status={passFail} />
-          </div>
-        </div>
-      </div>
+        )}
+      </section>
 
     </div>
   );
