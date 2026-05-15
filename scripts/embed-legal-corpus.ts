@@ -13,24 +13,36 @@ import * as path from "path";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseUrl    = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const openaiKey = process.env.OPENAI_API_KEY;
-const embeddingModel = process.env.EMBEDDING_MODEL ?? "text-embedding-3-small";
+const openrouterKey  = process.env.OPENROUTER_API_KEY;
+const openaiKey      = process.env.OPENAI_API_KEY;
+const apiKey         = openrouterKey ?? openaiKey;
+const baseURL        = openrouterKey ? "https://openrouter.ai/api/v1" : undefined;
+
+const defaultEmbedModel = openrouterKey
+  ? "openai/text-embedding-3-small"
+  : "text-embedding-3-small";
+const embeddingModel = process.env.EMBEDDING_MODEL ?? defaultEmbedModel;
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local");
   process.exit(1);
 }
 
-if (!openaiKey) {
-  console.error("Missing OPENAI_API_KEY in .env.local - real embeddings require an API key.");
-  console.error("The app will still work using the deterministic hash fallback, but semantic search will not be accurate.");
+if (!apiKey) {
+  console.error("Missing OPENROUTER_API_KEY (or OPENAI_API_KEY) in .env.local — real embeddings require an API key.");
   process.exit(1);
 }
 
 const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
-const openai = new OpenAI({ apiKey: openaiKey });
+const openai   = new OpenAI({
+  apiKey: apiKey,
+  baseURL,
+  defaultHeaders: openrouterKey
+    ? { "HTTP-Referer": "https://github.com/sanketmuchhala/LexOrchestrator", "X-Title": "LexOrchestrator" }
+    : undefined,
+});
 
 interface ChunkRow {
   id: string;

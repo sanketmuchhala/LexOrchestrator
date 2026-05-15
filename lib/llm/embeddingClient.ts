@@ -1,19 +1,31 @@
-// OpenAI embeddings wrapper with deterministic fallback.
-// If OPENAI_API_KEY is present → real 1536-dim embeddings via text-embedding-3-small.
-// If absent → deterministic hash-based fallback (not semantically meaningful,
-// but reproducible and allows the code path to run without errors).
+// Embeddings wrapper — supports OpenRouter and OpenAI, with deterministic fallback.
+// Set OPENROUTER_API_KEY to use OpenRouter for embeddings.
+// Set OPENAI_API_KEY to use OpenAI directly.
+// If neither key is set → deterministic hash-based fallback (reproducible but not
+// semantically meaningful; hybrid RAG degrades to keyword-only scoring).
 
 import OpenAI from "openai";
+import {
+  LLM_API_KEY,
+  LLM_BASE_URL,
+  LLM_EXTRA_HEADERS,
+  DEFAULT_EMBEDDING_MODEL,
+} from "@/lib/llm/config";
 
-export const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL ?? "text-embedding-3-small";
+export const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL ?? DEFAULT_EMBEDDING_MODEL;
 const EMBEDDING_DIMS = 1536;
-const API_KEY = process.env.OPENAI_API_KEY;
 
 let _client: OpenAI | null = null;
 
 function getClient(): OpenAI | null {
-  if (!API_KEY) return null;
-  if (!_client) _client = new OpenAI({ apiKey: API_KEY });
+  if (!LLM_API_KEY) return null;
+  if (!_client) {
+    _client = new OpenAI({
+      apiKey: LLM_API_KEY,
+      baseURL: LLM_BASE_URL,
+      defaultHeaders: LLM_EXTRA_HEADERS,
+    });
+  }
   return _client;
 }
 
@@ -49,7 +61,7 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
 
   if (!client) {
     if (!_warnedFallback) {
-      console.warn("[Embedding] OPENAI_API_KEY not set - using deterministic hash fallback (not semantically meaningful).");
+      console.warn("[Embedding] No API key set — using deterministic hash fallback (not semantically meaningful).");
       _warnedFallback = true;
     }
     return deterministicEmbedding(text);
