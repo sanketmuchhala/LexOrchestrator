@@ -10,6 +10,7 @@ export interface DraftWorkspace extends WorkflowRunDetail {
   primaryDraft: WorkflowArtifactRow | null;
   adversarialReview: WorkflowArtifactRow | null;
   localRulesArtifact: WorkflowArtifactRow | null;
+  judgeBriefArtifact: WorkflowArtifactRow | null;
 }
 
 export async function getDraftWorkspace(id: string): Promise<DraftWorkspace> {
@@ -24,5 +25,8 @@ export async function getDraftWorkspace(id: string): Promise<DraftWorkspace> {
   const localRulesArtifact =
     base.artifacts.find((a) => a.artifact_type === "local_rules_check") ?? null;
 
-  return { ...base, primaryDraft, adversarialReview, localRulesArtifact };
+  const judgeBriefArtifact =
+    base.artifacts.find((a) => a.artifact_type === "judge_brief") ?? null;
+
+  return { ...base, primaryDraft, adversarialReview, localRulesArtifact, judgeBriefArtifact };
 }

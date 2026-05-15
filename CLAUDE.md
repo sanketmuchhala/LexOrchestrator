@@ -432,6 +432,61 @@ When both are empty: shows "No citations detected" with an explanation.
 
 ---
 
+## Phase 7 Judge Brief Agent
+
+Adds judge-aware argument preparation to the litigation workflow and draft workspace.
+
+### Judge lookup helpers (`lib/litigation/judges/`)
+
+| File | Purpose |
+|---|---|
+| `findJudge.ts` | Looks up judge by ID (exact) or name (fuzzy). Supports court and jurisdiction filters. Returns `matchStatus`: exact / partial / not_found / ambiguous. |
+| `getJudgeProfile.ts` | Loads `judge_profiles` by judge_id. Prefers matching `motion_type`, falls back to any cached profile for the judge. Returns null safely. |
+| `saveJudgeProfile.ts` | Inserts a generated profile into `judge_profiles`. No-ops if Supabase is unavailable. |
+
+### Judge Brief Agent behavior (`lib/litigation/agents/judgeBriefAgent.ts`)
+
+Returns `JudgeBriefResult` with:
+- `matchStatus`: exact | partial | not_found | ambiguous | not_requested
+- `profileAvailable`: whether a cached opinion-derived profile was found
+- `styleNotes`, `citationPreferences`, `argumentGuidance`, `motionTypeGuidance`, `riskNotes`, `limitations`
+- `artifactContent`: formatted text saved to `draft_artifacts`
+
+Logic flow:
+1. No judge provided → `not_requested`, empty artifactContent, no artifact saved
+2. Judge not found → `not_found`, artifact saved with lookup explanation
+3. Judge found, profile cached → `profileAvailable: true`, full guidance
+4. Judge found, no profile → deterministic fallback with generic court-level guidance
+
+Language constraint: use "argument guidance", "style notes", "preparation signals", "available profile data". Never claim outcome prediction or win probability.
+
+### Artifact persistence
+
+`judge_brief` artifact saved to `draft_artifacts` whenever judge info is provided (even for not_found). Artifact `metadata.judgeBrief` stores the full structured `JudgeBriefResult` for the workspace panel.
+
+### Draft workspace changes
+
+`JudgeBriefPanel` added to the right column of `/draft/[id]` (§ 04b, between Verification Inspector and Adversarial Review). Shows judge identity, match status, style notes, citation preferences, argument guidance, motion-type guidance, risk notes, and limitations.
+
+If no judge brief artifact exists: "No Judge Brief was generated for this workflow."
+If judge not found: "Judge profile unavailable. The workflow continued without judge-specific guidance."
+
+### Demo seed changes
+
+`scripts/seed-litigation-demo.ts` now seeds two judge profiles for Jed S. Rakoff (SDNY):
+- `daubert` motion type (3 source opinions)
+- `motion_to_dismiss` motion type (5 source opinions)
+
+Both clearly marked as demo fixture data.
+
+### Smoke command
+
+```bash
+npm run smoke:judge-brief   # finds demo judge, loads profile, runs agent, tests all three paths
+```
+
+---
+
 ## Key Files
 ```
 lib/llm/config.ts           — provider detection (OpenRouter vs OpenAI)

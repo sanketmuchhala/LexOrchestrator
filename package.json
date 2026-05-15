@@ -14,6 +14,7 @@
     "smoke:legal-search": "tsx scripts/smoke-test-legal-opinion-search.ts",
     "smoke:citations": "tsx scripts/smoke-test-citation-verification.ts",
     "smoke:litigation-workflow": "tsx scripts/smoke-test-litigation-workflow.ts",
+    "smoke:judge-brief": "tsx scripts/smoke-test-judge-brief.ts",
     "check:safety": "tsx scripts/check-safety.ts",
     "check:all": "npm run check:safety && npm run lint && npx tsc --noEmit && npm run build"
   },

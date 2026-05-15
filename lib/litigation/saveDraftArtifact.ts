@@ -9,7 +9,8 @@ export interface SavedArtifact extends DraftArtifactOutput {
 export async function saveDraftArtifact(
   workflowRunId: string,
   artifact: DraftArtifactOutput,
-  createdByAgent: string
+  createdByAgent: string,
+  metadata?: Record<string, unknown>
 ): Promise<SavedArtifact> {
   const citationRows = artifact.citations.map((c) => ({ citation: c }));
 
@@ -20,6 +21,7 @@ export async function saveDraftArtifact(
     content: artifact.draftText,
     citations: citationRows,
     createdByAgent,
+    metadata,
   });
 
   return { ...artifact, artifactId, persisted: DB_AVAILABLE };

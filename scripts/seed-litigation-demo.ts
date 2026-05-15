@@ -218,6 +218,52 @@ async function seed() {
     }
   }
 
+  // ── 5. Seed motion_to_dismiss judge profile ─────────────────────────────
+
+  if (judgeRow) {
+    const mtdProfile = {
+      judge_id: judgeRow.id,
+      profile_version: "v1",
+      motion_type: "motion_to_dismiss",
+      jurisdiction: "Federal",
+      grant_rate_summary: {
+        note: DISCLAIMER,
+        motion_to_dismiss: "Demo data only. Real grant rates require empirical analysis.",
+        estimated_grant_rate: "N/A - demo fixture",
+      },
+      citation_preferences: {
+        note: DISCLAIMER,
+        preferred_sources: ["Twombly, 550 U.S. 544 (2007)", "Iqbal, 556 U.S. 662 (2009)"],
+        formatting_notes: "Bluebook citation format expected",
+      },
+      style_notes: `${DISCLAIMER} Scrutinizes pleadings carefully under the plausibility standard. Tends to dismiss complaints with leave to amend on first motion unless the defect is clearly incurable.`,
+      argument_guidance: `${DISCLAIMER} Lead with the controlling plausibility standard. Identify each element of the claim the plaintiff has failed to plead with specificity. Distinguish bare legal conclusions from well-pleaded factual allegations. Address the leave-to-amend question affirmatively.`,
+      source_opinion_count: 5,
+      generated_by: "demo-seed-script",
+      metadata: { demo: true, disclaimer: DISCLAIMER },
+    };
+
+    await supabase
+      .from("judge_profiles")
+      .delete()
+      .eq("judge_id", judgeRow.id)
+      .eq("profile_version", "v1")
+      .eq("motion_type", "motion_to_dismiss")
+      .eq("jurisdiction", "Federal");
+
+    const { error: mtdProfileError } = await supabase
+      .from("judge_profiles")
+      .insert(mtdProfile);
+
+    if (mtdProfileError) {
+      console.error(`  x Failed to insert MTD judge profile:`, mtdProfileError.message);
+      errors++;
+    } else {
+      console.log(`  + Judge Profile: ${judge.full_name} / motion_to_dismiss / v1`);
+      seeded++;
+    }
+  }
+
   // ── Summary ─────────────────────────────────────────────────────────────
 
   console.log(`\nSeed complete: ${seeded} rows seeded, ${errors} errors.`);

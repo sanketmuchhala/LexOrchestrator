@@ -154,11 +154,30 @@ export interface LocalRulesAgentOutput {
   revisedDraftText?: string;
 }
 
-export interface JudgeBriefAgentOutput {
-  judgeSummary: string;
-  styleNotes: string[];
-  argumentGuidance: string[];
+export type JudgeMatchStatus =
+  | "exact"
+  | "partial"
+  | "not_found"
+  | "ambiguous"
+  | "not_requested";
+
+export interface JudgeBriefResult {
+  judgeName: string | null;
+  court: string | null;
+  jurisdiction: string | null;
+  matchStatus: JudgeMatchStatus;
+  profileAvailable: boolean;
   sourceOpinionCount: number;
+  styleNotes: string[];
+  citationPreferences: string[];
+  argumentGuidance: string[];
+  motionTypeGuidance: string[];
+  riskNotes: string[];
+  confidence: number;
+  limitations: string[];
+  artifactContent: string;
 }
+
+export type JudgeBriefAgentOutput = JudgeBriefResult;
 
 export type EvalAgentOutput = EvalSummary;

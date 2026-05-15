@@ -11,6 +11,7 @@ import type {
   AdversarialAgentOutput,
   LocalRulesAgentOutput,
   EvalAgentOutput,
+  JudgeBriefResult,
 } from "./types";
 import { createWorkflowRun } from "./createWorkflowRun";
 import { logAgentEvent, makeEvent } from "./logAgentEvent";
@@ -125,10 +126,26 @@ export async function runLitigationWorkflow(
     await dispatchAndLog(localRulesResult, workflowRunId, allEvents);
     const localRulesOutput = localRulesResult.output as unknown as LocalRulesAgentOutput;
 
-    // Step 9: Judge Brief Agent (only when judge info is provided)
-    if (input.judgeName || input.judgeId) {
-      const judgeBriefResult = await runLitigationJudgeBriefAgent(ctx);
-      await dispatchAndLog(judgeBriefResult, workflowRunId, allEvents);
+    // Step 9: Judge Brief Agent (always runs; returns not_requested when no judge provided)
+    const judgeBriefResult = await runLitigationJudgeBriefAgent(ctx);
+    await dispatchAndLog(judgeBriefResult, workflowRunId, allEvents);
+    const judgeBrief = judgeBriefResult.output as unknown as JudgeBriefResult;
+
+    if (judgeBrief.matchStatus !== "not_requested" && judgeBrief.artifactContent) {
+      await saveDraftArtifact(
+        workflowRunId,
+        {
+          title: judgeBrief.judgeName
+            ? `Judge Brief — ${judgeBrief.judgeName}`
+            : "Judge Brief",
+          sections: [],
+          draftText: judgeBrief.artifactContent,
+          citations: [],
+          artifactType: "judge_brief",
+        },
+        "JudgeBriefAgent",
+        { judgeBrief }
+      );
     }
 
     // Step 10: Eval Agent

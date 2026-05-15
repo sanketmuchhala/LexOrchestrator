@@ -8,6 +8,7 @@ import AuthorityPanel from "@/components/draft/AuthorityPanel";
 import AdversarialReviewPanel from "@/components/draft/AdversarialReviewPanel";
 import LocalRulesPanel from "@/components/draft/LocalRulesPanel";
 import DraftEvalPanel from "@/components/draft/DraftEvalPanel";
+import JudgeBriefPanel from "@/components/draft/JudgeBriefPanel";
 import AgentEventFeed from "@/components/workflows/AgentEventFeed";
 
 export const dynamic = "force-dynamic";
@@ -63,7 +64,7 @@ function PanelCard({ children }: { children: React.ReactNode }) {
 export default async function DraftWorkspacePage({ params }: Props) {
   const { id } = await params;
   const workspace = await getDraftWorkspace(id);
-  const { workflow, events, primaryDraft, adversarialReview, localRulesArtifact, citationReports } = workspace;
+  const { workflow, events, primaryDraft, adversarialReview, localRulesArtifact, judgeBriefArtifact, citationReports } = workspace;
 
   return (
     <div className="pt-10 pb-32 appear">
@@ -191,6 +192,11 @@ export default async function DraftWorkspacePage({ params }: Props) {
                     artifact={primaryDraft}
                   />
                 </div>
+              </section>
+
+              <section>
+                <SectionTitle n="04b">Judge Brief</SectionTitle>
+                <JudgeBriefPanel artifact={judgeBriefArtifact} />
               </section>
 
               <section>

@@ -845,6 +845,7 @@ export interface WorkflowArtifactRow {
   verification_status: string | null;
   created_by_agent: string | null;
   created_at: string;
+  metadata: Record<string, unknown>;
 }
 
 export interface WorkflowCitationReportRow {
@@ -919,7 +920,7 @@ export async function getLitigationWorkflowArtifacts(
 
   const { data, error } = await client
     .from("draft_artifacts")
-    .select("id, workflow_run_id, artifact_type, title, content, citations, verification_status, created_by_agent, created_at")
+    .select("id, workflow_run_id, artifact_type, title, content, citations, verification_status, created_by_agent, created_at, metadata")
     .eq("workflow_run_id", workflowRunId)
     .order("created_at", { ascending: true });
 
@@ -927,7 +928,10 @@ export async function getLitigationWorkflowArtifacts(
     console.warn("[DB] getLitigationWorkflowArtifacts failed:", error.message);
     return [];
   }
-  return (data ?? []) as WorkflowArtifactRow[];
+  return (data ?? []).map((row) => ({
+    ...row,
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
+  })) as WorkflowArtifactRow[];
 }
 
 export async function getLitigationWorkflowCitationReports(
@@ -947,4 +951,128 @@ export async function getLitigationWorkflowCitationReports(
     return [];
   }
   return (data ?? []) as WorkflowCitationReportRow[];
+}
+
+// ─── Judge Helpers (Phase 7) ──────────────────────────────────────────────────
+
+export interface JudgeRow {
+  id: string;
+  external_id: string | null;
+  full_name: string;
+  court: string | null;
+  jurisdiction: string | null;
+  biography: string | null;
+}
+
+export async function searchJudgesByName(
+  term: string,
+  limit = 5
+): Promise<JudgeRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("legal_judges")
+    .select("id, external_id, full_name, court, jurisdiction, biography")
+    .ilike("full_name", `%${term}%`)
+    .limit(limit);
+
+  if (error) {
+    console.warn("[DB] searchJudgesByName failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as JudgeRow[];
+}
+
+export async function getJudgeById(id: string): Promise<JudgeRow | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const { data, error } = await client
+    .from("legal_judges")
+    .select("id, external_id, full_name, court, jurisdiction, biography")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return null;
+  return data as JudgeRow;
+}
+
+export async function getJudgeProfileWithFallback(
+  judgeId: string,
+  motionType?: string
+): Promise<JudgeProfileRow | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const buildRow = (data: Record<string, unknown>): JudgeProfileRow => {
+    const judge = data.legal_judges as Record<string, string> | null;
+    return {
+      judgeId: data.judge_id as string,
+      judgeName: judge?.full_name ?? "Unknown",
+      court: (judge?.court as string | null) ?? null,
+      jurisdiction: (data.jurisdiction as string | null) ?? null,
+      styleNotes: (data.style_notes as string | null) ?? null,
+      argumentGuidance: (data.argument_guidance as string | null) ?? null,
+      sourceOpinionCount: (data.source_opinion_count as number) ?? 0,
+      motionType: (data.motion_type as string | null) ?? null,
+    };
+  };
+
+  const selectCols = "judge_id, style_notes, argument_guidance, source_opinion_count, motion_type, jurisdiction, legal_judges(full_name, court, jurisdiction)";
+
+  // Prefer exact motion_type match
+  if (motionType) {
+    const { data: exact } = await client
+      .from("judge_profiles")
+      .select(selectCols)
+      .eq("judge_id", judgeId)
+      .eq("motion_type", motionType)
+      .limit(1)
+      .single();
+    if (exact) return buildRow(exact as Record<string, unknown>);
+  }
+
+  // Fallback: any profile for this judge
+  const { data: any, error } = await client
+    .from("judge_profiles")
+    .select(selectCols)
+    .eq("judge_id", judgeId)
+    .order("source_opinion_count", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !any) return null;
+  return buildRow(any as Record<string, unknown>);
+}
+
+export async function insertJudgeProfile(data: {
+  judgeId: string;
+  profileVersion?: string;
+  motionType?: string;
+  jurisdiction?: string;
+  styleNotes?: string;
+  argumentGuidance?: string;
+  sourceOpinionCount?: number;
+  generatedBy?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const { error } = await client.from("judge_profiles").insert({
+    judge_id: data.judgeId,
+    profile_version: data.profileVersion ?? "v1",
+    motion_type: data.motionType ?? null,
+    jurisdiction: data.jurisdiction ?? null,
+    style_notes: data.styleNotes ?? null,
+    argument_guidance: data.argumentGuidance ?? null,
+    source_opinion_count: data.sourceOpinionCount ?? 0,
+    generated_by: data.generatedBy ?? "litigation-workflow",
+    grant_rate_summary: {},
+    citation_preferences: {},
+    metadata: data.metadata ?? {},
+  });
+
+  if (error) console.warn("[DB] insertJudgeProfile failed:", error.message);
 }
