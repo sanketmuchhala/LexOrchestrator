@@ -283,6 +283,145 @@ export interface EvalReportRecord {
   created_at: string;
 }
 
+// ─── Litigation Workflow DB Types (Migration 004) ────────────────────────────
+
+export interface LegalOpinion {
+  id: string;
+  external_id: string | null;
+  source: "courtlistener" | "cap" | "demo" | "public" | "manual";
+  court: string | null;
+  jurisdiction: string | null;
+  case_name: string;
+  citation: string | null;
+  decision_date: string | null;
+  judge_name: string | null;
+  opinion_url: string | null;
+  raw_text: string | null;
+  html_text: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LegalOpinionChunk {
+  id: string;
+  opinion_id: string;
+  chunk_index: number;
+  chunk_text: string;
+  page_start: number | null;
+  page_end: number | null;
+  span_start: number | null;
+  span_end: number | null;
+  citation: string | null;
+  court: string | null;
+  jurisdiction: string | null;
+  decision_date: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface LegalJudge {
+  id: string;
+  external_id: string | null;
+  full_name: string;
+  court: string | null;
+  jurisdiction: string | null;
+  appointment_source: string | null;
+  education: string | null;
+  prior_roles: string | null;
+  biography: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JudgeProfile {
+  id: string;
+  judge_id: string;
+  profile_version: string;
+  motion_type: string | null;
+  jurisdiction: string | null;
+  grant_rate_summary: Record<string, unknown>;
+  citation_preferences: Record<string, unknown>;
+  style_notes: string | null;
+  argument_guidance: string | null;
+  source_opinion_count: number;
+  generated_by: string | null;
+  generated_at: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface LitigationWorkflowRun {
+  id: string;
+  organization_id: string | null;
+  user_id: string | null;
+  workflow_type: "motion_draft" | "memo" | "brief" | "red_team" | "eval";
+  status: "queued" | "running" | "completed" | "failed" | "cancelled";
+  jurisdiction: string | null;
+  court: string | null;
+  judge_id: string | null;
+  motion_type: string | null;
+  input_summary: string | null;
+  final_output: string | null;
+  confidence: number | null;
+  faithfulness_score: number | null;
+  citation_pass_rate: number | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LitigationAgentEvent {
+  id: string;
+  workflow_run_id: string;
+  agent_name: string;
+  event_type: string;
+  event_status: string | null;
+  message: string | null;
+  tool_name: string | null;
+  tool_input: Record<string, unknown>;
+  tool_output: Record<string, unknown>;
+  token_count: number | null;
+  cost_usd: number | null;
+  latency_ms: number | null;
+  created_at: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface DraftArtifact {
+  id: string;
+  workflow_run_id: string;
+  artifact_type: "motion_section" | "memo" | "red_team_memo" | "judge_brief" | "local_rules_check" | "full_draft" | "outline";
+  title: string | null;
+  content: string;
+  citations: Record<string, unknown>[];
+  verification_status: "pending" | "verified" | "partial" | "failed" | null;
+  version: number;
+  created_by_agent: string | null;
+  created_at: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface CitationVerificationReport {
+  id: string;
+  workflow_run_id: string;
+  draft_artifact_id: string | null;
+  citation_text: string;
+  normalized_citation: string | null;
+  opinion_id: string | null;
+  proposition: string | null;
+  quote_text: string | null;
+  pin_cite: string | null;
+  existence_status: "found" | "not_found" | "error" | null;
+  quote_status: "exact_match" | "close_match" | "mismatch" | "not_checked" | null;
+  pin_cite_status: "confirmed" | "mismatch" | "not_checked" | null;
+  proposition_status: "supported" | "partially_supported" | "unsupported" | "not_checked" | null;
+  treatment_status: "positive" | "negative" | "neutral" | "not_checked" | null;
+  overall_status: "verified" | "parsed_unverified" | "quote_mismatch" | "pin_mismatch" | "unsupported_proposition" | "not_found" | "error" | "unknown";
+  report: Record<string, unknown>;
+  created_at: string;
+}
+
 // ─── Corpus (in-memory fallback) ─────────────────────────────────────────────
 
 export interface CorpusEntry {

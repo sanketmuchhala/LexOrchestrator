@@ -128,6 +128,34 @@ Vector search: `match_document_chunks()` is the primary function. `match_legal_c
 
 ---
 
+## Phase 1 Database Foundation (migration 004)
+
+Additive migration -- does not modify existing tables. The seven-agent pipeline remains active.
+
+New tables prepare for motion drafting, judge brief, verification inspector, and agent event streaming:
+
+| Table | Purpose |
+|---|---|
+| `legal_opinions` | Real court opinions from CourtListener / CAP / demo fixtures |
+| `legal_opinion_chunks` | Chunked opinion text with pgvector embeddings |
+| `legal_citation_edges` | Opinion-to-opinion citation graph |
+| `legal_judges` | Judge metadata |
+| `judge_profiles` | Cached judge analysis for Judge Brief sidebar |
+| `litigation_workflow_runs` | Top-level workflow run for draft-generation flows |
+| `litigation_agent_events` | Streamable event feed for agent UI |
+| `draft_artifacts` | Generated motion sections, memos, red-team outputs |
+| `citation_verification_reports` | Detailed citation verification results |
+
+Vector search: `match_opinion_chunks()` searches opinion chunks by embedding similarity.
+
+RLS enabled on all new tables. Open policies for now (service role handles writes).
+
+```bash
+npm run seed:litigation-demo   # seeds 3 demo opinions, chunks, 1 judge, 1 judge profile
+```
+
+---
+
 ## Key Files
 ```
 lib/llm/config.ts           — provider detection (OpenRouter vs OpenAI)

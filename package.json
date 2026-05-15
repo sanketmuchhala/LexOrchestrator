@@ -10,6 +10,7 @@
     "seed:legal": "tsx scripts/seed-legal-corpus.ts",
     "seed:constitution": "tsx scripts/seed-constitution.ts",
     "embed:legal": "tsx scripts/embed-legal-corpus.ts",
+    "seed:litigation-demo": "tsx scripts/seed-litigation-demo.ts",
     "check:safety": "tsx scripts/check-safety.ts",
     "check:all": "npm run check:safety && npm run lint && npx tsc --noEmit && npm run build"
   },
