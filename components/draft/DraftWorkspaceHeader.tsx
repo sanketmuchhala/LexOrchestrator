@@ -1,0 +1,113 @@
+import type { WorkflowRunRow } from "@/lib/litigation/getWorkflowRun";
+
+function scoreColor(v: number): string {
+  if (v >= 0.7) return "#34d399";
+  if (v >= 0.4) return "#fbbf24";
+  return "#f87171";
+}
+
+function statusBadgeClass(status: string): string {
+  const s = status.toLowerCase();
+  if (s === "completed") return "badge-pass";
+  if (s === "failed") return "badge-fail";
+  if (s === "running" || s === "queued") return "badge-warn";
+  return "badge-neutral";
+}
+
+function Metric({ label, value }: { label: string; value: number | null }) {
+  if (value === null) return null;
+  const pct = Math.round(value * 100);
+  return (
+    <span style={{ display: "flex", alignItems: "baseline", gap: "0.375rem" }}>
+      <span className="label">{label}</span>
+      <span
+        className="tabular-nums"
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "13px",
+          fontWeight: 700,
+          color: scoreColor(value),
+        }}
+      >
+        {pct}%
+      </span>
+    </span>
+  );
+}
+
+export default function DraftWorkspaceHeader({
+  workflow,
+  judgeName,
+}: {
+  workflow: WorkflowRunRow;
+  judgeName?: string;
+}) {
+  const passFail =
+    workflow.confidence != null
+      ? workflow.confidence >= 0.5
+        ? "pass"
+        : "fail"
+      : null;
+
+  return (
+    <div
+      style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "1rem", marginBottom: "1.5rem" }}
+    >
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+
+        <span className={`badge ${statusBadgeClass(workflow.status)}`}>
+          {workflow.status.toUpperCase()}
+        </span>
+
+        {passFail && (
+          <span className={`badge ${passFail === "pass" ? "badge-pass" : "badge-fail"}`}>
+            {passFail.toUpperCase()}
+          </span>
+        )}
+
+        {workflow.motion_type && (
+          <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            <span className="label">Motion</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+              {workflow.motion_type.replace(/_/g, " ")}
+            </span>
+          </span>
+        )}
+
+        {workflow.jurisdiction && (
+          <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            <span className="label">Jurisdiction</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+              {workflow.jurisdiction}
+              {workflow.court ? ` / ${workflow.court}` : ""}
+            </span>
+          </span>
+        )}
+
+        {judgeName && (
+          <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            <span className="label">Judge</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+              {judgeName}
+            </span>
+          </span>
+        )}
+
+        <Metric label="Confidence" value={workflow.confidence} />
+        <Metric label="Faithfulness" value={workflow.faithfulness_score} />
+        <Metric label="Citations" value={workflow.citation_pass_rate} />
+
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "10px",
+            color: "#404040",
+            marginLeft: "auto",
+          }}
+        >
+          {workflow.id.slice(0, 8)}
+        </span>
+      </div>
+    </div>
+  );
+}

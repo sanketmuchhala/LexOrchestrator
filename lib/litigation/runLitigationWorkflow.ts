@@ -9,6 +9,7 @@ import type {
   DraftingAgentOutput,
   CitationAgentOutput,
   AdversarialAgentOutput,
+  LocalRulesAgentOutput,
   EvalAgentOutput,
 } from "./types";
 import { createWorkflowRun } from "./createWorkflowRun";
@@ -23,6 +24,39 @@ import { runLitigationAdversarialAgent } from "./agents/adversarialAgent";
 import { runLitigationLocalRulesAgent } from "./agents/localRulesAgent";
 import { runLitigationJudgeBriefAgent } from "./agents/judgeBriefAgent";
 import { runLitigationEvalAgent } from "./agents/evalAgent";
+
+function formatAdversarialContent(output: AdversarialAgentOutput): string {
+  const lines: string[] = [
+    `ADVERSARIAL RISK: ${output.riskLevel.toUpperCase()}`,
+    "",
+    "STRONGEST WEAKNESSES",
+    ...output.strongestWeaknesses.map((w, i) => `${i + 1}. ${w}`),
+    "",
+    "UNSUPPORTED CLAIMS",
+    ...output.unsupportedClaims.map((c, i) => `${i + 1}. ${c}`),
+    "",
+    "LIKELY COUNTERARGUMENTS",
+    ...output.likelyCounterarguments.map((c, i) => `${i + 1}. ${c}`),
+    "",
+    "RED TEAM MEMO",
+    output.redTeamMemo,
+  ];
+  return lines.join("\n");
+}
+
+function formatLocalRulesContent(output: LocalRulesAgentOutput): string {
+  const lines: string[] = [
+    "FORMATTING NOTES",
+    ...output.formattingNotes.map((n, i) => `${i + 1}. ${n}`),
+    "",
+    "RULE WARNINGS",
+    ...output.ruleWarnings.map((w, i) => `${i + 1}. ${w}`),
+  ];
+  if (output.revisedDraftText) {
+    lines.push("", "REVISED DRAFT NOTE", output.revisedDraftText);
+  }
+  return lines.join("\n");
+}
 
 async function dispatchAndLog(
   result: AgentResult,
@@ -89,6 +123,7 @@ export async function runLitigationWorkflow(
     // Step 8: Local Rules Agent
     const localRulesResult = await runLitigationLocalRulesAgent(ctx, intake);
     await dispatchAndLog(localRulesResult, workflowRunId, allEvents);
+    const localRulesOutput = localRulesResult.output as unknown as LocalRulesAgentOutput;
 
     // Step 9: Judge Brief Agent (only when judge info is provided)
     if (input.judgeName || input.judgeId) {
@@ -106,6 +141,30 @@ export async function runLitigationWorkflow(
     const artifactEvent = makeEvent("Orchestrator", "draft_chunk", savedArtifact.title);
     allEvents.push(artifactEvent);
     await logAgentEvent(workflowRunId, artifactEvent);
+
+    await saveDraftArtifact(
+      workflowRunId,
+      {
+        title: `Adversarial Review — ${intake.motionType.replace(/_/g, " ")}`,
+        sections: [],
+        draftText: formatAdversarialContent(adversarial),
+        citations: [],
+        artifactType: "red_team_memo",
+      },
+      "AdversarialAgent"
+    );
+
+    await saveDraftArtifact(
+      workflowRunId,
+      {
+        title: `Local Rules — ${ctx.input.court}`,
+        sections: [],
+        draftText: formatLocalRulesContent(localRulesOutput),
+        citations: [],
+        artifactType: "local_rules_check",
+      },
+      "LocalRulesAgent"
+    );
 
     // Step 12: Update workflow run with final scores
     await updateLitigationWorkflowRun(workflowRunId, {

@@ -352,7 +352,83 @@ Phase 5 implements DB-polled refresh. `AgentEventFeed` polls `/api/litigation/wo
 
 ### Full motion editor
 
-Not yet built. `/workflows/[id]` is read-only inspection only.
+Not yet built. `/workflows/[id]` is read-only inspection only. See Phase 6.
+
+---
+
+## Phase 6 Motion Drafting Workspace
+
+Adds the first-version legal drafting surface. `/workflows/[id]` remains the technical inspection page. `/draft/[id]` is the product-facing drafting workspace.
+
+### Routes
+
+| Route | Purpose |
+|---|---|
+| `/draft` | New draft form -- matter name, motion type, jurisdiction, court, judge, facts, desired output |
+| `/draft/[id]` | Two-column drafting workspace with document preview and verification inspector |
+
+On form submit, `/draft` POSTs to `POST /api/litigation/workflows` and redirects to `/draft/[workflowRunId]`.
+
+### Workspace layout (`/draft/[id]`)
+
+Two-column grid (`1fr 22rem`):
+
+| Column | Contents |
+|---|---|
+| Left (wider) | § 02 Document Preview, § 04 Authority Retrieved |
+| Right (22rem) | § 03 Verification Inspector, § 05 Adversarial Review, § 06 Local Rules Notes, § 07 Eval Summary |
+
+Below both columns: Agent Feed (reused from Phase 5 `AgentEventFeed` with live polling).
+
+### Workspace sections
+
+| Section | Data source |
+|---|---|
+| § 01 Draft Workspace Header | `litigation_workflow_runs` (status, motion_type, scores) |
+| § 02 Document Preview | `draft_artifacts` where type in (outline, full_draft, motion_section, memo) |
+| § 03 Verification Inspector | `citation_verification_reports`; falls back to draft artifact citations |
+| § 04 Authority Retrieved | Citations array from primary draft artifact |
+| § 05 Adversarial Review | `draft_artifacts` where type = red_team_memo |
+| § 06 Local Rules Notes | `draft_artifacts` where type = local_rules_check |
+| § 07 Eval Summary | `litigation_workflow_runs` (confidence, faithfulness_score, citation_pass_rate) |
+
+### Components added (`components/draft/`)
+
+`DraftLauncherForm`, `DraftWorkspaceHeader`, `DocumentPreview`, `VerificationInspector`, `AuthorityPanel`, `AdversarialReviewPanel`, `LocalRulesPanel`, `DraftEvalPanel`
+
+### runLitigationWorkflow changes
+
+Phase 6 adds two additional `saveDraftArtifact` calls after the drafting agent:
+- `AdversarialAgent` output serialized and saved as type `red_team_memo`
+- `LocalRulesAgent` output serialized and saved as type `local_rules_check`
+
+This gives the workspace three queryable artifacts per run: `outline`, `red_team_memo`, `local_rules_check`.
+
+### Data helper added
+
+`lib/litigation/getDraftWorkspace.ts` -- extends `getWorkflowRun` with `primaryDraft`, `adversarialReview`, `localRulesArtifact` fields selected from the artifacts array.
+
+### Document preview behavior
+
+Parses draft text by double-newline into blocks. Heading detection: short block, all-caps, or Roman numeral prefix (`I.`, `II.`, etc.). Headings render in mono uppercase; prose renders in EB Garamond serif at 16px/1.85 line height.
+
+### Verification inspector behavior
+
+When `citation_verification_reports` are present: shows per-citation status with sub-status badges (exists, quote, pin cite, proposition, treatment). Summary strip shows pass/warn/fail counts.
+
+When reports are absent but draft artifact has citations: shows them as "not verified" in amber.
+
+When both are empty: shows "No citations detected" with an explanation.
+
+### /workflows vs /draft
+
+- `/workflows/[id]` = technical inspection (all events, raw artifact list, citation reports table, eval scores)
+- `/draft/[id]` = product surface (document preview, verification inspector, adversarial review, local rules, eval)
+- Link from `/draft/[id]` → `/workflows/[id]` labeled "Technical Inspection"
+
+### Navigation
+
+"Draft" added as the first nav link (before Research, History, Workflows).
 
 ---
 
