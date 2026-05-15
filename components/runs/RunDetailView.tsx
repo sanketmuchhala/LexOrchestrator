@@ -286,7 +286,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
           <div className="space-y-px">
             {retrievalResults.map((rr, idx) => {
               const isPrimary = rr.citation_id.startsWith("CONST-");
-              const score = normalizedScore(rr.score, 0);
+              const score = normalizedScore(rr.final_score, 0);
               const scoreColor =
                 score >= 0.7
                   ? "text-emerald-400"

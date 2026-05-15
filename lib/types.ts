@@ -139,6 +139,71 @@ export interface Phase1OrchestratorResult {
 
 // ─── DB Types ─────────────────────────────────────────────────────────────────
 
+// ── Organizations & Users ──────────────────────────────────────────────────────
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  plan: "free" | "pro" | "enterprise";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserProfile {
+  id: string;
+  organization_id: string | null;
+  role: "owner" | "admin" | "member" | "viewer";
+  full_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Document Corpus ────────────────────────────────────────────────────────────
+
+export interface DocumentRecord {
+  id: string;
+  organization_id: string | null;
+  created_by: string | null;
+  title: string;
+  source_type: "primary" | "secondary" | "user_upload" | "sample";
+  jurisdiction: string | null;
+  practice_area: string | null;
+  storage_bucket: string | null;
+  storage_path: string | null;
+  original_filename: string | null;
+  file_size_bytes: number | null;
+  mime_type: string | null;
+  status: "pending" | "processing" | "indexed" | "error";
+  error_message: string | null;
+  chunk_count: number;
+  authority_level: number;
+  citation_prefix: string | null;
+  disclaimer: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocumentChunkFromDB {
+  id: string;
+  document_id: string;
+  citation_id: string;
+  chunk_index: number;
+  chunk_text: string;
+  chunk_summary: string | null;
+  page_number: number | null;
+  section_heading: string | null;
+  keywords: string[];
+  jurisdiction: string | null;
+  practice_area: string | null;
+  source_type: "primary" | "secondary" | "user_upload" | "sample";
+  embedding_model: string | null;
+  authority_weight: number;
+  created_at: string;
+}
+
+// Backward-compat alias used throughout retrieval pipeline
 export interface LegalChunkFromDB {
   id: string;
   document_id: string;
@@ -149,9 +214,8 @@ export interface LegalChunkFromDB {
   practice_area: string | null;
   document_title?: string;
   disclaimer?: string;
-  // "primary" = US Constitution and other authoritative sources (retrieval priority boost)
-  // "sample" = sample educational corpus
   source_type?: string;
+  authority_weight?: number;
 }
 
 // Phase 2: vector search result with cosine similarity score
@@ -192,7 +256,7 @@ export interface AgentTraceRecord {
 export interface RetrievalResultRecord {
   id: string;
   citation_id: string;
-  score: number;
+  final_score: number;
   reason: string | null;
   created_at: string;
 }

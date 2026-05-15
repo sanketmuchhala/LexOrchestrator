@@ -143,39 +143,56 @@ async function seed() {
   let errors = 0;
 
   for (const entry of corpus) {
-    // Upsert legal_documents record
-    const { data: doc, error: docError } = await supabase
-      .from("legal_documents")
-      .upsert(
-        {
+    // Check if document already exists (no unique constraint on title, so query first)
+    const { data: existing } = await supabase
+      .from("documents")
+      .select("id")
+      .eq("title", entry.title)
+      .eq("source_type", "sample")
+      .maybeSingle();
+
+    let docId: string;
+
+    if (existing?.id) {
+      docId = existing.id;
+    } else {
+      const { data: doc, error: docError } = await supabase
+        .from("documents")
+        .insert({
           title: entry.title,
           jurisdiction: entry.jurisdiction,
           practice_area: entry.practiceArea,
           source_type: "sample",
           disclaimer: DISCLAIMER,
-        },
-        { onConflict: "title" }
-      )
-      .select("id")
-      .single();
+          status: "indexed",
+          authority_level: 5,
+          chunk_count: 1,
+        })
+        .select("id")
+        .single();
 
-    if (docError || !doc) {
-      console.error(`  ✗ Failed to upsert document "${entry.title}":`, docError?.message);
-      errors++;
-      continue;
+      if (docError || !doc) {
+        console.error(`  ✗ Failed to insert document "${entry.title}":`, docError?.message);
+        errors++;
+        continue;
+      }
+      docId = doc.id;
     }
 
-    // Upsert legal_chunks record
+    // Upsert document_chunks (chunk_index = 0; one chunk per sample document)
     const { error: chunkError } = await supabase
-      .from("legal_chunks")
+      .from("document_chunks")
       .upsert(
         {
-          document_id: doc.id,
+          document_id: docId,
           citation_id: entry.citationId,
+          chunk_index: 0,
           chunk_text: entry.chunkText,
           keywords: entry.keywords,
           jurisdiction: entry.jurisdiction,
           practice_area: entry.practiceArea,
+          source_type: "sample",
+          authority_weight: 1.0,
         },
         { onConflict: "citation_id" }
       );

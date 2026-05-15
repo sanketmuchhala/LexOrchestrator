@@ -137,9 +137,9 @@ const CONSTITUTION_CHUNKS: Array<{
 async function seed() {
   console.log("\nSeeding US Constitution as primary RAG source...\n");
 
-  // Check if constitution already partially seeded
+  // Check which CONST- chunks are already in document_chunks
   const { data: existing } = await supabase
-    .from("legal_chunks")
+    .from("document_chunks")
     .select("citation_id")
     .like("citation_id", "CONST-%");
 
@@ -151,41 +151,61 @@ async function seed() {
     return;
   }
 
-  // Upsert parent legal_document for Constitution
-  const { data: doc, error: docError } = await supabase
-    .from("legal_documents")
-    .upsert(
-      {
+  // Find or create the parent document record
+  const { data: existingDoc } = await supabase
+    .from("documents")
+    .select("id")
+    .eq("title", "United States Constitution (1787, with Amendments)")
+    .eq("source_type", "primary")
+    .maybeSingle();
+
+  let docId: string;
+
+  if (existingDoc?.id) {
+    docId = existingDoc.id;
+  } else {
+    const { data: doc, error: docError } = await supabase
+      .from("documents")
+      .insert({
         title: "United States Constitution (1787, with Amendments)",
         jurisdiction: "Federal",
         practice_area: "constitutional",
         source_type: "primary",
-        disclaimer: "Public domain. Official text of the United States Constitution. This is authoritative legal text, not sample content.",
-      },
-      { onConflict: "title" }
-    )
-    .select("id")
-    .single();
+        disclaimer: "Public domain. Official text of the United States Constitution. Authoritative legal text.",
+        status: "indexed",
+        authority_level: 10,
+        chunk_count: CONSTITUTION_CHUNKS.length,
+        citation_prefix: "CONST",
+      })
+      .select("id")
+      .single();
 
-  if (docError || !doc) {
-    console.error("Failed to upsert Constitution document:", docError?.message);
-    process.exit(1);
+    if (docError || !doc) {
+      console.error("Failed to insert Constitution document:", docError?.message);
+      process.exit(1);
+    }
+    docId = doc.id;
   }
 
   let seeded = 0;
   let errors = 0;
 
-  for (const chunk of toSeed) {
+  for (const [i, chunk] of toSeed.entries()) {
+    const chunkIndex = CONSTITUTION_CHUNKS.findIndex((c) => c.citationId === chunk.citationId);
+
     const { error } = await supabase
-      .from("legal_chunks")
+      .from("document_chunks")
       .upsert(
         {
-          document_id: doc.id,
+          document_id: docId,
           citation_id: chunk.citationId,
+          chunk_index: chunkIndex,
           chunk_text: chunk.text,
           keywords: chunk.keywords,
           jurisdiction: "Federal",
           practice_area: chunk.practiceArea,
+          source_type: "primary",
+          authority_weight: 1.5,
         },
         { onConflict: "citation_id" }
       );
@@ -197,6 +217,7 @@ async function seed() {
       console.log(`  OK    ${chunk.citationId} - ${chunk.title}`);
       seeded++;
     }
+    void i; // suppress unused warning
   }
 
   console.log(`\nConstitution seed complete: ${seeded} chunks added, ${errors} errors.`);

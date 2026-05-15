@@ -65,7 +65,7 @@ async function embed() {
   console.log(`\nStarting embedding backfill (model: ${embeddingModel})...\n`);
 
   const { data, error } = await supabase
-    .from("legal_chunks")
+    .from("document_chunks")
     .select("id, citation_id, chunk_text, keywords, jurisdiction, practice_area, embedding")
     .is("embedding", null)
     .order("citation_id");
@@ -98,7 +98,7 @@ async function embed() {
     }
 
     const { error: updateError } = await supabase
-      .from("legal_chunks")
+      .from("document_chunks")
       .update({
         embedding,
         embedding_model: embeddingModel,

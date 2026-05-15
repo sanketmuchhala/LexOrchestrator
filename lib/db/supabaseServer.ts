@@ -5,6 +5,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type {
   LegalChunkFromDB,
   LegalChunkWithSimilarity,
+  DocumentRecord,
   RunSummary,
   RunDetail,
   AgentTraceRecord,
@@ -116,25 +117,24 @@ export async function insertRetrievalResults(
   // Look up chunk UUIDs by citation_id
   const citationIds = sources.map((s) => s.citationId);
   const { data: chunks } = await client
-    .from("legal_chunks")
+    .from("document_chunks")
     .select("id, citation_id")
     .in("citation_id", citationIds);
 
   const chunkMap = new Map((chunks ?? []).map((c: { id: string; citation_id: string }) => [c.citation_id, c.id]));
 
-  const rows = sources.map((s) => ({
+  const rows = sources.map((s, i) => ({
     run_id: runId,
     chunk_id: chunkMap.get(s.citationId) ?? null,
     citation_id: s.citationId,
-    score: s.finalScore ?? s.relevanceScore,  // finalScore preferred, falls back to relevanceScore
+    final_score: s.finalScore ?? s.relevanceScore,
     reason: s.reason ?? null,
-    // Phase 2: hybrid RAG columns (null if not present - migration adds these as nullable)
-    retrieval_method: s.retrievalMethod ?? null,
+    retrieval_method: s.retrievalMethod ?? "hybrid_rag",
     keyword_score: s.keywordScore ?? null,
     vector_score: s.vectorScore ?? null,
     hybrid_score: s.hybridScore ?? null,
     rerank_score: s.rerankScore ?? null,
-    rank_position: s.rankPosition ?? null,
+    rank_position: s.rankPosition ?? i,
   }));
 
   const { error } = await client.from("retrieval_results").insert(rows);
@@ -218,7 +218,7 @@ export async function getRunById(id: string): Promise<RunDetail | null> {
       .order("step_index"),
     client
       .from("retrieval_results")
-      .select("id, citation_id, score, reason, created_at")
+      .select("id, citation_id, final_score, reason, created_at")
       .eq("run_id", id),
     client
       .from("citation_validations")
@@ -278,10 +278,9 @@ export async function searchLegalChunksFromDB(keyTerms: string[]): Promise<Legal
   const client = getClient();
   if (!client || keyTerms.length === 0) return [];
 
-  // Fetch all chunks and filter/score in TypeScript (Phase 2: replace with pgvector)
   const { data, error } = await client
-    .from("legal_chunks")
-    .select("id, document_id, citation_id, chunk_text, keywords, jurisdiction, practice_area, legal_documents(title, disclaimer, source_type)")
+    .from("document_chunks")
+    .select("id, document_id, citation_id, chunk_text, keywords, jurisdiction, practice_area, source_type, authority_weight, documents(title, disclaimer)")
     .limit(300);
 
   if (error) {
@@ -297,10 +296,80 @@ export async function searchLegalChunksFromDB(keyTerms: string[]): Promise<Legal
     keywords: (row.keywords as string[]) ?? [],
     jurisdiction: row.jurisdiction as string | null,
     practice_area: row.practice_area as string | null,
-    document_title: (row.legal_documents as Record<string, string> | null)?.title,
-    disclaimer: (row.legal_documents as Record<string, string> | null)?.disclaimer,
-    source_type: (row.legal_documents as Record<string, string> | null)?.source_type ?? "sample",
+    source_type: row.source_type as string ?? "sample",
+    authority_weight: row.authority_weight as number ?? 1.0,
+    document_title: (row.documents as Record<string, string> | null)?.title,
+    disclaimer: (row.documents as Record<string, string> | null)?.disclaimer,
   }));
+}
+
+// ─── Documents ────────────────────────────────────────────────────────────────
+
+export interface CreateDocumentData {
+  title: string;
+  source_type: "primary" | "secondary" | "user_upload" | "sample";
+  jurisdiction?: string;
+  practice_area?: string;
+  original_filename?: string;
+  file_size_bytes?: number;
+  mime_type?: string;
+  storage_path?: string;
+  authority_level?: number;
+  citation_prefix?: string;
+  disclaimer?: string;
+}
+
+export async function createDocument(data: CreateDocumentData): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const { data: row, error } = await client
+    .from("documents")
+    .insert({
+      ...data,
+      status: data.storage_path ? "pending" : "indexed",
+      authority_level: data.authority_level ?? 5,
+    })
+    .select("id")
+    .single();
+
+  if (error || !row) {
+    console.warn("[DB] createDocument failed:", error?.message);
+    return null;
+  }
+  return row.id as string;
+}
+
+export async function updateDocumentStatus(
+  id: string,
+  status: DocumentRecord["status"],
+  extra: { error_message?: string; chunk_count?: number } = {}
+): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const { error } = await client
+    .from("documents")
+    .update({ status, updated_at: new Date().toISOString(), ...extra })
+    .eq("id", id);
+  if (error) console.warn("[DB] updateDocumentStatus failed:", error.message);
+}
+
+export async function getDocuments(limit = 50): Promise<DocumentRecord[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("documents")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.warn("[DB] getDocuments failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as DocumentRecord[];
 }
 
 export { DB_AVAILABLE };
