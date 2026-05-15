@@ -18,9 +18,11 @@
     "smoke:local-rules": "tsx scripts/smoke-test-local-rules.ts",
     "smoke:workflow-eval": "tsx scripts/smoke-test-workflow-eval.ts",
     "smoke:mcp": "tsx scripts/smoke-test-mcp-tools.ts",
+    "smoke:demo-path": "tsx scripts/smoke-test-demo-path.ts",
     "mcp:server": "tsx mcp/server.ts",
     "check:safety": "tsx scripts/check-safety.ts",
-    "check:all": "npm run check:safety && npm run lint && npx tsc --noEmit && npm run build"
+    "check:demo": "tsx scripts/check-demo-readiness.ts",
+    "check:all": "npm run check:safety && npm run lint && npx tsc --noEmit && npm run build && npm run check:demo"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

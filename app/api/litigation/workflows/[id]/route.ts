@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWorkflowRun } from "@/lib/litigation/getWorkflowRun";
 
+function apiError(message: string, status: number, code: string) {
+  return NextResponse.json({ error: message, code }, { status });
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -8,13 +12,13 @@ export async function GET(
   const { id } = await params;
 
   if (!id || typeof id !== "string") {
-    return NextResponse.json({ error: "Invalid workflow run ID." }, { status: 400 });
+    return apiError("Invalid workflow run ID.", 400, "INVALID_WORKFLOW_ID");
   }
 
   try {
     const detail = await getWorkflowRun(id);
     if (!detail.workflow) {
-      return NextResponse.json({ error: "Workflow run not found." }, { status: 404 });
+      return apiError("Workflow run not found.", 404, "WORKFLOW_NOT_FOUND");
     }
     return NextResponse.json(detail);
   } catch (err) {
@@ -22,6 +26,6 @@ export async function GET(
       "[/api/litigation/workflows/[id]] GET failed:",
       err instanceof Error ? err.message : String(err)
     );
-    return NextResponse.json({ error: "Failed to fetch workflow run." }, { status: 500 });
+    return apiError("Failed to fetch workflow run.", 500, "WORKFLOW_FETCH_FAILED");
   }
 }

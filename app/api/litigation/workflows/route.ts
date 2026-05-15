@@ -2,26 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { runLitigationWorkflow } from "@/lib/litigation/runLitigationWorkflow";
 import type { LitigationWorkflowInput } from "@/lib/litigation/types";
 
+function apiError(message: string, status: number, code: string) {
+  return NextResponse.json({ error: message, code }, { status });
+}
+
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+    return apiError("Invalid JSON body.", 400, "INVALID_JSON");
   }
 
   const query = typeof body.query === "string" ? body.query.trim() : "";
   if (!query || query.length < 5) {
-    return NextResponse.json(
-      { error: "query is required (minimum 5 characters)." },
-      { status: 400 }
-    );
+    return apiError("query is required (minimum 5 characters).", 400, "INVALID_QUERY");
   }
   if (query.length > 5000) {
-    return NextResponse.json(
-      { error: "query must be under 5000 characters." },
-      { status: 400 }
-    );
+    return apiError("query must be under 5000 characters.", 400, "QUERY_TOO_LONG");
   }
 
   const jurisdiction =
@@ -63,9 +61,6 @@ export async function POST(req: NextRequest) {
       "[/api/litigation/workflows] Workflow failed:",
       err instanceof Error ? err.message : String(err)
     );
-    return NextResponse.json(
-      { error: "Litigation workflow failed. Check server logs." },
-      { status: 500 }
-    );
+    return apiError("Litigation workflow failed. Check server logs.", 500, "WORKFLOW_FAILED");
   }
 }

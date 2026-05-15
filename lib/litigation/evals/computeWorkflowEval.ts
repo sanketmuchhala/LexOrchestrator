@@ -35,6 +35,12 @@ const CITATION_PASS_STATUSES = new Set(["pass", "verified"]);
 
 const round3 = (n: number) => Math.round(n * 1000) / 1000;
 
+function artifactType(row: WorkflowArtifactRow): string {
+  return typeof row.metadata?.originalArtifactType === "string"
+    ? row.metadata.originalArtifactType
+    : row.artifact_type;
+}
+
 function computeCitationQuality(
   reports: WorkflowCitationReportRow[],
   workflowPassRate: number | null
@@ -67,10 +73,10 @@ function computeCitationQuality(
 function computeArtifactQuality(
   artifacts: WorkflowArtifactRow[]
 ): ArtifactQualityMetrics {
-  const draftArt = artifacts.find((a) => PRIMARY_ARTIFACT_TYPES.has(a.artifact_type)) ?? null;
-  const advArt = artifacts.find((a) => a.artifact_type === "red_team_memo") ?? null;
-  const lrArt = artifacts.find((a) => a.artifact_type === "local_rules_check") ?? null;
-  const jbArt = artifacts.find((a) => a.artifact_type === "judge_brief") ?? null;
+  const draftArt = artifacts.find((a) => PRIMARY_ARTIFACT_TYPES.has(artifactType(a))) ?? null;
+  const advArt = artifacts.find((a) => artifactType(a) === "red_team_memo") ?? null;
+  const lrArt = artifacts.find((a) => artifactType(a) === "local_rules_check") ?? null;
+  const jbArt = artifacts.find((a) => artifactType(a) === "judge_brief") ?? null;
 
   let draftSectionCoverage = 0.5;
   let missingSections: string[] = [];
@@ -111,7 +117,7 @@ function computeRetrievalQuality(
   artifacts: WorkflowArtifactRow[],
   workflow: WorkflowRunRow
 ): { metrics: RetrievalQualityMetrics; coverage: number } {
-  const draftArt = artifacts.find((a) => PRIMARY_ARTIFACT_TYPES.has(a.artifact_type));
+  const draftArt = artifacts.find((a) => PRIMARY_ARTIFACT_TYPES.has(artifactType(a)));
   const citationRows = Array.isArray(draftArt?.citations) ? draftArt!.citations : [];
   const total = citationRows.length;
   const withCitation = citationRows.filter((c) => typeof c.citation === "string" && c.citation).length;
@@ -137,7 +143,7 @@ function computeRetrievalQuality(
 }
 
 function judgeBriefCoverageScore(artifacts: WorkflowArtifactRow[]): number {
-  const jbArt = artifacts.find((a) => a.artifact_type === "judge_brief");
+  const jbArt = artifacts.find((a) => artifactType(a) === "judge_brief");
   if (!jbArt?.metadata?.judgeBrief) return 0;
   const jb = jbArt.metadata.judgeBrief as JudgeBriefResult;
   if (jb.profileAvailable) return 1.0;
@@ -146,7 +152,7 @@ function judgeBriefCoverageScore(artifacts: WorkflowArtifactRow[]): number {
 }
 
 function adversarialRiskScore(artifacts: WorkflowArtifactRow[]): number {
-  const advArt = artifacts.find((a) => a.artifact_type === "red_team_memo");
+  const advArt = artifacts.find((a) => artifactType(a) === "red_team_memo");
   if (!advArt) return 0.5;
   const c = advArt.content;
   if (c.includes("ADVERSARIAL RISK: HIGH") || c.includes("HIGH RISK")) return 0.8;

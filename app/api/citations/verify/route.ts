@@ -2,17 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyCitation } from "@/lib/citations/verifyCitation";
 import { saveCitationVerificationReport } from "@/lib/citations/saveCitationVerificationReport";
 
+function apiError(message: string, status: number, code: string) {
+  return NextResponse.json({ error: message, code }, { status });
+}
+
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+    return apiError("Invalid JSON body.", 400, "INVALID_JSON");
   }
 
   const citationText = typeof body.citationText === "string" ? body.citationText.trim() : "";
   if (!citationText || citationText.length < 3) {
-    return NextResponse.json({ error: "citationText must be at least 3 characters." }, { status: 400 });
+    return apiError("citationText must be at least 3 characters.", 400, "INVALID_CITATION_TEXT");
   }
 
   const proposition = typeof body.proposition === "string" ? body.proposition : undefined;
@@ -43,9 +47,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ result });
   } catch (err) {
     console.warn("[/api/citations/verify] Verification failed:", err instanceof Error ? err.message : String(err));
-    return NextResponse.json(
-      { error: "Citation verification failed. Check server logs." },
-      { status: 500 }
-    );
+    return apiError("Citation verification failed. Check server logs.", 500, "CITATION_VERIFICATION_FAILED");
   }
 }

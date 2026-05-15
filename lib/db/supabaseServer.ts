@@ -721,23 +721,49 @@ export async function insertDraftArtifactRecord(data: {
   const client = getClient();
   if (!client) return crypto.randomUUID();
 
+  const insertPayload = (artifactType: string, metadata: Record<string, unknown>) => ({
+    workflow_run_id: data.workflowRunId,
+    artifact_type: artifactType,
+    title: data.title ?? null,
+    content: data.content,
+    citations: data.citations ?? [],
+    verification_status: "pending",
+    version: 1,
+    created_by_agent: data.createdByAgent ?? null,
+    metadata,
+  });
+
   const { data: row, error } = await client
     .from("draft_artifacts")
-    .insert({
-      workflow_run_id: data.workflowRunId,
-      artifact_type: data.artifactType,
-      title: data.title ?? null,
-      content: data.content,
-      citations: data.citations ?? [],
-      verification_status: "pending",
-      version: 1,
-      created_by_agent: data.createdByAgent ?? null,
-      metadata: data.metadata ?? {},
-    })
+    .insert(insertPayload(data.artifactType, data.metadata ?? {}))
     .select("id")
     .single();
 
   if (error || !row) {
+    const canFallbackToMemo =
+      error?.code === "23514" &&
+      ["judge_brief", "local_rules_check", "workflow_eval"].includes(data.artifactType);
+
+    if (canFallbackToMemo) {
+      const fallbackMetadata = {
+        ...(data.metadata ?? {}),
+        originalArtifactType: data.artifactType,
+        persistenceFallback: "memo_artifact_type",
+      };
+      const { data: fallbackRow, error: fallbackError } = await client
+        .from("draft_artifacts")
+        .insert(insertPayload("memo", fallbackMetadata))
+        .select("id")
+        .single();
+
+      if (!fallbackError && fallbackRow) {
+        console.warn(
+          `[DB] insertDraftArtifactRecord used memo fallback for ${data.artifactType}; apply migration 006 to update the check constraint.`
+        );
+        return fallbackRow.id as string;
+      }
+    }
+
     console.warn("[DB] insertDraftArtifactRecord failed:", error?.message);
     return crypto.randomUUID();
   }

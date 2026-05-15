@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  demoCourt,
+  demoDesiredOutput,
+  demoFacts,
+  demoJudgeName,
+  demoJurisdiction,
+  demoMotionType,
+} from "@/lib/demo/litigationDemoFixture";
 
 const MOTION_TYPES = [
   { value: "motion_to_dismiss",            label: "Motion to Dismiss" },
@@ -64,6 +72,17 @@ export default function DraftLauncherForm() {
   const [judgeName, setJudgeName]       = useState("");
   const [facts, setFacts]               = useState("");
   const [desiredOutput, setDesiredOutput] = useState("");
+
+  function loadDemo() {
+    setMatterName("Aurora Analytics LLC v. Northstar Retail Systems");
+    setMotionType(demoMotionType);
+    setJurisdiction(demoJurisdiction);
+    setCourt(demoCourt);
+    setJudgeName(demoJudgeName);
+    setFacts(demoFacts);
+    setDesiredOutput(demoDesiredOutput);
+    setError(null);
+  }
 
   const query = [
     matterName ? `Matter: ${matterName}.` : "",
@@ -199,31 +218,53 @@ export default function DraftLauncherForm() {
       )}
 
       <div
-        className="flex items-center justify-between pt-2"
+        className="flex flex-wrap items-center justify-between gap-4 pt-2"
         style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
       >
         <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
           {running ? "Running eight-agent workflow. This may take a moment..." : "Eight agents will retrieve authority, draft, and verify citations."}
         </p>
-        <button
-          type="submit"
-          disabled={running}
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "11px",
-            fontWeight: 700,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: running ? "#737373" : "#000",
-            background: running ? "#111" : "#f4f4f4",
-            border: "1px solid rgba(255,255,255,0.12)",
-            padding: "0.5rem 1.5rem",
-            cursor: running ? "default" : "pointer",
-            flexShrink: 0,
-          }}
-        >
-          {running ? "Drafting..." : "Draft Motion"}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={loadDemo}
+            disabled={running}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#d4d4d4",
+              background: "#0a0a0a",
+              border: "1px solid rgba(255,255,255,0.12)",
+              padding: "0.5rem 1rem",
+              cursor: running ? "default" : "pointer",
+              flexShrink: 0,
+            }}
+          >
+            Load Demo
+          </button>
+          <button
+            type="submit"
+            disabled={running}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: running ? "#737373" : "#000",
+              background: running ? "#111" : "#f4f4f4",
+              border: "1px solid rgba(255,255,255,0.12)",
+              padding: "0.5rem 1.5rem",
+              cursor: running ? "default" : "pointer",
+              flexShrink: 0,
+            }}
+          >
+            {running ? "Drafting..." : "Draft Motion"}
+          </button>
+        </div>
       </div>
 
     </form>

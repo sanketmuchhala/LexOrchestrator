@@ -42,6 +42,19 @@ export default async function WorkflowDetailPage({ params }: Props) {
         </Link>
         <div className="flex items-center gap-3">
           <Link
+            href={`/draft/${id}`}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: "#404040",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+            }}
+            className="transition-colors hover:text-white"
+          >
+            Draft Workspace &rarr;
+          </Link>
+          <Link
             href={`/evals/${id}`}
             style={{
               fontFamily: "var(--font-mono)",

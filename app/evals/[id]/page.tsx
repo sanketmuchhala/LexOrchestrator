@@ -8,6 +8,7 @@ import RetrievalQualityPanel from "@/components/evals/RetrievalQualityPanel";
 import ArtifactQualityPanel from "@/components/evals/ArtifactQualityPanel";
 import AgentRuntimePanel from "@/components/evals/AgentRuntimePanel";
 import EvalWarningsPanel from "@/components/evals/EvalWarningsPanel";
+import { formatPercent, getStatusBadgeClass } from "@/lib/utils/status";
 
 export const dynamic = "force-dynamic";
 
@@ -40,12 +41,6 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
       </span>
     </div>
   );
-}
-
-function verdictClass(verdict: string): string {
-  if (verdict === "pass") return "badge-pass";
-  if (verdict === "warn") return "badge-warn";
-  return "badge-fail";
 }
 
 export default async function EvalDetailPage({ params }: Props) {
@@ -128,7 +123,7 @@ export default async function EvalDetailPage({ params }: Props) {
                   Workflow Evaluation
                 </p>
                 <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <span className={`badge ${verdictClass(summary.passFail)}`}>
+                  <span className={`badge ${getStatusBadgeClass(summary.passFail)}`}>
                     {summary.passFail.toUpperCase()}
                   </span>
                   <span
@@ -144,7 +139,7 @@ export default async function EvalDetailPage({ params }: Props) {
                           : "#f87171",
                     }}
                   >
-                    {Math.round(summary.overallConfidence * 100)}% confidence
+                    {formatPercent(summary.overallConfidence)} confidence
                   </span>
                   {workflow.motion_type && (
                     <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
