@@ -12,18 +12,20 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") }); // fallback when .env.local absent
 
 const supabaseUrl    = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const openrouterKey  = process.env.OPENROUTER_API_KEY;
 const openaiKey      = process.env.OPENAI_API_KEY;
 const apiKey         = openrouterKey ?? openaiKey;
-const baseURL        = openrouterKey ? "https://openrouter.ai/api/v1" : undefined;
 
-const defaultEmbedModel = openrouterKey
-  ? "openai/text-embedding-3-small"
-  : "text-embedding-3-small";
-const embeddingModel = process.env.EMBEDDING_MODEL ?? defaultEmbedModel;
+// Auto-detect OpenRouter keys by prefix so sk-or-... stored as OPENAI_API_KEY still works
+const isOpenRouter = !!openrouterKey || (!!openaiKey && openaiKey.startsWith("sk-or-"));
+const baseURL      = isOpenRouter ? "https://openrouter.ai/api/v1" : undefined;
+
+const defaultEmbedModel = isOpenRouter ? "openai/text-embedding-3-small" : "text-embedding-3-small";
+const embeddingModel    = process.env.EMBEDDING_MODEL ?? defaultEmbedModel;
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local");
@@ -31,7 +33,7 @@ if (!supabaseUrl || !serviceRoleKey) {
 }
 
 if (!apiKey) {
-  console.error("Missing OPENROUTER_API_KEY (or OPENAI_API_KEY) in .env.local — real embeddings require an API key.");
+  console.error("Missing OPENROUTER_API_KEY (or OPENAI_API_KEY) in .env — real embeddings require an API key.");
   process.exit(1);
 }
 
@@ -39,7 +41,7 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSess
 const openai   = new OpenAI({
   apiKey: apiKey,
   baseURL,
-  defaultHeaders: openrouterKey
+  defaultHeaders: isOpenRouter
     ? { "HTTP-Referer": "https://github.com/sanketmuchhala/LexOrchestrator", "X-Title": "LexOrchestrator" }
     : undefined,
 });
