@@ -149,9 +149,24 @@ export interface AdversarialAgentOutput {
 }
 
 export interface LocalRulesAgentOutput {
+  profileId: string;
+  profileLabel: string;
   formattingNotes: string[];
-  ruleWarnings: string[];
+  requiredSections: string[];
+  missingSections: string[];
+  citationNotes: string[];
+  filingNotes: string[];
+  warnings: string[];
   revisedDraftText?: string;
+  confidence: number;
+  limitations: string[];
+  artifactContent: string;
+  sectionChecks: Array<{
+    sectionId: string;
+    label: string;
+    required: boolean;
+    detected: boolean;
+  }>;
 }
 
 export type JudgeMatchStatus =

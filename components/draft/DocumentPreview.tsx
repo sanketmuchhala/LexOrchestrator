@@ -1,20 +1,59 @@
 import type { WorkflowArtifactRow } from "@/lib/litigation/getWorkflowRun";
 
-function isHeading(text: string): boolean {
-  const t = text.trim();
-  if (t.length > 100) return false;
-  if (/^[IVX]+\.\s/i.test(t)) return true;
-  const upper = t.toUpperCase();
-  return t === upper && t.length < 70 && /[A-Z]/.test(t);
+type BlockType = "heading-main" | "heading-sub" | "note" | "para";
+
+interface Block {
+  type: BlockType;
+  text: string;
 }
 
-function parseBlocks(content: string): Array<{ type: "heading" | "para"; text: string }> {
+const STANDARD_HEADINGS = new Set([
+  "PRELIMINARY STATEMENT",
+  "STATEMENT OF RELEVANT FACTS",
+  "STATEMENT OF FACTS",
+  "LEGAL STANDARD",
+  "ARGUMENT",
+  "CONCLUSION",
+  "INTRODUCTION",
+  "BACKGROUND",
+  "DISCUSSION",
+  "RELIEF REQUESTED",
+  "SIGNATURE",
+]);
+
+function classifyBlock(text: string): BlockType {
+  const t = text.trim();
+  if (t.length === 0) return "para";
+
+  if (t.toLowerCase().startsWith("note:") || t.startsWith("[DEMO")) {
+    return "note";
+  }
+
+  if (t.length > 120) return "para";
+
+  // Roman numeral main headings: "I. INTRODUCTION", "IV. ARGUMENT"
+  if (/^[IVX]+\.\s+\S/i.test(t)) return "heading-main";
+
+  // Letter sub-headings: "A. Argument", "B. Facts"
+  if (/^[A-Z]\.\s+\S/.test(t) && t.length < 60) return "heading-sub";
+
+  // All-caps standard heading
+  const upper = t.toUpperCase();
+  if (t === upper && STANDARD_HEADINGS.has(t)) return "heading-main";
+
+  // All-caps short (< 70 chars) — still treat as heading-main
+  if (t === upper && t.length < 70 && /[A-Z]{3}/.test(t)) return "heading-main";
+
+  return "para";
+}
+
+function parseBlocks(content: string): Block[] {
   return content
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean)
     .map((block) => ({
-      type: isHeading(block) ? "heading" : "para",
+      type: classifyBlock(block),
       text: block,
     }));
 }
@@ -57,6 +96,86 @@ function CitationList({ citations }: { citations: Record<string, unknown>[] }) {
   );
 }
 
+function renderBlock(block: Block, i: number, isFirst: boolean) {
+  if (block.type === "heading-main") {
+    return (
+      <div
+        key={i}
+        style={{
+          marginTop: isFirst ? 0 : "2.25rem",
+          paddingTop: isFirst ? 0 : "1.5rem",
+          borderTop: isFirst ? "none" : "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "10px",
+            fontWeight: 700,
+            letterSpacing: "0.22em",
+            color: "#737373",
+            textTransform: "uppercase",
+          }}
+        >
+          {block.text}
+        </p>
+      </div>
+    );
+  }
+
+  if (block.type === "heading-sub") {
+    return (
+      <p
+        key={i}
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "11px",
+          fontWeight: 600,
+          letterSpacing: "0.1em",
+          color: "#737373",
+          marginTop: "1.25rem",
+        }}
+      >
+        {block.text}
+      </p>
+    );
+  }
+
+  if (block.type === "note") {
+    return (
+      <p
+        key={i}
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "11px",
+          lineHeight: "1.65",
+          color: "#404040",
+          padding: "0.5rem 0.875rem",
+          borderLeft: "2px solid rgba(251,191,36,0.3)",
+          background: "rgba(251,191,36,0.03)",
+        }}
+      >
+        {block.text}
+      </p>
+    );
+  }
+
+  return (
+    <p
+      key={i}
+      style={{
+        fontFamily: "var(--font-serif), Georgia, serif",
+        fontSize: "15.5px",
+        lineHeight: "1.9",
+        color: "#d4d4d4",
+        letterSpacing: "0.01em",
+      }}
+    >
+      {block.text}
+    </p>
+  );
+}
+
 export default function DocumentPreview({
   artifact,
   finalOutput,
@@ -95,39 +214,9 @@ export default function DocumentPreview({
         </p>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {blocks.map((block, i) =>
-          block.type === "heading" ? (
-            <p
-              key={i}
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "10px",
-                fontWeight: 700,
-                letterSpacing: "0.2em",
-                color: "#737373",
-                textTransform: "uppercase",
-                marginTop: i > 0 ? "2rem" : 0,
-                paddingTop: i > 0 ? "1.25rem" : 0,
-                borderTop: i > 0 ? "1px solid rgba(255,255,255,0.04)" : "none",
-              }}
-            >
-              {block.text}
-            </p>
-          ) : (
-            <p
-              key={i}
-              style={{
-                fontFamily: "var(--font-serif), Georgia, serif",
-                fontSize: "16px",
-                lineHeight: "1.85",
-                color: "#d4d4d4",
-                letterSpacing: "0.01em",
-              }}
-            >
-              {block.text}
-            </p>
-          )
+          renderBlock(block, i, i === 0)
         )}
       </div>
 

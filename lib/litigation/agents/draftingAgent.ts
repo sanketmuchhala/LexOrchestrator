@@ -44,27 +44,27 @@ function deterministicDraft(
 
   const sections: DraftSection[] = [
     {
-      heading: "I. INTRODUCTION",
+      heading: "PRELIMINARY STATEMENT",
       content: `Pursuant to ${intake.motionType.replace(/_/g, " ")}, ${ctx.input.query}${noCiteNotice}`,
       citations: [],
     },
     {
-      heading: "II. STATEMENT OF FACTS",
+      heading: "STATEMENT OF RELEVANT FACTS",
       content: ctx.input.facts ?? "The underlying facts are as set forth in the record.",
       citations: [],
     },
     {
-      heading: "III. LEGAL STANDARD",
+      heading: "LEGAL STANDARD",
       content: `The applicable standard in ${intake.jurisdiction} requires the following analysis.\n\n${authorityBlock}`,
       citations: citations.slice(0, 2),
     },
     {
-      heading: "IV. ARGUMENT",
+      heading: "ARGUMENT",
       content: `Based on the retrieved authority and the facts stated above, the movant respectfully submits that ${ctx.input.query}`,
       citations,
     },
     {
-      heading: "V. CONCLUSION",
+      heading: "CONCLUSION",
       content: "For the foregoing reasons, the Court should grant the relief requested.",
       citations: [],
     },
@@ -96,13 +96,18 @@ export async function runLitigationDraftingAgent(
     system: `You are a litigation drafting assistant. Generate a structured motion outline as JSON with these exact keys:
 - title: string (motion title including court)
 - sections: array of { heading: string, content: string, citations: string[] }
-  Include: INTRODUCTION, STATEMENT OF FACTS, LEGAL STANDARD, ARGUMENT, CONCLUSION
-- draftText: string (all sections concatenated as a single coherent draft)
+  Use these exact section headings in order:
+  1. PRELIMINARY STATEMENT
+  2. STATEMENT OF RELEVANT FACTS
+  3. LEGAL STANDARD
+  4. ARGUMENT
+  5. CONCLUSION
+- draftText: string (all sections concatenated as a single coherent draft, headings followed by content)
 - citations: string[] (only citations from the authority provided -- do not invent citations)
 - artifactType: "outline"
 
 CRITICAL: Only use citations from the authority provided below.
-If no authority is available, include in the draft: "NOTE: No verified legal citations were retrieved."
+If no authority is available, include in LEGAL STANDARD: "NOTE: No verified legal citations were retrieved. This draft must be supplemented with properly researched authority before use."
 Return JSON only.`,
     prompt: `Motion type: ${intake.motionType}
 Jurisdiction: ${intake.jurisdiction} | Court: ${intake.court}

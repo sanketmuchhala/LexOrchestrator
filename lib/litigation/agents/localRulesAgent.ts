@@ -1,92 +1,168 @@
 import type { AgentContext, AgentResult, LocalRulesAgentOutput, IntakeAgentOutput } from "../types";
 import { makeEvent } from "../logAgentEvent";
+import { getLocalRules } from "../localRules/getLocalRules";
+import { checkDraftAgainstRules, getMissingSections } from "../localRules/checkDraftAgainstRules";
+import type { LocalRuleProfile } from "../localRules/types";
 
-interface JurisdictionRules {
-  formattingNotes: string[];
-  ruleWarnings: string[];
+function buildWarnings(
+  profile: LocalRuleProfile,
+  missingSections: string[],
+  motionType: string
+): string[] {
+  const warnings: string[] = [];
+
+  if (missingSections.length > 0) {
+    warnings.push(
+      `${missingSections.length} required section(s) not detected: ${missingSections.join(", ")}.`
+    );
+  }
+
+  if (profile.id === "sdny") {
+    if (motionType === "motion_to_dismiss" || motionType === "motion_for_summary_judgment") {
+      warnings.push(
+        "SDNY dispositive motions typically require a pre-motion conference letter to the assigned judge before filing (Local Rule 7.1(a))."
+      );
+    }
+    warnings.push(
+      "Individual judge practices in SDNY vary significantly. Verify the assigned judge's individual rules."
+    );
+  }
+
+  if (profile.id === "new_york_state_generic") {
+    warnings.push(
+      "New York state motion papers typically require affirmation or affidavit support for factual assertions."
+    );
+    warnings.push(
+      "Verify e-filing requirements via NYSCEF for the applicable county and part."
+    );
+  }
+
+  return warnings;
 }
 
-const JURISDICTION_RULES: Record<string, JurisdictionRules> = {
-  sdny: {
-    formattingNotes: [
-      "SDNY requires 12-point Times New Roman or equivalent proportionally spaced font (Local Rule 11.1).",
-      "Briefs must be double-spaced with 1-inch margins on all sides (Local Rule 11.1).",
-      "Individual judge rules may impose additional page limits -- always check the assigned judge's individual practices.",
-      "Tables of contents and authorities are required for briefs exceeding 10 pages.",
-    ],
-    ruleWarnings: [
-      "SDNY requires pre-motion conference letters before filing most dispositive motions (Local Rule 7.1(a)).",
-      "Memoranda of law in support of motions are limited to 25 pages without court permission.",
-      "Reply memoranda are limited to 10 pages without court permission.",
-      "NOTE: This summary covers common SDNY local rules only. Always consult the current Local Rules and the assigned judge's individual rules before filing.",
-    ],
-  },
-  federal: {
-    formattingNotes: [
-      "Federal court briefs must comply with applicable local rules for font, margins, and spacing.",
-      "Citation format should follow The Bluebook: A Uniform System of Citation.",
-      "Case names in citations should be italicized or underlined per Bluebook Rule 10.",
-    ],
-    ruleWarnings: [
-      "Page and word limits vary by district -- confirm the specific court's local rules.",
-      "Certificates of compliance are required for briefs subject to word limits (FRAP 32(g)).",
-      "NOTE: This summary covers generic federal standards only. Always confirm court-specific local rules before filing.",
-    ],
-  },
-  "new york": {
-    formattingNotes: [
-      "New York state court papers must comply with 22 NYCRR Part 202 (Uniform Civil Rules for Supreme Court).",
-      "Affidavits and affirmations must be notarized or contain the required CPLR 2106 affirmation language.",
-      "Briefs filed in the Appellate Division must comply with applicable Part 1000 rules.",
-    ],
-    ruleWarnings: [
-      "Commercial Division rules apply in IAS Commercial Parts -- check Part 48 for additional requirements.",
-      "E-filing through NYSCEF is required in most New York County Supreme Court matters.",
-      "NOTE: This summary covers common New York state standards. Always confirm Part-specific and judge-specific rules before filing.",
-    ],
-  },
-};
+function formatArtifactContent(
+  profile: LocalRuleProfile,
+  sectionChecks: LocalRulesAgentOutput["sectionChecks"],
+  missingSections: string[],
+  warnings: string[]
+): string {
+  const lines: string[] = [
+    `LOCAL RULES REVIEW -- ${profile.label}`,
+    "[DRAFTING REMINDER] This review contains formatting checks and reminders only.",
+    "It does not constitute a compliance certification or legal advice.",
+    "",
+    "PROFILE",
+    `Profile: ${profile.label}`,
+    `Jurisdiction: ${profile.jurisdiction}${profile.court ? ` / ${profile.court}` : ""}`,
+    "",
+    "SECTION ANALYSIS",
+    `Required sections detected: ${sectionChecks.filter((s) => s.detected && s.required).length} of ${sectionChecks.filter((s) => s.required).length}`,
+    ...sectionChecks
+      .filter((s) => s.required)
+      .map((s) => `  [${s.detected ? "DETECTED" : "MISSING"}] ${s.label}`),
+  ];
 
-function matchJurisdiction(jurisdiction: string, court: string): JurisdictionRules {
-  const combined = `${jurisdiction} ${court}`.toLowerCase();
-  if (
-    combined.includes("sdny") ||
-    combined.includes("s.d.n.y") ||
-    combined.includes("southern district of new york")
-  ) {
-    return JURISDICTION_RULES.sdny;
+  if (missingSections.length > 0) {
+    lines.push("", "MISSING SECTIONS");
+    missingSections.forEach((sec) => lines.push(`- ${sec}`));
   }
-  if (combined.includes("new york") && !combined.includes("federal")) {
-    return JURISDICTION_RULES["new york"];
+
+  if (profile.formattingNotes.length > 0) {
+    lines.push("", "FORMATTING NOTES");
+    profile.formattingNotes.forEach((n, i) => lines.push(`${i + 1}. ${n}`));
   }
-  return JURISDICTION_RULES.federal;
+
+  if (profile.citationNotes.length > 0) {
+    lines.push("", "CITATION NOTES");
+    profile.citationNotes.forEach((n, i) => lines.push(`${i + 1}. ${n}`));
+  }
+
+  if (profile.filingNotes.length > 0) {
+    lines.push("", "FILING NOTES");
+    profile.filingNotes.forEach((n, i) => lines.push(`${i + 1}. ${n}`));
+  }
+
+  if (warnings.length > 0) {
+    lines.push("", "WARNINGS");
+    warnings.forEach((w, i) => lines.push(`${i + 1}. ${w}`));
+  }
+
+  if (profile.limitations.length > 0) {
+    lines.push("", "LIMITATIONS");
+    profile.limitations.forEach((l) => lines.push(`- ${l}`));
+  }
+
+  return lines.join("\n");
 }
 
 export async function runLitigationLocalRulesAgent(
   ctx: AgentContext,
-  intake: IntakeAgentOutput
+  intake: IntakeAgentOutput,
+  draftText?: string
 ): Promise<AgentResult> {
   const start = performance.now();
-  const events = [makeEvent("LocalRulesAgent", "agent_started", `Applying local rules: ${ctx.input.court}`)];
+  const events = [
+    makeEvent("LocalRulesAgent", "agent_started", `Applying local rules: ${ctx.input.court}`),
+  ];
 
-  const rules = matchJurisdiction(intake.jurisdiction, ctx.input.court);
+  const profile = getLocalRules(intake.jurisdiction, ctx.input.court);
+
+  events.push(
+    makeEvent("LocalRulesAgent", "tool_call", `Profile: ${profile.label}`, {
+      toolName: "getLocalRules",
+    })
+  );
+
+  const sectionChecks = checkDraftAgainstRules(draftText ?? "", profile);
+  const missingSections = getMissingSections(sectionChecks);
+
+  events.push(
+    makeEvent(
+      "LocalRulesAgent",
+      "tool_result",
+      `${sectionChecks.filter((s) => s.detected && s.required).length}/${sectionChecks.filter((s) => s.required).length} sections detected`,
+      { toolName: "checkDraftAgainstRules" }
+    )
+  );
+
+  const warnings = buildWarnings(profile, missingSections, intake.motionType);
+
+  const confidence =
+    missingSections.length === 0 ? 0.8 : missingSections.length <= 2 ? 0.6 : 0.4;
+
+  const artifactContent = formatArtifactContent(profile, sectionChecks, missingSections, warnings);
 
   const output: LocalRulesAgentOutput = {
-    formattingNotes: rules.formattingNotes,
-    ruleWarnings: rules.ruleWarnings,
+    profileId: profile.id,
+    profileLabel: profile.label,
+    formattingNotes: profile.formattingNotes,
+    requiredSections: profile.requiredSections,
+    missingSections,
+    citationNotes: profile.citationNotes,
+    filingNotes: profile.filingNotes,
+    warnings,
+    confidence,
+    limitations: profile.limitations,
+    artifactContent,
+    sectionChecks,
   };
 
   const latencyMs = Math.round(performance.now() - start);
   events.push(
-    makeEvent("LocalRulesAgent", "agent_completed", `${rules.ruleWarnings.length} rule warnings issued`, { latencyMs })
+    makeEvent(
+      "LocalRulesAgent",
+      "agent_completed",
+      `Profile: ${profile.label} | Missing sections: ${missingSections.length} | Warnings: ${warnings.length}`,
+      { latencyMs }
+    )
   );
 
   return {
     agentName: "LocalRulesAgent",
     status: "success",
-    message: `Local rules applied for ${ctx.input.court}. ${rules.formattingNotes.length} formatting notes, ${rules.ruleWarnings.length} rule warnings.`,
+    message: `Local rules applied (${profile.label}). ${missingSections.length} missing section(s). ${warnings.length} warning(s).`,
     output: output as unknown as Record<string, unknown>,
-    confidence: 0.7,
+    confidence,
     events,
   };
 }

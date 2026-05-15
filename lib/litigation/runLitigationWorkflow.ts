@@ -45,20 +45,6 @@ function formatAdversarialContent(output: AdversarialAgentOutput): string {
   return lines.join("\n");
 }
 
-function formatLocalRulesContent(output: LocalRulesAgentOutput): string {
-  const lines: string[] = [
-    "FORMATTING NOTES",
-    ...output.formattingNotes.map((n, i) => `${i + 1}. ${n}`),
-    "",
-    "RULE WARNINGS",
-    ...output.ruleWarnings.map((w, i) => `${i + 1}. ${w}`),
-  ];
-  if (output.revisedDraftText) {
-    lines.push("", "REVISED DRAFT NOTE", output.revisedDraftText);
-  }
-  return lines.join("\n");
-}
-
 async function dispatchAndLog(
   result: AgentResult,
   workflowRunId: string,
@@ -122,7 +108,7 @@ export async function runLitigationWorkflow(
     const adversarial = adversarialResult.output as unknown as AdversarialAgentOutput;
 
     // Step 8: Local Rules Agent
-    const localRulesResult = await runLitigationLocalRulesAgent(ctx, intake);
+    const localRulesResult = await runLitigationLocalRulesAgent(ctx, intake, draft.draftText);
     await dispatchAndLog(localRulesResult, workflowRunId, allEvents);
     const localRulesOutput = localRulesResult.output as unknown as LocalRulesAgentOutput;
 
@@ -174,13 +160,14 @@ export async function runLitigationWorkflow(
     await saveDraftArtifact(
       workflowRunId,
       {
-        title: `Local Rules — ${ctx.input.court}`,
+        title: `Local Rules Review — ${localRulesOutput.profileLabel}`,
         sections: [],
-        draftText: formatLocalRulesContent(localRulesOutput),
+        draftText: localRulesOutput.artifactContent,
         citations: [],
         artifactType: "local_rules_check",
       },
-      "LocalRulesAgent"
+      "LocalRulesAgent",
+      { localRules: localRulesOutput }
     );
 
     // Step 12: Update workflow run with final scores

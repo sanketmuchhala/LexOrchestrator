@@ -487,6 +487,92 @@ npm run smoke:judge-brief   # finds demo judge, loads profile, runs agent, tests
 
 ---
 
+## Phase 8 Local Rules Agent
+
+Upgrades the Local Rules Agent from a static string-list to a structured, section-aware review module.
+
+### Static rules module (`lib/litigation/localRules/`)
+
+| File | Purpose |
+|---|---|
+| `types.ts` | `LocalRuleProfile`, `SectionCheckResult`, `LocalRulesResult` interfaces |
+| `rules.ts` | Static profile data for three jurisdictions |
+| `getLocalRules.ts` | Selects profile by jurisdiction/court string matching |
+| `checkDraftAgainstRules.ts` | Keyword-based section detection; returns per-section detected/missing status |
+
+### Supported profiles
+
+| Profile ID | Label |
+|---|---|
+| `sdny` | Southern District of New York (SDNY) |
+| `federal_generic` | Federal Court (Generic) |
+| `new_york_state_generic` | New York State Court (Generic) |
+
+Each profile includes: `formattingNotes`, `requiredSections`, `citationNotes`, `filingNotes`, `limitations`.
+
+### Local Rules Agent behavior (`lib/litigation/agents/localRulesAgent.ts`)
+
+Upgraded output (`LocalRulesAgentOutput`) includes:
+- `profileId` / `profileLabel` — which profile was applied
+- `sectionChecks` — per-section detected/required/missing status
+- `missingSections` — list of required sections not detected in draft
+- `warnings` — dynamic warnings based on motion type and jurisdiction
+- `citationNotes`, `filingNotes` — from profile
+- `confidence` — 0.8 when all sections detected, 0.6 for 1-2 missing, 0.4 for 3+
+- `artifactContent` — formatted review text saved to `draft_artifacts`
+
+The agent now receives the draft text (`draftText`) from Step 5 (DraftingAgent) and runs section detection before producing the review.
+
+### Drafting Agent formatting changes
+
+Deterministic fallback now uses stable section headings:
+- PRELIMINARY STATEMENT
+- STATEMENT OF RELEVANT FACTS
+- LEGAL STANDARD
+- ARGUMENT
+- CONCLUSION
+
+LLM prompt updated to request the same headings. Stable headings enable reliable section detection by the Local Rules Agent.
+
+### Persistence
+
+`local_rules_check` artifact now saved with `metadata.localRules` containing the full structured `LocalRulesAgentOutput`. This allows `LocalRulesPanel` to read structured data directly.
+
+### Local Rules Panel behavior
+
+`LocalRulesPanel.tsx` reads from `artifact.metadata.localRules` when available. Shows:
+- Profile label and confidence
+- Section analysis grid with pass (detected) / fail (missing) badges
+- Warnings (amber)
+- Formatting notes, citation notes, filing notes
+- Limitations block
+
+Falls back to text parsing for older artifacts without structured metadata.
+
+### Document Preview improvements
+
+`DocumentPreview.tsx` now classifies blocks into four types:
+- `heading-main` — Roman numeral or all-caps standard heading; rendered with ruling separator
+- `heading-sub` — letter-prefix sub-headings (A., B.); rendered in mono at smaller weight
+- `note` — lines starting with "NOTE:" or "[DEMO"; rendered amber with left border
+- `para` — standard legal prose; rendered in EB Garamond serif
+
+### Limitation: artifact_type constraint
+
+`draft_artifacts.artifact_type` is constrained to the values in migration 004. `local_rules_review` is not in that constraint; `local_rules_check` is used instead. A future migration can rename the type if needed.
+
+### Language constraint
+
+These notes are drafting reminders only. Every profile and panel includes an explicit limitation statement that this does not constitute a compliance certification or legal advice.
+
+### Smoke command
+
+```bash
+npm run smoke:local-rules   # loads SDNY profile, checks complete and incomplete drafts, runs agent
+```
+
+---
+
 ## Key Files
 ```
 lib/llm/config.ts           — provider detection (OpenRouter vs OpenAI)
