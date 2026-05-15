@@ -11,6 +11,8 @@
     "seed:constitution": "tsx scripts/seed-constitution.ts",
     "embed:legal": "tsx scripts/embed-legal-corpus.ts",
     "seed:litigation-demo": "tsx scripts/seed-litigation-demo.ts",
+    "smoke:legal-search": "tsx scripts/smoke-test-legal-opinion-search.ts",
+    "smoke:citations": "tsx scripts/smoke-test-citation-verification.ts",
     "check:safety": "tsx scripts/check-safety.ts",
     "check:all": "npm run check:safety && npm run lint && npx tsc --noEmit && npm run build"
   },

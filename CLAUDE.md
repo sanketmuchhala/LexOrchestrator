@@ -156,6 +156,87 @@ npm run seed:litigation-demo   # seeds 3 demo opinions, chunks, 1 judge, 1 judge
 
 ---
 
+## Phase 2 Legal Opinion Retrieval (migration 005)
+
+New parallel retrieval path for litigation workflows. Old `searchLegalCorpus.ts` (document_chunks) remains active.
+
+### New retrieval module
+
+`lib/retrieval/searchLegalOpinions.ts` -- hybrid RAG over `legal_opinion_chunks`:
+
+```
+finalScore = min(1, keywordScore * 0.35 + vectorScore * 0.45 + jurisdictionBoost + courtBoost + citationBoost + recencyBoost)
+```
+
+Fallback chain: `hybrid_rag` -> `keyword_only` -> `direct_query` -> `empty`
+
+### SQL function (migration 005)
+
+`match_legal_opinion_chunks()` -- vector similarity with jurisdiction/court/date filters.
+`search_legal_opinion_chunks_fulltext()` -- full-text keyword search with same filters.
+
+### API route
+
+`POST /api/legal-opinions/search` -- accepts `{ query, jurisdiction?, court?, dateFrom?, dateTo?, limit? }`
+
+### DB helpers
+
+`lib/db/supabaseServer.ts` -- added `vectorSearchOpinionChunks()`, `fulltextSearchOpinionChunks()`, `directSearchOpinionChunks()`
+
+### Smoke test
+
+```bash
+npm run smoke:legal-search   # runs 3 demo queries, degrades gracefully without Supabase
+```
+
+---
+
+## Phase 3 Citation Verification
+
+Output verification layer for generated or pasted legal text. This is output verification, not a claim of zero hallucination.
+
+### Extraction module
+
+`lib/citations/extractCitations.ts` -- regex-based extractor for common U.S. citation forms (U.S., F.2d/3d/4th, F. Supp., S. Ct., N.Y., A.D., Misc.).
+
+### Verification module
+
+`lib/citations/verifyCitation.ts` -- single citation verification:
+1. Normalize citation text
+2. Search `legal_opinions` by exact/partial citation match
+3. If matched: check quote, pin cite, proposition support, treatment status
+4. Produce structured result with confidence and evidence
+
+`lib/citations/verifyCitationsInText.ts` -- bulk text verification: extract all citations from freeform text, verify each, produce summary.
+
+### API routes
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/api/citations/extract` | POST | Extract citations from text |
+| `/api/citations/verify` | POST | Verify a single citation |
+| `/api/citations/verify-text` | POST | Extract and verify all citations in text |
+
+### Persistence
+
+`lib/citations/saveCitationVerificationReport.ts` -- saves to `citation_verification_reports` table when Supabase is configured and `workflowRunId` is provided.
+
+### Current limitations
+
+- Regex extraction only (no ML-based extraction)
+- Verification limited to locally indexed opinions
+- Quote matching uses word overlap (not semantic similarity)
+- Proposition support is term-overlap based (not LLM-based)
+- Pin cite verification requires page metadata in chunks (often absent)
+
+### Smoke test
+
+```bash
+npm run smoke:citations   # runs extraction, verification, bulk text verification
+```
+
+---
+
 ## Key Files
 ```
 lib/llm/config.ts           — provider detection (OpenRouter vs OpenAI)

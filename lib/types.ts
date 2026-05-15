@@ -432,3 +432,51 @@ export interface CorpusEntry {
   jurisdiction: string;
   keywords: string[];
 }
+
+// ─── Legal Opinion Search (Phase 2) ──────────────────────────────────────────
+
+export interface LegalOpinionSearchInput {
+  query: string;
+  jurisdiction?: string;
+  court?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  limit?: number;
+  minScore?: number;
+}
+
+export interface LegalOpinionSearchResult {
+  chunkId: string;
+  opinionId: string;
+  caseName: string;
+  citation: string | null;
+  court: string | null;
+  jurisdiction: string | null;
+  decisionDate: string | null;
+  chunkText: string;
+  chunkIndex: number;
+  pageStart: number | null;
+  pageEnd: number | null;
+  spanStart: number | null;
+  spanEnd: number | null;
+  score: number;
+  keywordScore: number;
+  vectorScore: number;
+  authorityScore: number;
+  metadata: Record<string, unknown>;
+}
+
+export type LegalOpinionSearchSource =
+  | "legal_opinions"
+  | "legacy_document_chunks"
+  | "memory"
+  | "empty";
+
+export interface LegalOpinionSearchResponse {
+  results: LegalOpinionSearchResult[];
+  fallbackUsed: boolean;
+  source: LegalOpinionSearchSource;
+  retrievalMethod: string;
+  totalCandidates: number;
+}
+

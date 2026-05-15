@@ -373,3 +373,237 @@ export async function getDocuments(limit = 50): Promise<DocumentRecord[]> {
 }
 
 export { DB_AVAILABLE };
+
+// ─── Legal Opinion Search (Phase 2) ──────────────────────────────────────────
+
+export interface OpinionChunkRow {
+  id: string;
+  opinion_id: string;
+  chunk_index: number;
+  chunk_text: string;
+  citation: string | null;
+  court: string | null;
+  jurisdiction: string | null;
+  decision_date: string | null;
+  page_start: number | null;
+  page_end: number | null;
+  span_start: number | null;
+  span_end: number | null;
+  case_name: string;
+  metadata: Record<string, unknown>;
+  similarity?: number;
+  rank?: number;
+}
+
+export async function vectorSearchOpinionChunks(
+  queryEmbedding: number[],
+  matchCount: number = 20,
+  filters?: {
+    jurisdiction?: string;
+    court?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }
+): Promise<OpinionChunkRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client.rpc("match_legal_opinion_chunks", {
+    query_embedding: queryEmbedding,
+    match_count: matchCount,
+    filter_jurisdiction: filters?.jurisdiction ?? null,
+    filter_court: filters?.court ?? null,
+    filter_date_from: filters?.dateFrom ?? null,
+    filter_date_to: filters?.dateTo ?? null,
+  });
+
+  if (error) {
+    console.warn("[DB] vectorSearchOpinionChunks RPC failed:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as OpinionChunkRow[];
+}
+
+export async function fulltextSearchOpinionChunks(
+  searchQuery: string,
+  matchCount: number = 20,
+  filters?: {
+    jurisdiction?: string;
+    court?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }
+): Promise<OpinionChunkRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client.rpc("search_legal_opinion_chunks_fulltext", {
+    search_query: searchQuery,
+    match_count: matchCount,
+    filter_jurisdiction: filters?.jurisdiction ?? null,
+    filter_court: filters?.court ?? null,
+    filter_date_from: filters?.dateFrom ?? null,
+    filter_date_to: filters?.dateTo ?? null,
+  });
+
+  if (error) {
+    console.warn("[DB] fulltextSearchOpinionChunks RPC failed:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    ...row,
+    rank: row.rank as number,
+  })) as OpinionChunkRow[];
+}
+
+export async function directSearchOpinionChunks(
+  matchCount: number = 20,
+  filters?: {
+    jurisdiction?: string;
+    court?: string;
+  }
+): Promise<OpinionChunkRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  let query = client
+    .from("legal_opinion_chunks")
+    .select("id, opinion_id, chunk_index, chunk_text, citation, court, jurisdiction, decision_date, page_start, page_end, span_start, span_end, metadata, legal_opinions(case_name)")
+    .limit(matchCount);
+
+  if (filters?.jurisdiction) {
+    query = query.ilike("jurisdiction", `%${filters.jurisdiction}%`);
+  }
+  if (filters?.court) {
+    query = query.ilike("court", `%${filters.court}%`);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.warn("[DB] directSearchOpinionChunks failed:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    id: row.id as string,
+    opinion_id: row.opinion_id as string,
+    chunk_index: row.chunk_index as number,
+    chunk_text: row.chunk_text as string,
+    citation: row.citation as string | null,
+    court: row.court as string | null,
+    jurisdiction: row.jurisdiction as string | null,
+    decision_date: row.decision_date as string | null,
+    page_start: row.page_start as number | null,
+    page_end: row.page_end as number | null,
+    span_start: row.span_start as number | null,
+    span_end: row.span_end as number | null,
+    case_name: (row.legal_opinions as Record<string, string> | null)?.case_name ?? "Unknown",
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
+  }));
+}
+
+// ─── Citation Verification DB Helpers (Phase 3) ──────────────────────────────
+
+export interface OpinionRow {
+  id: string;
+  case_name: string;
+  citation: string | null;
+  court: string | null;
+  jurisdiction: string | null;
+  decision_date: string | null;
+  raw_text: string | null;
+}
+
+export interface OpinionChunkForVerification {
+  id: string;
+  chunk_index: number;
+  chunk_text: string;
+  page_start: number | null;
+  page_end: number | null;
+}
+
+export interface CitationEdgeRow {
+  id: string;
+  from_opinion_id: string;
+  to_opinion_id: string;
+  treatment: string | null;
+  cited_citation: string | null;
+  citation_context: string | null;
+}
+
+export async function searchOpinionByCitation(citation: string): Promise<OpinionRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  // Try exact match first
+  const { data: exact, error: exactErr } = await client
+    .from("legal_opinions")
+    .select("id, case_name, citation, court, jurisdiction, decision_date, raw_text")
+    .eq("citation", citation)
+    .limit(5);
+
+  if (exactErr) {
+    console.warn("[DB] searchOpinionByCitation exact failed:", exactErr.message);
+  }
+
+  if (exact && exact.length > 0) {
+    return exact as OpinionRow[];
+  }
+
+  // Fallback: ilike partial match
+  const { data: partial, error: partialErr } = await client
+    .from("legal_opinions")
+    .select("id, case_name, citation, court, jurisdiction, decision_date, raw_text")
+    .ilike("citation", `%${citation}%`)
+    .limit(5);
+
+  if (partialErr) {
+    console.warn("[DB] searchOpinionByCitation partial failed:", partialErr.message);
+    return [];
+  }
+
+  return (partial ?? []) as OpinionRow[];
+}
+
+export async function getOpinionChunksByOpinionId(
+  opinionId: string
+): Promise<OpinionChunkForVerification[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("legal_opinion_chunks")
+    .select("id, chunk_index, chunk_text, page_start, page_end")
+    .eq("opinion_id", opinionId)
+    .order("chunk_index");
+
+  if (error) {
+    console.warn("[DB] getOpinionChunksByOpinionId failed:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as OpinionChunkForVerification[];
+}
+
+export async function getCitationEdgesByOpinionId(
+  opinionId: string
+): Promise<CitationEdgeRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("legal_citation_edges")
+    .select("id, from_opinion_id, to_opinion_id, treatment, cited_citation, citation_context")
+    .or(`from_opinion_id.eq.${opinionId},to_opinion_id.eq.${opinionId}`)
+    .limit(50);
+
+  if (error) {
+    console.warn("[DB] getCitationEdgesByOpinionId failed:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as CitationEdgeRow[];
+}
