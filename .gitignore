@@ -1,7 +1,23 @@
 node_modules/
 .next/
-.env*.local
 *.tsbuildinfo
 
-# Private endpoint documentation — not for public repo
+# Environment files -- never commit secrets
+.env
+.env.local
+.env*.local
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+
+# Private endpoint documentation -- not for public repo
 mirofish-endpoint.md
+
+# Private research and planning notes
+research/
+docs/private-notes/

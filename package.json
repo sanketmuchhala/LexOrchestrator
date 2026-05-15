@@ -9,7 +9,9 @@
     "lint": "eslint app components lib scripts --ext .ts,.tsx",
     "seed:legal": "tsx scripts/seed-legal-corpus.ts",
     "seed:constitution": "tsx scripts/seed-constitution.ts",
-    "embed:legal": "tsx scripts/embed-legal-corpus.ts"
+    "embed:legal": "tsx scripts/embed-legal-corpus.ts",
+    "check:safety": "tsx scripts/check-safety.ts",
+    "check:all": "npm run check:safety && npm run lint && npx tsc --noEmit && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",

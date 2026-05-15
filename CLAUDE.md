@@ -167,3 +167,31 @@ app/globals.css             — design tokens, badge classes, animations
 - Short imperative subject line
 - No `Co-Authored-By: Claude` lines
 - No em dashes (`—`) in commit messages or code comments
+
+---
+
+## Phase 0 Safety Gate
+
+Before every commit, run:
+
+```bash
+npm run check:all
+```
+
+This runs, in order:
+1. `check:safety` -- scans for forbidden employer terms and leaked secrets
+2. `lint` -- ESLint across source dirs
+3. `tsc --noEmit` -- type check
+4. `build` -- production build
+
+The safety script lives at `scripts/check-safety.ts`. It will exit 1 if:
+- Any forbidden employer name appears in tracked project files
+- Any secret pattern (API keys, JWT secrets) appears in source files
+- `.env` or `.env.local` is tracked by git
+
+Package scripts available:
+```bash
+npm run check:safety    # safety scan only
+npm run check:all       # full preflight (safety + lint + typecheck + build)
+```
+
