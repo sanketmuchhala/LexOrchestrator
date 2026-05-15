@@ -607,3 +607,198 @@ export async function getCitationEdgesByOpinionId(
 
   return (data ?? []) as CitationEdgeRow[];
 }
+
+// ─── Litigation Workflow (Phase 4) ───────────────────────────────────────────
+
+export async function insertLitigationWorkflowRun(data: {
+  workflowType: string;
+  jurisdiction?: string;
+  court?: string;
+  judgeId?: string;
+  motionType?: string;
+  inputSummary?: string;
+  userId?: string;
+  organizationId?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<string> {
+  const client = getClient();
+  if (!client) return crypto.randomUUID();
+
+  const { data: row, error } = await client
+    .from("litigation_workflow_runs")
+    .insert({
+      workflow_type: data.workflowType,
+      status: "running",
+      jurisdiction: data.jurisdiction ?? null,
+      court: data.court ?? null,
+      judge_id: data.judgeId ?? null,
+      motion_type: data.motionType ?? null,
+      input_summary: data.inputSummary ?? null,
+      user_id: data.userId ?? null,
+      organization_id: data.organizationId ?? null,
+      metadata: data.metadata ?? {},
+    })
+    .select("id")
+    .single();
+
+  if (error || !row) {
+    console.warn("[DB] insertLitigationWorkflowRun failed:", error?.message);
+    return crypto.randomUUID();
+  }
+  return row.id as string;
+}
+
+export async function updateLitigationWorkflowRun(
+  id: string,
+  data: {
+    status: string;
+    finalOutput?: string;
+    confidence?: number;
+    faithfulnessScore?: number;
+    citationPassRate?: number;
+    metadata?: Record<string, unknown>;
+  }
+): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const { error } = await client
+    .from("litigation_workflow_runs")
+    .update({
+      status: data.status,
+      final_output: data.finalOutput ?? null,
+      confidence: data.confidence ?? null,
+      faithfulness_score: data.faithfulnessScore ?? null,
+      citation_pass_rate: data.citationPassRate ?? null,
+      ...(data.metadata ? { metadata: data.metadata } : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  if (error) console.warn("[DB] updateLitigationWorkflowRun failed:", error.message);
+}
+
+export async function insertLitigationAgentEvent(data: {
+  workflowRunId: string;
+  agentName: string;
+  eventType: string;
+  eventStatus?: string;
+  message?: string;
+  toolName?: string;
+  toolInput?: Record<string, unknown>;
+  toolOutput?: Record<string, unknown>;
+  latencyMs?: number;
+  metadata?: Record<string, unknown>;
+}): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const { error } = await client.from("litigation_agent_events").insert({
+    workflow_run_id: data.workflowRunId,
+    agent_name: data.agentName,
+    event_type: data.eventType,
+    event_status: data.eventStatus ?? null,
+    message: data.message ?? null,
+    tool_name: data.toolName ?? null,
+    tool_input: data.toolInput ?? {},
+    tool_output: data.toolOutput ?? {},
+    latency_ms: data.latencyMs ?? null,
+    metadata: data.metadata ?? {},
+  });
+
+  if (error) console.warn("[DB] insertLitigationAgentEvent failed:", error.message);
+}
+
+export async function insertDraftArtifactRecord(data: {
+  workflowRunId: string;
+  artifactType: string;
+  title?: string;
+  content: string;
+  citations?: Record<string, unknown>[];
+  createdByAgent?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<string> {
+  const client = getClient();
+  if (!client) return crypto.randomUUID();
+
+  const { data: row, error } = await client
+    .from("draft_artifacts")
+    .insert({
+      workflow_run_id: data.workflowRunId,
+      artifact_type: data.artifactType,
+      title: data.title ?? null,
+      content: data.content,
+      citations: data.citations ?? [],
+      verification_status: "pending",
+      version: 1,
+      created_by_agent: data.createdByAgent ?? null,
+      metadata: data.metadata ?? {},
+    })
+    .select("id")
+    .single();
+
+  if (error || !row) {
+    console.warn("[DB] insertDraftArtifactRecord failed:", error?.message);
+    return crypto.randomUUID();
+  }
+  return row.id as string;
+}
+
+export interface JudgeProfileRow {
+  judgeId: string;
+  judgeName: string;
+  court: string | null;
+  jurisdiction: string | null;
+  styleNotes: string | null;
+  argumentGuidance: string | null;
+  sourceOpinionCount: number;
+  motionType: string | null;
+}
+
+export async function getJudgeProfileByJudgeId(
+  judgeId: string
+): Promise<JudgeProfileRow | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const { data, error } = await client
+    .from("judge_profiles")
+    .select("judge_id, style_notes, argument_guidance, source_opinion_count, motion_type, jurisdiction, legal_judges(full_name, court, jurisdiction)")
+    .eq("judge_id", judgeId)
+    .limit(1)
+    .single();
+
+  if (error || !data) return null;
+
+  const row = data as Record<string, unknown>;
+  const judge = row.legal_judges as Record<string, string> | null;
+
+  return {
+    judgeId: row.judge_id as string,
+    judgeName: judge?.full_name ?? "Unknown",
+    court: (judge?.court as string | null) ?? null,
+    jurisdiction: (row.jurisdiction as string | null) ?? null,
+    styleNotes: (row.style_notes as string | null) ?? null,
+    argumentGuidance: (row.argument_guidance as string | null) ?? null,
+    sourceOpinionCount: (row.source_opinion_count as number) ?? 0,
+    motionType: (row.motion_type as string | null) ?? null,
+  };
+}
+
+export async function getJudgeByName(
+  judgeName: string
+): Promise<{ id: string; full_name: string; court: string | null; jurisdiction: string | null } | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const { data, error } = await client
+    .from("legal_judges")
+    .select("id, full_name, court, jurisdiction")
+    .ilike("full_name", `%${judgeName}%`)
+    .limit(1)
+    .single();
+
+  if (error || !data) return null;
+
+  return data as { id: string; full_name: string; court: string | null; jurisdiction: string | null };
+}

@@ -237,6 +237,74 @@ npm run smoke:citations   # runs extraction, verification, bulk text verificatio
 
 ---
 
+## Phase 4 Litigation Orchestrator
+
+Parallel architecture alongside the original seven-agent research pipeline. The old pipeline (`lib/orchestrator/runOrchestration.ts`) is unchanged. Phase 4 introduces a new orchestrator and specialist agents specifically for litigation drafting workflows.
+
+### Parallel architecture
+
+The Phase 4 workflow is entirely separate:
+- Old pipeline: `lib/orchestrator/` + `lib/agents/` + `/api/orchestrate`
+- New pipeline: `lib/litigation/` + `lib/litigation/agents/` + `/api/litigation/workflows`
+
+Neither pipeline modifies the other.
+
+### Core module: `lib/litigation/`
+
+| File | Purpose |
+|---|---|
+| `types.ts` | All litigation workflow types: `LitigationWorkflowInput`, `LitigationWorkflowResult`, `AgentContext`, `AgentResult`, per-agent output types |
+| `createWorkflowRun.ts` | Inserts into `litigation_workflow_runs`. Returns ephemeral UUID if Supabase is unavailable. |
+| `logAgentEvent.ts` | Inserts into `litigation_agent_events`. No-ops safely if Supabase is unavailable. |
+| `saveDraftArtifact.ts` | Inserts into `draft_artifacts`. Returns local object if Supabase is unavailable. |
+| `runLitigationWorkflow.ts` | Main entry point. Runs all agents sequentially, persists events, returns `LitigationWorkflowResult`. |
+
+### Specialist agents: `lib/litigation/agents/`
+
+| Agent | Purpose | Fallback |
+|---|---|---|
+| `intakeAgent.ts` | Normalize request: motionType, jurisdiction, keyFacts, legalIssues, missingInputs | Deterministic pattern matching |
+| `retrievalAgent.ts` | Hybrid RAG via Phase 2 `searchLegalOpinions` | Returns empty results with explanation |
+| `draftingAgent.ts` | Generate motion/memo outline grounded in retrieved authority | Deterministic 5-section outline |
+| `citationAgent.ts` | Verify citations in draft via Phase 3 `verifyCitationsInText` | Returns empty citationSummary |
+| `adversarialAgent.ts` | Opposing-counsel critique: weaknesses, unsupported claims, counterarguments | Playbook by motion type |
+| `localRulesAgent.ts` | Jurisdiction formatting reminders (SDNY, Federal, New York) | Pattern match on jurisdiction string |
+| `judgeBriefAgent.ts` | Look up `judge_profiles` by judgeId or judgeName | Returns "no cached judge profile available" |
+| `evalAgent.ts` | Deterministic scoring: faithfulness, citationPassRate, retrievalCoverage, overallConfidence | Always runs; no LLM dependency |
+
+### Execution model
+
+Agents run sequentially for now. The `AgentContext` object is built progressively -- each agent receives what prior agents produced. Future parallelization: agents with no data dependency on each other (adversarial, local rules, judge brief) can be parallelized by running them concurrently and awaiting all three before eval.
+
+### Persistence tables used
+
+- `litigation_workflow_runs` -- one row per workflow run; updated with final scores at completion
+- `litigation_agent_events` -- one row per agent event; event_type must match the DB check constraint
+- `draft_artifacts` -- draft content and citations saved after the drafting agent completes
+- `citation_verification_reports` -- written by Phase 3 `verifyCitationsInText` when workflowRunId is provided
+
+### API route
+
+`POST /api/litigation/workflows` -- accepts `LitigationWorkflowInput`, returns `LitigationWorkflowResult`:
+```json
+{
+  "query": "...",
+  "jurisdiction": "SDNY",
+  "court": "S.D.N.Y.",
+  "judgeName": "Demo Judge",
+  "motionType": "motion_to_dismiss",
+  "facts": "..."
+}
+```
+
+### Smoke test
+
+```bash
+npm run smoke:litigation-workflow   # runs full 8-agent workflow, degrades gracefully without Supabase or API keys
+```
+
+---
+
 ## Key Files
 ```
 lib/llm/config.ts           — provider detection (OpenRouter vs OpenAI)
@@ -246,7 +314,8 @@ lib/db/supabaseServer.ts    — all DB reads/writes (server-only)
 lib/types.ts                — all shared TypeScript interfaces
 lib/utils/display.ts        — defensive display helpers (normalizedScore, text, asRecord, etc.)
 lib/retrieval/searchLegalCorpus.ts  — hybrid RAG scoring
-lib/orchestrator/runOrchestration.ts — pipeline entry point
+lib/orchestrator/runOrchestration.ts — seven-agent research pipeline entry point
+lib/litigation/runLitigationWorkflow.ts — eight-agent litigation workflow entry point
 app/globals.css             — design tokens, badge classes, animations
 ```
 
