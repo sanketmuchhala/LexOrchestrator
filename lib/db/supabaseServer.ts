@@ -802,3 +802,149 @@ export async function getJudgeByName(
 
   return data as { id: string; full_name: string; court: string | null; jurisdiction: string | null };
 }
+
+// ─── Litigation Workflow Reads (Phase 5) ─────────────────────────────────────
+
+export interface WorkflowRunRow {
+  id: string;
+  workflow_type: string;
+  status: string;
+  jurisdiction: string | null;
+  court: string | null;
+  motion_type: string | null;
+  input_summary: string | null;
+  final_output: string | null;
+  confidence: number | null;
+  faithfulness_score: number | null;
+  citation_pass_rate: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkflowEventRow {
+  id: string;
+  workflow_run_id: string;
+  agent_name: string;
+  event_type: string;
+  event_status: string | null;
+  message: string | null;
+  tool_name: string | null;
+  latency_ms: number | null;
+  token_count: number | null;
+  cost_usd: number | null;
+  created_at: string;
+}
+
+export interface WorkflowArtifactRow {
+  id: string;
+  workflow_run_id: string;
+  artifact_type: string;
+  title: string | null;
+  content: string;
+  citations: Record<string, unknown>[];
+  verification_status: string | null;
+  created_by_agent: string | null;
+  created_at: string;
+}
+
+export interface WorkflowCitationReportRow {
+  id: string;
+  workflow_run_id: string;
+  citation_text: string;
+  normalized_citation: string | null;
+  overall_status: string;
+  existence_status: string | null;
+  quote_status: string | null;
+  pin_cite_status: string | null;
+  proposition_status: string | null;
+  treatment_status: string | null;
+  created_at: string;
+}
+
+export async function listLitigationWorkflowRuns(limit = 50): Promise<WorkflowRunRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("litigation_workflow_runs")
+    .select("id, workflow_type, status, jurisdiction, court, motion_type, input_summary, confidence, faithfulness_score, citation_pass_rate, created_at, updated_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.warn("[DB] listLitigationWorkflowRuns failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => ({ ...row, final_output: null })) as WorkflowRunRow[];
+}
+
+export async function getLitigationWorkflowRun(id: string): Promise<WorkflowRunRow | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const { data, error } = await client
+    .from("litigation_workflow_runs")
+    .select("id, workflow_type, status, jurisdiction, court, motion_type, input_summary, final_output, confidence, faithfulness_score, citation_pass_rate, created_at, updated_at")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return null;
+  return data as WorkflowRunRow;
+}
+
+export async function getLitigationWorkflowEvents(
+  workflowRunId: string
+): Promise<WorkflowEventRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("litigation_agent_events")
+    .select("id, workflow_run_id, agent_name, event_type, event_status, message, tool_name, latency_ms, token_count, cost_usd, created_at")
+    .eq("workflow_run_id", workflowRunId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.warn("[DB] getLitigationWorkflowEvents failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as WorkflowEventRow[];
+}
+
+export async function getLitigationWorkflowArtifacts(
+  workflowRunId: string
+): Promise<WorkflowArtifactRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("draft_artifacts")
+    .select("id, workflow_run_id, artifact_type, title, content, citations, verification_status, created_by_agent, created_at")
+    .eq("workflow_run_id", workflowRunId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.warn("[DB] getLitigationWorkflowArtifacts failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as WorkflowArtifactRow[];
+}
+
+export async function getLitigationWorkflowCitationReports(
+  workflowRunId: string
+): Promise<WorkflowCitationReportRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("citation_verification_reports")
+    .select("id, workflow_run_id, citation_text, normalized_citation, overall_status, existence_status, quote_status, pin_cite_status, proposition_status, treatment_status, created_at")
+    .eq("workflow_run_id", workflowRunId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.warn("[DB] getLitigationWorkflowCitationReports failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as WorkflowCitationReportRow[];
+}

@@ -305,6 +305,57 @@ npm run smoke:litigation-workflow   # runs full 8-agent workflow, degrades grace
 
 ---
 
+## Phase 5 Workflow Inspection UI
+
+Adds a workflow inspection surface for the Phase 4 litigation pipeline. The old seven-agent research pipeline (`/research`, `/runs`) remains fully active and unchanged.
+
+### UI routes added
+
+| Route | Type | Purpose |
+|---|---|---|
+| `/workflows` | Server component | List recent litigation workflow runs with Demo Workflow Launcher |
+| `/workflows/[id]` | Server component | Full workflow inspection — 5 sections |
+
+### API routes added
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/api/litigation/workflows/[id]` | GET | Full workflow detail: run + events + artifacts + citationReports |
+| `/api/litigation/workflows/[id]/events` | GET | Agent events for a workflow run |
+| `/api/litigation/workflows/[id]/artifacts` | GET | Draft artifacts for a workflow run |
+
+### Components added (`components/workflows/`)
+
+| Component | Type | Purpose |
+|---|---|---|
+| `WorkflowRunTable.tsx` | Client | Clickable table of workflow runs |
+| `WorkflowSummaryPanel.tsx` | Server | § 01 confidence/faithfulness/status grid |
+| `AgentEventFeed.tsx` | Client | § 02 chronological event feed with 2.5 s polling when running |
+| `DraftArtifactList.tsx` | Server | § 03 artifact cards with content preview |
+| `CitationReportTable.tsx` | Server | § 04 per-citation existence/quote/proposition status |
+| `EvalSummaryPanel.tsx` | Server | § 05 final scores + output prose |
+| `DemoWorkflowLauncher.tsx` | Client | Button that POSTs to /api/litigation/workflows and redirects |
+
+### DB helpers added (`lib/litigation/`)
+
+`listWorkflowRuns`, `getWorkflowRun`, `getWorkflowEvents`, `getWorkflowArtifacts`, `getWorkflowCitationReports`
+
+All backed by new `supabaseServer.ts` helpers. Return safe empty arrays when DB is unavailable.
+
+### Polling vs SSE
+
+Phase 5 implements DB-polled refresh. `AgentEventFeed` polls `/api/litigation/workflows/[id]` every 2.5 seconds when workflow status is `queued` or `running`. Polling stops automatically when the status reaches a terminal state (`completed`, `failed`, `cancelled`). True SSE is left for a future phase.
+
+### Navigation
+
+"Workflows" added to the main navigation bar alongside "Research" and "History".
+
+### Full motion editor
+
+Not yet built. `/workflows/[id]` is read-only inspection only.
+
+---
+
 ## Key Files
 ```
 lib/llm/config.ts           — provider detection (OpenRouter vs OpenAI)
