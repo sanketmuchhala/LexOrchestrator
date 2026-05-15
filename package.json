@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint app components lib scripts --ext .ts,.tsx",
+    "lint": "eslint app components lib scripts mcp --ext .ts,.tsx",
     "seed:legal": "tsx scripts/seed-legal-corpus.ts",
     "seed:constitution": "tsx scripts/seed-constitution.ts",
     "embed:legal": "tsx scripts/embed-legal-corpus.ts",
@@ -16,10 +16,14 @@
     "smoke:litigation-workflow": "tsx scripts/smoke-test-litigation-workflow.ts",
     "smoke:judge-brief": "tsx scripts/smoke-test-judge-brief.ts",
     "smoke:local-rules": "tsx scripts/smoke-test-local-rules.ts",
+    "smoke:workflow-eval": "tsx scripts/smoke-test-workflow-eval.ts",
+    "smoke:mcp": "tsx scripts/smoke-test-mcp-tools.ts",
+    "mcp:server": "tsx mcp/server.ts",
     "check:safety": "tsx scripts/check-safety.ts",
     "check:all": "npm run check:safety && npm run lint && npx tsc --noEmit && npm run build"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@supabase/supabase-js": "^2.105.4",
     "next": "^16.2.6",
     "openai": "^6.37.0",

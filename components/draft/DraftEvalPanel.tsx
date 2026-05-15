@@ -1,58 +1,26 @@
+import Link from "next/link";
 import type { WorkflowRunRow } from "@/lib/litigation/getWorkflowRun";
+import type { FullWorkflowEval } from "@/lib/litigation/evals/types";
+import EvalScoreBar from "@/components/evals/EvalScoreBar";
 
-function scoreColor(v: number): string {
-  if (v >= 0.7) return "#34d399";
-  if (v >= 0.4) return "#fbbf24";
-  return "#f87171";
+function verdictClass(verdict: string): string {
+  if (verdict === "pass") return "badge-pass";
+  if (verdict === "warn") return "badge-warn";
+  return "badge-fail";
 }
 
-function MetricBar({
-  label,
-  value,
-  invert,
-}: {
-  label: string;
-  value: number | null;
-  invert?: boolean;
-}) {
-  if (value === null) return null;
-  const effective = invert ? 1 - value : value;
-  const pct = Math.round(value * 100);
-  const color = scoreColor(effective);
-  const width = `${Math.round(effective * 100)}%`;
-
-  return (
-    <div>
-      <div className="flex items-baseline justify-between mb-1">
-        <span className="label">{label}</span>
-        <span
-          className="tabular-nums"
-          style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 700, color }}
-        >
-          {pct}%
-        </span>
-      </div>
-      <div
-        style={{
-          height: "2px",
-          background: "rgba(255,255,255,0.06)",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ position: "absolute", inset: 0, width, background: color }} />
-      </div>
-    </div>
-  );
+interface Props {
+  workflow: WorkflowRunRow;
+  fullEval?: FullWorkflowEval | null;
 }
 
-export default function DraftEvalPanel({ workflow }: { workflow: WorkflowRunRow }) {
+export default function DraftEvalPanel({ workflow, fullEval }: Props) {
   const hasData =
     workflow.confidence != null ||
     workflow.faithfulness_score != null ||
     workflow.citation_pass_rate != null;
 
-  if (!hasData) {
+  if (!hasData && !fullEval) {
     return (
       <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
         No eval data recorded for this workflow run.
@@ -60,35 +28,78 @@ export default function DraftEvalPanel({ workflow }: { workflow: WorkflowRunRow 
     );
   }
 
-  const passFail =
-    workflow.confidence != null
-      ? workflow.confidence >= 0.5
-        ? "pass"
-        : "fail"
-      : null;
+  const summary = fullEval?.summary;
+  const confidence = summary?.overallConfidence ?? workflow.confidence;
+  const faithfulness = summary?.faithfulnessScore ?? workflow.faithfulness_score;
+  const citationRate = summary?.citationPassRate ?? workflow.citation_pass_rate;
+  const verdict = summary?.passFail ?? (confidence != null ? (confidence >= 0.75 ? "pass" : confidence >= 0.55 ? "warn" : "fail") : null);
 
   return (
-    <div className="space-y-4">
-      <MetricBar label="Overall Confidence" value={workflow.confidence} />
-      <MetricBar label="Faithfulness" value={workflow.faithfulness_score} />
-      <MetricBar label="Citation Pass Rate" value={workflow.citation_pass_rate} />
-
-      {passFail && (
-        <div
-          className="flex items-center justify-between pt-2"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-        >
+    <div className="space-y-3">
+      {verdict && (
+        <div className="flex items-center justify-between">
           <span className="label">Verdict</span>
-          <span className={`badge ${passFail === "pass" ? "badge-pass" : "badge-fail"}`}>
-            {passFail.toUpperCase()}
-          </span>
+          <span className={`badge ${verdictClass(verdict)}`}>{verdict.toUpperCase()}</span>
         </div>
       )}
 
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}>
-        Scores are deterministic based on retrieval coverage, citation pass rate, and adversarial
-        risk. Not a claim of lawyer-grade validation.
-      </p>
+      <EvalScoreBar label="Overall Confidence" value={confidence} />
+      <EvalScoreBar label="Faithfulness" value={faithfulness} />
+      <EvalScoreBar label="Citation Pass Rate" value={citationRate} />
+
+      {summary && (
+        <>
+          <EvalScoreBar label="Retrieval Coverage" value={summary.retrievalCoverage} />
+          <EvalScoreBar label="Local Rules" value={summary.localRulesCompleteness} />
+          <EvalScoreBar label="Adversarial Risk" value={summary.adversarialRisk} invert />
+        </>
+      )}
+
+      {summary?.warnings && summary.warnings.length > 0 && (
+        <div
+          className="pt-2"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <p className="label mb-2">Warnings</p>
+          {summary.warnings.slice(0, 3).map((w, i) => (
+            <p
+              key={i}
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "10px",
+                color: "#fbbf24",
+                lineHeight: "1.6",
+                marginBottom: "0.25rem",
+              }}
+            >
+              {w}
+            </p>
+          ))}
+        </div>
+      )}
+
+      <div
+        className="flex items-center justify-between pt-2"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}>
+          Internal quality signal only.
+        </p>
+        <Link
+          href={`/evals/${workflow.id}`}
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "10px",
+            color: "#737373",
+            letterSpacing: "0.12em",
+            textDecoration: "none",
+            textTransform: "uppercase",
+          }}
+          className="transition-colors hover:text-white"
+        >
+          Full Eval &rarr;
+        </Link>
+      </div>
     </div>
   );
 }

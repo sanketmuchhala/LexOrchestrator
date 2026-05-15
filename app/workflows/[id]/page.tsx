@@ -40,23 +40,38 @@ export default async function WorkflowDetailPage({ params }: Props) {
         >
           &larr; Workflow Runs
         </Link>
-        <Link
-          href="/workflows"
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "11px",
-            fontWeight: 700,
-            letterSpacing: "0.2em",
-            color: "#000",
-            background: "#f4f4f4",
-            padding: "0.375rem 0.875rem",
-            textTransform: "uppercase",
-            textDecoration: "none",
-          }}
-          className="transition-opacity hover:opacity-80"
-        >
-          New Workflow
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/evals/${id}`}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: "#404040",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+            }}
+            className="transition-colors hover:text-white"
+          >
+            Eval &rarr;
+          </Link>
+          <Link
+            href="/workflows"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.2em",
+              color: "#000",
+              background: "#f4f4f4",
+              padding: "0.375rem 0.875rem",
+              textTransform: "uppercase",
+              textDecoration: "none",
+            }}
+            className="transition-opacity hover:opacity-80"
+          >
+            New Workflow
+          </Link>
+        </div>
       </div>
 
       {workflow === null ? (

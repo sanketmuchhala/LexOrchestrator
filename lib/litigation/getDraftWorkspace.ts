@@ -3,6 +3,8 @@ import {
   type WorkflowRunDetail,
   type WorkflowArtifactRow,
 } from "./getWorkflowRun";
+import { computeWorkflowEval } from "./evals/computeWorkflowEval";
+import type { FullWorkflowEval } from "./evals/types";
 
 const PRIMARY_DRAFT_TYPES = new Set(["outline", "full_draft", "motion_section", "memo"]);
 
@@ -11,6 +13,7 @@ export interface DraftWorkspace extends WorkflowRunDetail {
   adversarialReview: WorkflowArtifactRow | null;
   localRulesArtifact: WorkflowArtifactRow | null;
   judgeBriefArtifact: WorkflowArtifactRow | null;
+  fullEval: FullWorkflowEval | null;
 }
 
 export async function getDraftWorkspace(id: string): Promise<DraftWorkspace> {
@@ -28,5 +31,17 @@ export async function getDraftWorkspace(id: string): Promise<DraftWorkspace> {
   const judgeBriefArtifact =
     base.artifacts.find((a) => a.artifact_type === "judge_brief") ?? null;
 
-  return { ...base, primaryDraft, adversarialReview, localRulesArtifact, judgeBriefArtifact };
+  const fullEval =
+    base.workflow != null
+      ? computeWorkflowEval(base.workflow, base.events, base.artifacts, base.citationReports)
+      : null;
+
+  return {
+    ...base,
+    primaryDraft,
+    adversarialReview,
+    localRulesArtifact,
+    judgeBriefArtifact,
+    fullEval,
+  };
 }

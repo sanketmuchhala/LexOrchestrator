@@ -64,7 +64,7 @@ function PanelCard({ children }: { children: React.ReactNode }) {
 export default async function DraftWorkspacePage({ params }: Props) {
   const { id } = await params;
   const workspace = await getDraftWorkspace(id);
-  const { workflow, events, primaryDraft, adversarialReview, localRulesArtifact, judgeBriefArtifact, citationReports } = workspace;
+  const { workflow, events, primaryDraft, adversarialReview, localRulesArtifact, judgeBriefArtifact, citationReports, fullEval } = workspace;
 
   return (
     <div className="pt-10 pb-32 appear">
@@ -211,7 +211,7 @@ export default async function DraftWorkspacePage({ params }: Props) {
 
               <section>
                 <SectionTitle n="07">Eval Summary</SectionTitle>
-                <DraftEvalPanel workflow={workflow} />
+                <DraftEvalPanel workflow={workflow} fullEval={fullEval} />
               </section>
             </div>
           </div>

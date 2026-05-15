@@ -135,7 +135,9 @@ export async function runLitigationWorkflow(
     }
 
     // Step 10: Eval Agent
-    const evalResult = await runLitigationEvalAgent(ctx, retrieval, citationOutput, adversarial);
+    const evalResult = await runLitigationEvalAgent(
+      ctx, retrieval, citationOutput, adversarial, localRulesOutput, judgeBrief
+    );
     await dispatchAndLog(evalResult, workflowRunId, allEvents);
     const evalOutput = evalResult.output as unknown as EvalAgentOutput;
 

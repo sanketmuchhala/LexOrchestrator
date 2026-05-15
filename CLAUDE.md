@@ -573,6 +573,133 @@ npm run smoke:local-rules   # loads SDNY profile, checks complete and incomplete
 
 ---
 
+## Phase 9 Evals Dashboard
+
+Adds a quality metrics surface for completed workflow runs. This is an internal quality signal only -- not legal advice, not a compliance certification, not a hallucination-free guarantee.
+
+### Eval computation module (`lib/litigation/evals/`)
+
+| File | Purpose |
+|---|---|
+| `types.ts` | `FullWorkflowEval`, `WorkflowEvalSummary`, `CitationQualityMetrics`, `RetrievalQualityMetrics`, `ArtifactQualityMetrics`, `AgentRuntimeMetrics`, `EvalDashboardStats` |
+| `computeWorkflowEval.ts` | Accepts persisted DB rows; computes full eval metrics with weighted confidence formula |
+| `saveWorkflowEval.ts` | Inserts `workflow_eval` artifact to `draft_artifacts`; requires migration 006 |
+| `getEvalDashboardStats.ts` | Loads recent runs, computes aggregate pass/warn/fail counts in-memory |
+
+### Confidence formula
+
+```
+overallConfidence = citationPassRate * 0.35 + faithfulnessScore * 0.25 + retrievalCoverage * 0.15
+                  + localRulesCompleteness * 0.10 + adversarialSafetyScore * 0.10 + judgeScore * 0.05
+```
+
+`passFail`: "pass" if confidence >= 0.75 AND zero failed citations; "warn" if >= 0.55; "fail" otherwise.
+
+### Eval Agent upgrade (`lib/litigation/agents/evalAgent.ts`)
+
+Now accepts `localRulesOutput` and `judgeBrief` as inputs from prior agents. Builds synthetic `WorkflowArtifactRow` and `WorkflowRunRow` objects to feed `computeWorkflowEval` in-memory (before artifacts are persisted to DB). Output still produces `EvalAgentOutput` (= `EvalSummary`) for backward compatibility with the main workflow result type.
+
+### Migration 006 (`supabase/migrations/006_workflow_eval_artifact.sql`)
+
+Drops and recreates the `draft_artifacts.artifact_type` check constraint to add `workflow_eval`. Without this migration applied, `saveWorkflowEval` silently no-ops (the workflow still completes).
+
+### Routes added
+
+| Route | Type | Purpose |
+|---|---|---|
+| `/evals` | Server component | Aggregate quality dashboard: overview cards, recent eval table |
+| `/evals/[id]` | Server component | Per-run full eval: 8 score bars, citation quality, retrieval quality, artifact quality, agent runtime |
+
+### Components added (`components/evals/`)
+
+| Component | Purpose |
+|---|---|
+| `EvalScoreBar.tsx` | Reusable score bar with color-coded percentage; `invert` prop inverts the color logic (low = good) |
+| `EvalOverviewCards.tsx` | Grid of aggregate stat cards (total, average confidence, pass/warn/fail counts) |
+| `RecentEvalTable.tsx` | Client component; clickable rows navigate to `/evals/[id]` |
+| `CitationQualityPanel.tsx` | pass/warn/fail/unknown citation counts with pass rate |
+| `RetrievalQualityPanel.tsx` | Authority coverage metrics |
+| `ArtifactQualityPanel.tsx` | hasDraft/hasAdversarial/hasLocalRules/hasJudgeBrief badges, section coverage bar |
+| `AgentRuntimePanel.tsx` | Total events, agents completed/failed, latency, token count, cost |
+| `EvalWarningsPanel.tsx` | Warning list rendered in amber mono |
+
+### DraftEvalPanel upgrade
+
+`DraftEvalPanel.tsx` now accepts `fullEval?: FullWorkflowEval | null` (passed from `getDraftWorkspace`). When present: shows retrieval coverage, local rules completeness, adversarial risk bars and up to 3 warnings. Footer links to `/evals/[workflow.id]`.
+
+### Language constraints
+
+- Eval scores are internal quality signals -- not a claim of zero hallucination.
+- "Internal quality signal only" must appear in any public-facing eval surface.
+- Do not claim these metrics constitute legal advice or a compliance audit.
+
+### Smoke command
+
+```bash
+npm run smoke:workflow-eval   # 3-step: compute eval from sample data, dashboard stats, verify incomplete draft scores lower
+```
+
+---
+
+## Phase 10 MCP Server
+
+Adds a Model Context Protocol server that exposes LexOrchestrator litigation tools over stdio. The old seven-agent research pipeline and all app routes remain unchanged.
+
+### Entrypoint
+
+`mcp/server.ts` -- McpServer with StdioServerTransport. Loads env vars via dotenv before importing any tool modules so DB and LLM env vars are available at module load time.
+
+### Tools exposed (`mcp/tools/`)
+
+| File | Tool name | Calls |
+|---|---|---|
+| `searchLegalOpinionsTool.ts` | `search_legal_opinions` | `lib/retrieval/searchLegalOpinions` |
+| `extractCitationsTool.ts` | `extract_citations` | `lib/citations/extractCitations` |
+| `verifyCitationTool.ts` | `verify_citation` | `lib/citations/verifyCitation` |
+| `runLitigationWorkflowTool.ts` | `run_litigation_workflow` | `lib/litigation/runLitigationWorkflow` |
+| `getWorkflowStatusTool.ts` | `get_workflow_status` | `lib/litigation/getWorkflowRun` |
+| `getDraftArtifactsTool.ts` | `get_draft_artifacts` | `lib/litigation/getWorkflowArtifacts` |
+| `getJudgeBriefTool.ts` | `get_judge_brief` | `lib/litigation/judges/{findJudge,getJudgeProfile}` |
+| `getEvalSummaryTool.ts` | `get_eval_summary` | `lib/litigation/evals/computeWorkflowEval` |
+| `getLocalRulesProfileTool.ts` | `get_local_rules_profile` | `lib/litigation/localRules/getLocalRules` |
+
+### Transport
+
+stdio only. SSE is future work.
+
+### Input validation
+
+Zod schemas passed directly to `registerTool`. `limit` clamped to 1-20. Required string fields validated with `z.string().min(1)`.
+
+### Package scripts
+
+```bash
+npm run mcp:server   # start the MCP server (waits for stdio input)
+npm run smoke:mcp    # directly calls tool handler functions; does not require Claude Desktop
+```
+
+### Claude Desktop config path
+
+`~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
+`%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+
+See `mcp/README.md` for the full config block.
+
+### Limitations
+
+- SSE transport not yet implemented
+- Citation verification and opinion search are limited to locally indexed data
+- Judge brief requires seeded profiles (`npm run seed:litigation-demo`)
+- All tools degrade gracefully with no env vars
+
+### Smoke command
+
+```bash
+npm run smoke:mcp   # search, extract, verify, local rules, and full workflow
+```
+
+---
+
 ## Key Files
 ```
 lib/llm/config.ts           — provider detection (OpenRouter vs OpenAI)
