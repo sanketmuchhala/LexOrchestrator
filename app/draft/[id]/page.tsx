@@ -99,6 +99,19 @@ export default async function DraftWorkspacePage({ params }: Props) {
             Technical Inspection &rarr;
           </Link>
           <Link
+            href={`/evals/${id}`}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: "#404040",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+            }}
+            className="transition-colors hover:text-white"
+          >
+            Eval &rarr;
+          </Link>
+          <Link
             href="/draft"
             style={{
               fontFamily: "var(--font-mono)",

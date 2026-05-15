@@ -1,4 +1,5 @@
 import type { WorkflowRunRow } from "@/lib/litigation/getWorkflowRun";
+import { formatPercent, getStatusBadgeClass } from "@/lib/utils/status";
 
 function scoreColor(v: number): string {
   if (v >= 0.7) return "#34d399";
@@ -6,17 +7,8 @@ function scoreColor(v: number): string {
   return "#f87171";
 }
 
-function statusBadgeClass(status: string): string {
-  const s = status.toLowerCase();
-  if (s === "completed") return "badge-pass";
-  if (s === "failed") return "badge-fail";
-  if (s === "running" || s === "queued") return "badge-warn";
-  return "badge-neutral";
-}
-
 function Metric({ label, value }: { label: string; value: number | null }) {
   if (value === null) return null;
-  const pct = Math.round(value * 100);
   return (
     <span style={{ display: "flex", alignItems: "baseline", gap: "0.375rem" }}>
       <span className="label">{label}</span>
@@ -29,7 +21,7 @@ function Metric({ label, value }: { label: string; value: number | null }) {
           color: scoreColor(value),
         }}
       >
-        {pct}%
+        {formatPercent(value)}
       </span>
     </span>
   );
@@ -55,8 +47,8 @@ export default function DraftWorkspaceHeader({
     >
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
 
-        <span className={`badge ${statusBadgeClass(workflow.status)}`}>
-          {workflow.status.toUpperCase()}
+        <span className={`badge ${getStatusBadgeClass(workflow.status)}`}>
+          {(workflow.status || "unknown").toUpperCase()}
         </span>
 
         {passFail && (

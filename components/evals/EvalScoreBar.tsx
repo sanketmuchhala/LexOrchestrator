@@ -1,3 +1,5 @@
+import { formatPercent } from "@/lib/utils/status";
+
 function scoreColor(v: number, invert = false): string {
   const eff = invert ? 1 - v : v;
   if (eff >= 0.7) return "#34d399";
@@ -17,7 +19,6 @@ export default function EvalScoreBar({
   suffix?: string;
 }) {
   if (value === null) return null;
-  const pct = Math.round(value * 100);
   const effective = invert ? 1 - value : value;
   const color = scoreColor(effective);
   const barWidth = `${Math.round(effective * 100)}%`;
@@ -30,7 +31,7 @@ export default function EvalScoreBar({
           className="tabular-nums"
           style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 700, color }}
         >
-          {pct}{suffix}
+          {suffix === "%" ? formatPercent(value) : `${value.toFixed(2)}${suffix}`}
         </span>
       </div>
       <div

@@ -24,10 +24,26 @@ npm run lint           # eslint across app/ components/ lib/ scripts/
 npm run seed:legal     # seed 12 sample corpus chunks into Supabase
 npm run seed:constitution  # seed 14 US Constitution chunks (primary RAG source)
 npm run embed:legal    # backfill pgvector embeddings (requires API key)
+npm run check:demo     # verify fixture, routes, MCP, eval/local-rules/citation modules
+npm run smoke:demo-path # run canonical litigation demo workflow
+npm run smoke:mcp      # smoke test MCP tool modules
+npm run mcp:server     # start stdio MCP server
 npx tsc --noEmit       # type check without building
 ```
 
 **Always run `npm run lint && npx tsc --noEmit` before committing.** Then `npm run build` to confirm the output is clean.
+
+## Phase 11 Demo Hardening
+
+Phase 11 is demo stability and production polish only. Do not add uploads, auth-gated matters, or new major product surfaces.
+
+- Canonical demo fixture: `lib/demo/litigationDemoFixture.ts`
+- Demo readiness check: `npm run check:demo` via `scripts/check-demo-readiness.ts`
+- Demo path smoke test: `npm run smoke:demo-path` via `scripts/smoke-test-demo-path.ts`
+- Draft, workflow, and eval pages cross-link by workflow run ID.
+- Shared status helpers live in `lib/utils/status.ts`.
+- API routes should return structured 400s for invalid input and safe 500s for unexpected failures.
+- MCP startup is checked with `npm run smoke:mcp` and `npm run mcp:server`.
 
 ---
 
@@ -767,4 +783,3 @@ Package scripts available:
 npm run check:safety    # safety scan only
 npm run check:all       # full preflight (safety + lint + typecheck + build)
 ```
-

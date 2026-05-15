@@ -2,14 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { WorkflowRunRow } from "@/lib/litigation/listWorkflowRuns";
-
-function statusBadgeClass(status: string): string {
-  const s = status.toLowerCase();
-  if (s === "completed") return "badge-pass";
-  if (s === "failed") return "badge-fail";
-  if (s === "running" || s === "queued") return "badge-warn";
-  return "badge-neutral";
-}
+import { formatDateTime, formatPercent, getStatusBadgeClass } from "@/lib/utils/status";
 
 function confColor(v: number): string {
   if (v >= 0.7) return "#34d399";
@@ -17,20 +10,8 @@ function confColor(v: number): string {
   return "#f87171";
 }
 
-function shortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 function WorkflowRow({ run }: { run: WorkflowRunRow }) {
   const router = useRouter();
-  const confPct = run.confidence != null ? Math.round(run.confidence * 100) : null;
-  const faithPct =
-    run.faithfulness_score != null ? Math.round(run.faithfulness_score * 100) : null;
 
   return (
     <tr
@@ -49,7 +30,7 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
           whiteSpace: "nowrap",
         }}
       >
-        {shortDate(run.created_at)}
+        {formatDateTime(run.created_at)}
       </td>
 
       <td className="py-4 pr-6 align-top" style={{ maxWidth: "28rem" }}>
@@ -81,7 +62,7 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
       </td>
 
       <td className="hidden py-4 pr-6 text-right align-top lg:table-cell tabular-nums">
-        {confPct != null ? (
+        {run.confidence != null ? (
           <span
             style={{
               fontFamily: "var(--font-mono)",
@@ -90,7 +71,7 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
               color: confColor(run.confidence!),
             }}
           >
-            {confPct}%
+            {formatPercent(run.confidence)}
           </span>
         ) : (
           <span
@@ -102,7 +83,7 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
       </td>
 
       <td className="hidden py-4 pr-6 text-right align-top lg:table-cell tabular-nums">
-        {faithPct != null ? (
+        {run.faithfulness_score != null ? (
           <span
             style={{
               fontFamily: "var(--font-mono)",
@@ -110,7 +91,7 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
               color: confColor(run.faithfulness_score!),
             }}
           >
-            {faithPct}%
+            {formatPercent(run.faithfulness_score)}
           </span>
         ) : (
           <span
@@ -122,8 +103,8 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
       </td>
 
       <td className="py-4 text-center align-top">
-        <span className={`badge ${statusBadgeClass(run.status)}`}>
-          {run.status.toUpperCase()}
+        <span className={`badge ${getStatusBadgeClass(run.status)}`}>
+          {(run.status || "unknown").toUpperCase()}
         </span>
       </td>
     </tr>

@@ -1,4 +1,5 @@
 import type { WorkflowRunRow } from "@/lib/litigation/getWorkflowRun";
+import { formatDateTime, formatPercent, getStatusBadgeClass } from "@/lib/utils/status";
 
 function SectionTitle({ n, children }: { n: string; children: string }) {
   return (
@@ -29,14 +30,6 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
   );
 }
 
-function statusBadgeClass(status: string): string {
-  const s = status.toLowerCase();
-  if (s === "completed") return "badge-pass";
-  if (s === "failed") return "badge-fail";
-  if (s === "running" || s === "queued") return "badge-warn";
-  return "badge-neutral";
-}
-
 function scoreColor(v: number): string {
   if (v >= 0.7) return "#34d399";
   if (v >= 0.4) return "#fbbf24";
@@ -50,7 +43,6 @@ function MetricCell({
   label: string;
   value: number | null;
 }) {
-  const pct = value != null ? Math.round(value * 100) : null;
   const color = value != null ? scoreColor(value) : "#404040";
 
   return (
@@ -59,7 +51,7 @@ function MetricCell({
       style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
     >
       <p className="label mb-3">{label}</p>
-      {pct != null ? (
+      {value != null ? (
         <div className="flex items-baseline gap-1">
           <span
             className="tabular-nums"
@@ -71,7 +63,7 @@ function MetricCell({
               lineHeight: 1,
             }}
           >
-            {pct}
+            {formatPercent(value).replace("%", "")}
           </span>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
             %
@@ -122,8 +114,8 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
           </span>
 
           <span className="label">Status</span>
-          <span className={`badge ${statusBadgeClass(workflow.status)}`}>
-            {workflow.status.toUpperCase()}
+          <span className={`badge ${getStatusBadgeClass(workflow.status)}`}>
+            {(workflow.status || "unknown").toUpperCase()}
           </span>
 
           <span className="label">Type</span>
@@ -162,7 +154,7 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
               marginLeft: "auto",
             }}
           >
-            {new Date(workflow.created_at).toISOString().replace("T", " ").slice(0, 19)} UTC
+            {formatDateTime(workflow.created_at)}
           </span>
         </div>
       </div>

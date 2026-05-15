@@ -10,6 +10,84 @@ This is a prototype for litigation AI reliability architecture. It is not a prod
 
 ---
 
+## What LexOrchestrator Is
+
+LexOrchestrator is a Next.js litigation workflow demo that runs legal research and drafting requests through retrieval, drafting, citation verification, adversarial review, local rules review, judge brief generation, and eval scoring. It is designed to demonstrate orchestration and reliability checks, not to provide legal advice or guarantee legal accuracy.
+
+The original seven-agent research pipeline remains available. The litigation draft flow is a parallel workflow under `/draft`, `/workflows`, `/evals`, and `/api/litigation/workflows`.
+
+## Demo Workflow
+
+1. Visit `/draft`.
+2. Click **Load Demo** to populate the canonical SDNY motion-to-dismiss fixture.
+3. Submit the draft workflow.
+4. Review `/draft/[id]` for the draft preview, verification inspector, Judge Brief, Local Rules Review, Adversarial Review, and Eval Summary.
+5. Use the cross-links to inspect `/workflows/[id]` and `/evals/[id]`.
+6. Run the MCP smoke test before a demo.
+
+## How To Run Locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000/draft`.
+
+## Required Optional Env Vars
+
+The app degrades to deterministic fallback behavior when external services are absent.
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENAI_API_KEY=
+OPENROUTER_API_KEY=
+LLM_MODEL=
+EMBEDDING_MODEL=
+```
+
+Supabase enables persisted workflow runs, seeded demo judge profiles, citation report storage, and dashboard history. An LLM key improves generation quality; without one, fallback output is used.
+
+## Demo Commands
+
+```bash
+npm run seed:litigation-demo
+npm run check:demo
+npm run smoke:demo-path
+```
+
+## MCP Server Command
+
+```bash
+npm run smoke:mcp
+npm run mcp:server
+```
+
+`npm run mcp:server` starts the stdio MCP server for compatible MCP clients. It is not an SSE server.
+
+## Quality Checks
+
+```bash
+npm run check:safety
+npm run lint
+npx tsc --noEmit
+npm run build
+npm run check:demo
+```
+
+`npm run check:all` runs the core safety, lint, type, build, and demo-readiness checks. Longer smoke tests stay separate.
+
+## Known Limitations
+
+- Demo fixture facts and seeded judge data are fictional or demo-safe.
+- Citation verification is limited to locally indexed opinions and extractor coverage.
+- Local rules review is drafting guidance only, not a compliance certification.
+- Judge Brief output is argument preparation only and does not predict outcomes.
+- No file uploads, auth-gated matters, or production legal compliance workflow are included.
+
+---
+
 ## What Is Real in Phase 2
 
 | Capability | Status |
