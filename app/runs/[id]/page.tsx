@@ -14,7 +14,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   return {
-    title: `Run ${id.slice(0, 8)} — LexOrchestrator`,
+    title: `Run ${id.slice(0, 8)} - LexOrchestrator`,
   };
 }
 

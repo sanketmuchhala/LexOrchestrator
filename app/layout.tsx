@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const firaCode = Fira_Code({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-fira-code" });
 
 export const metadata: Metadata = {
-  title: "LexOrchestrator — Multi-Agent Litigation Reliability Engine",
+  title: "LexOrchestrator - Multi-Agent Litigation Reliability Engine",
   description:
     "A multi-agent legal AI orchestration system for litigation reliability. Routes legal queries through intake, hybrid RAG retrieval, citation validation, adversarial review, hallucination scoring, and eval reporting.",
 };

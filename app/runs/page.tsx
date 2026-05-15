@@ -4,7 +4,7 @@ import { getRecentRuns } from "@/lib/db/supabaseServer";
 import RunCard from "@/components/runs/RunCard";
 
 export const metadata: Metadata = {
-  title: "Research History — LexOrchestrator",
+  title: "Research History - LexOrchestrator",
 };
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export default async function RunsPage() {
           <h1 className="mt-1.5 text-2xl font-semibold text-slate-100">Research History</h1>
           <p className="mt-1 text-sm text-slate-500">
             {runs.length > 0
-              ? `${runs.length} saved run${runs.length === 1 ? "" : "s"} — click any to view the full analysis.`
+              ? `${runs.length} saved run${runs.length === 1 ? "" : "s"} - click any to view the full analysis.`
               : "No runs recorded yet. Start with a query."}
           </p>
         </div>
@@ -49,7 +49,7 @@ export default async function RunsPage() {
           <p className="mb-6 text-sm text-slate-600">
             {process.env.NEXT_PUBLIC_SUPABASE_URL
               ? "Run a query to start building history."
-              : "Database not configured — runs will not be persisted."}
+              : "Database not configured - runs will not be persisted."}
           </p>
           <Link
             href="/research"

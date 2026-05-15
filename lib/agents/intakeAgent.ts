@@ -79,7 +79,7 @@ Return JSON only. No prose.`,
     fallback,
   });
 
-  // Validate critical fields — fall back to deterministic if LLM returns garbage
+  // Validate critical fields - fall back to deterministic if LLM returns garbage
   const validIssues = ["contract", "tort", "evidence", "procedure", "discovery", "general"];
   if (!validIssues.includes(result.legalIssue) || !Array.isArray(result.keyTerms) || result.keyTerms.length === 0) {
     return fallback;

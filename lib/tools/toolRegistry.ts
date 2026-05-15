@@ -1,4 +1,4 @@
-// MCP-inspired tool registry — each tool has a name, description, schema, and execute fn.
+// MCP-inspired tool registry - each tool has a name, description, schema, and execute fn.
 // Orchestrator calls all side-effectful operations through this registry for clean separation
 // and future MCP migration.
 
@@ -54,7 +54,7 @@ interface PersistTraceInput {
 
 const searchLegalCorpusTool: Tool<SearchInput, RetrievedSource[]> = {
   name: "searchLegalCorpus",
-  description: "Hybrid RAG retrieval — pgvector cosine similarity + keyword overlap scoring. Falls back to keyword-only or in-memory if embeddings unavailable.",
+  description: "Hybrid RAG retrieval - pgvector cosine similarity + keyword overlap scoring. Falls back to keyword-only or in-memory if embeddings unavailable.",
   inputSchema: {
     query: { type: "string" },
     keyTerms: { type: "array", items: { type: "string" } },

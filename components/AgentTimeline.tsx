@@ -32,7 +32,7 @@ export default function AgentTimeline({ result }: AgentTimelineProps) {
     {
       agentName: "Citation Validator",
       icon: "✅",
-      summary: `Validated ${citationValidation.claims.length} claims — ${citationValidation.supportedCount} supported, ${citationValidation.unsupportedCount} unsupported. ${citationValidation.flags.length > 0 ? citationValidation.flags[0] : "No critical flags."}`,
+      summary: `Validated ${citationValidation.claims.length} claims - ${citationValidation.supportedCount} supported, ${citationValidation.unsupportedCount} unsupported. ${citationValidation.flags.length > 0 ? citationValidation.flags[0] : "No critical flags."}`,
       score: citationValidation.overallScore,
       scoreLabel: "citation support",
       executionStep: getStep("Citation Validator"),

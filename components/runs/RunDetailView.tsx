@@ -1,4 +1,4 @@
-// Server-safe — no hooks, no client-only APIs. Receives full RunDetail data as props.
+// Server-safe - no hooks, no client-only APIs. Receives full RunDetail data as props.
 
 import type { ReactNode } from "react";
 import type { RunDetail } from "@/lib/types";
@@ -161,7 +161,7 @@ export default function RunDetailView({ detail }: RunDetailViewProps) {
                     <span className={`w-fit self-start rounded border px-2 py-0.5 text-[11px] font-semibold uppercase ${styleForStatus(cv.support_status)}`}>
                       {cv.support_status}
                     </span>
-                    <p className="text-xs leading-5 text-slate-500">{cv.explanation ?? "—"}</p>
+                    <p className="text-xs leading-5 text-slate-500">{cv.explanation ?? "-"}</p>
                   </div>
                 ))}
               </div>

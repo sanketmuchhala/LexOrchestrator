@@ -27,7 +27,7 @@ const FEATURES = [
     eyebrow: "Validation",
     title: "Citation Checking",
     tag: "verified · partial · unsupported",
-    body: "Every generated claim is checked against retrieved corpus entries before synthesis. Unsupported claims are flagged and counted toward hallucination risk — not hidden.",
+    body: "Every generated claim is checked against retrieved corpus entries before synthesis. Unsupported claims are flagged and counted toward hallucination risk - not hidden.",
     metric: "Per-claim support score",
     accent: "emerald",
   },
@@ -86,8 +86,8 @@ export default function LandingPage() {
         {/* Value prop */}
         <p className="mx-auto mb-10 max-w-2xl text-base leading-7 text-slate-400">
           A single LLM call cannot validate its own citations. LexOrchestrator routes every legal
-          query through a seven-agent pipeline — retrieval, citation validation, adversarial review,
-          and hallucination scoring — before surfacing a final answer with structured eval metrics.
+          query through a seven-agent pipeline - retrieval, citation validation, adversarial review,
+          and hallucination scoring - before surfacing a final answer with structured eval metrics.
         </p>
 
         {/* CTA */}
@@ -125,7 +125,7 @@ export default function LandingPage() {
               )}
 
               <div className={`relative flex w-full flex-col items-center rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-4 text-center ${i > 0 ? "ml-4" : ""}`}>
-                {/* Arrow between cards — overlaid */}
+                {/* Arrow between cards - overlaid */}
                 {i > 0 && (
                   <div className="absolute -left-[18px] top-1/2 -translate-y-1/2 font-mono text-xs text-slate-700">
                     ›
@@ -215,7 +215,7 @@ export default function LandingPage() {
       {/* ── Disclaimer ── */}
       <footer className="border-t border-slate-800/50 py-8 text-center">
         <p className="text-xs text-slate-600">
-          ⚠ Sample educational corpus only — not real legal authority. LexOrchestrator is a prototype
+          ⚠ Sample educational corpus only - not real legal authority. LexOrchestrator is a prototype
           for litigation AI reliability architecture. Not legal advice. Not court-ready.
         </p>
       </footer>

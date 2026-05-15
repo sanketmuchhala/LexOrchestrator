@@ -1,5 +1,5 @@
 // Shared display utilities for rendering API response data across pages.
-// All functions are defensive — they handle missing keys, null values, and
+// All functions are defensive - they handle missing keys, null values, and
 // both camelCase and snake_case field names from the API.
 
 export type ApiRecord = Record<string, unknown>;
