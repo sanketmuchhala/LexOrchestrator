@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint app components lib scripts --ext .ts,.tsx",
     "seed:legal": "tsx scripts/seed-legal-corpus.ts",
+    "seed:constitution": "tsx scripts/seed-constitution.ts",
     "embed:legal": "tsx scripts/embed-legal-corpus.ts"
   },
   "dependencies": {

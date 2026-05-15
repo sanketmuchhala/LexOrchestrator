@@ -281,8 +281,8 @@ export async function searchLegalChunksFromDB(keyTerms: string[]): Promise<Legal
   // Fetch all chunks and filter/score in TypeScript (Phase 2: replace with pgvector)
   const { data, error } = await client
     .from("legal_chunks")
-    .select("id, document_id, citation_id, chunk_text, keywords, jurisdiction, practice_area, legal_documents(title, disclaimer)")
-    .limit(200);
+    .select("id, document_id, citation_id, chunk_text, keywords, jurisdiction, practice_area, legal_documents(title, disclaimer, source_type)")
+    .limit(300);
 
   if (error) {
     console.warn("[DB] searchLegalChunksFromDB failed:", error.message);
@@ -299,6 +299,7 @@ export async function searchLegalChunksFromDB(keyTerms: string[]): Promise<Legal
     practice_area: row.practice_area as string | null,
     document_title: (row.legal_documents as Record<string, string> | null)?.title,
     disclaimer: (row.legal_documents as Record<string, string> | null)?.disclaimer,
+    source_type: (row.legal_documents as Record<string, string> | null)?.source_type ?? "sample",
   }));
 }
 

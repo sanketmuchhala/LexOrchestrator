@@ -1,131 +1,158 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import LoadingState from "./LoadingState";
-import ResultSummaryCard from "./ResultSummaryCard";
 
 const SAMPLE_QUERIES = [
-  "What are the evidentiary standards for admitting expert testimony in federal civil litigation?",
-  "What elements must a plaintiff prove to establish a breach of contract claim?",
-  "How does the summary judgment standard apply when disputed facts involve expert opinions?",
-  "What are a party's discovery obligations and what proportionality limits apply?",
+  { n: "01", q: "What constitutional protections apply to unreasonable searches and seizures under the Fourth Amendment?" },
+  { n: "02", q: "What are the evidentiary standards for admitting expert testimony in federal civil litigation?" },
+  { n: "03", q: "How does the Fourteenth Amendment equal protection clause apply to state discrimination claims?" },
+  { n: "04", q: "What elements must a plaintiff prove to establish a breach of contract claim under common law?" },
+  { n: "05", q: "What discovery proportionality limits apply under the Federal Rules of Civil Procedure?" },
 ];
 
 export default function ResearchWorkspace() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!query.trim() || loading) return;
+    const trimmed = query.trim();
+    if (!trimmed || trimmed.length < 5 || loading) return;
 
     setLoading(true);
     setError(null);
-    setResult(null);
 
     try {
       const res = await fetch("/api/orchestrate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query.trim() }),
+        body: JSON.stringify({ query: trimmed }),
       });
-      const data: unknown = await res.json().catch(() => ({}));
+
+      const data = await res.json().catch(() => ({})) as Record<string, unknown>;
+
       if (!res.ok) {
-        const errMsg = (data as Record<string, unknown>)?.error;
-        throw new Error(typeof errMsg === "string" ? errMsg : "Orchestration failed.");
+        const msg = data?.error;
+        throw new Error(typeof msg === "string" ? msg : "Orchestration failed.");
       }
-      setResult(data as Record<string, unknown>);
+
+      const runId = data?.runId as string | undefined;
+      if (runId) {
+        router.push(`/runs/${runId}`);
+        return;
+      }
+
+      throw new Error("Pipeline completed but no run ID returned. Configure Supabase to enable persistence.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unexpected error.");
-    } finally {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
       setLoading(false);
     }
   }
 
-  function reset() {
-    setResult(null);
-    setError(null);
-    setQuery("");
-  }
+  if (loading) return <LoadingState />;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 appear">
 
-      {/* Input form (hidden once result is showing) */}
-      {!result && (
-        <section className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="query" className="mb-2 block font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Legal Research Query
-              </label>
-              <textarea
-                id="query"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit(e as unknown as FormEvent); }}
-                placeholder="Describe the legal issue, jurisdiction, and specific question…"
-                rows={4}
-                maxLength={1200}
-                disabled={loading}
-                className="w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-sm leading-6 text-slate-100 placeholder-slate-600 outline-none transition focus:border-cyan-400/60 focus:ring-1 focus:ring-cyan-400/20 disabled:opacity-60"
-              />
-              <p className="mt-1.5 text-right font-mono text-[10px] text-slate-700">
-                {query.length} / 1200
-              </p>
-            </div>
+      {/* Query form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label
+            htmlFor="query"
+            className="label mb-2 block"
+          >
+            Research Query
+          </label>
+          <textarea
+            id="query"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                handleSubmit(e as unknown as FormEvent);
+              }
+            }}
+            placeholder="Describe the legal issue, jurisdiction, and specific question..."
+            rows={5}
+            maxLength={1200}
+            className="w-full resize-none bg-[#0a0a0a] px-4 py-4 text-sm leading-7 text-[#f4f4f4] placeholder-[#404040] outline-none transition"
+            style={{
+              fontFamily: "var(--font-mono), monospace",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "2px",
+            }}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)")}
+            onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")}
+          />
+          <div
+            className="mt-2 flex items-center justify-between text-[10px] text-[#404040]"
+            style={{ fontFamily: "var(--font-mono), monospace" }}
+          >
+            <span>CMD+ENTER to submit</span>
+            <span className="tabular-nums">{query.length} / 1200</span>
+          </div>
+        </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="hidden text-xs text-slate-600 sm:block">⌘ + Enter to submit</p>
-              <button
-                type="submit"
-                disabled={loading || query.trim().length < 5}
-                className="w-full rounded-lg bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-600 sm:w-auto"
-              >
-                {loading ? "Orchestrating…" : "Run Orchestration ⚡"}
-              </button>
-            </div>
-          </form>
+        <button
+          type="submit"
+          disabled={query.trim().length < 5}
+          className="w-full py-3 text-xs font-bold uppercase tracking-[0.2em] transition-colors disabled:cursor-not-allowed"
+          style={{
+            fontFamily: "var(--font-mono), monospace",
+            background: query.trim().length >= 5 ? "#f4f4f4" : "#111111",
+            color: query.trim().length >= 5 ? "#000" : "#404040",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "2px",
+          }}
+        >
+          Submit for Analysis
+        </button>
+      </form>
 
-          {/* Sample queries */}
-          {!loading && (
-            <div className="mt-5 border-t border-slate-800 pt-5">
-              <p className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-600">
-                Sample Queries
-              </p>
-              <div className="space-y-2">
-                {SAMPLE_QUERIES.map((q) => (
-                  <button
-                    key={q}
-                    onClick={() => setQuery(q)}
-                    className="block w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-left text-xs text-slate-400 transition hover:border-slate-700 hover:text-slate-200"
-                  >
-                    <span className="mr-2 font-mono text-slate-700">→</span>
-                    {q}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Loading */}
-      {loading && <LoadingState />}
-
-      {/* Error */}
-      {error && !loading && (
-        <div className="rounded-lg border border-rose-500/25 bg-rose-500/8 px-4 py-3 text-sm text-rose-300">
-          ⚠ {error}
+      {error && (
+        <div
+          className="px-4 py-3 text-xs text-[#f87171]"
+          style={{
+            fontFamily: "var(--font-mono), monospace",
+            border: "1px solid rgba(248,113,113,0.2)",
+            background: "rgba(248,113,113,0.04)",
+            borderRadius: "2px",
+          }}
+        >
+          ERROR: {error}
         </div>
       )}
 
-      {/* Result summary */}
-      {result && !loading && (
-        <ResultSummaryCard result={result} onReset={reset} />
-      )}
+      {/* Sample queries */}
+      <div>
+        <div className="rule mb-6" />
+        <p className="label mb-4">Sample Queries</p>
+        <div className="space-y-px">
+          {SAMPLE_QUERIES.map(({ n, q }) => (
+            <button
+              key={n}
+              onClick={() => setQuery(q)}
+              className="flex w-full items-start gap-5 px-4 py-3.5 text-left transition-colors"
+              style={{
+                fontFamily: "var(--font-mono), monospace",
+                background: "#0a0a0a",
+                border: "none",
+                borderBottom: "1px solid rgba(255,255,255,0.04)",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#111111")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#0a0a0a")}
+            >
+              <span className="shrink-0 text-[11px] font-bold text-[#404040]">{n}</span>
+              <span className="text-xs leading-5 text-[#737373]">{q}</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
     </div>
   );

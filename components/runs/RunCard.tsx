@@ -1,5 +1,6 @@
-import Link from "next/link";
-import { normalizedScore, metricTone, styleForStatus, text, relativeTime } from "@/lib/utils/display";
+"use client";
+
+import { useRouter } from "next/navigation";
 
 interface RunCardProps {
   id: string;
@@ -11,56 +12,103 @@ interface RunCardProps {
   created_at: string;
 }
 
-export default function RunCard({ id, query, status, model, confidence, hallucination_risk, created_at }: RunCardProps) {
-  const confPct = confidence != null ? Math.round(normalizedScore(confidence) * 100) : null;
-  const riskPct = hallucination_risk != null ? Math.round(normalizedScore(hallucination_risk) * 100) : null;
+function riskLevel(score: number | null): { label: string; cls: string } {
+  if (score === null) return { label: "N/A", cls: "badge-neutral" };
+  const pct = Math.round(score * 100);
+  if (pct <= 20) return { label: "LOW",    cls: "badge-pass" };
+  if (pct <= 50) return { label: "MED",    cls: "badge-warn" };
+  return             { label: "HIGH",   cls: "badge-fail" };
+}
 
-  // Derive pass/fail from confidence as a proxy (full eval data lives in the detail page)
-  const passStatus = confPct != null ? (confPct >= 60 ? "pass" : "fail") : status;
+function passFailClass(confidence: number | null): string {
+  if (confidence === null) return "badge-neutral";
+  return confidence >= 0.6 ? "badge-pass" : "badge-fail";
+}
+
+function passFailLabel(confidence: number | null): string {
+  if (confidence === null) return "UNKNOWN";
+  return confidence >= 0.6 ? "PASS" : "FAIL";
+}
+
+function confColor(v: number): string {
+  if (v >= 0.7) return "#34d399";
+  if (v >= 0.4) return "#fbbf24";
+  return "#f87171";
+}
+
+function shortDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+export default function RunCard({
+  id,
+  query,
+  confidence,
+  hallucination_risk,
+  created_at,
+}: RunCardProps) {
+  const router = useRouter();
+  const risk = riskLevel(hallucination_risk);
+  const confPct = confidence != null ? Math.round(confidence * 100) : null;
 
   return (
-    <Link
-      href={`/runs/${id}`}
-      className="group block rounded-xl border border-slate-800 bg-slate-900/40 p-5 transition hover:border-slate-700 hover:bg-slate-900/70"
+    <tr
+      onClick={() => router.push(`/runs/${id}`)}
+      className="cursor-pointer transition-colors"
+      style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "#0a0a0a")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
+      {/* Date */}
+      <td
+        className="py-4 pr-6 align-top"
+        style={{ fontFamily: "var(--font-mono), monospace", fontSize: "11px", color: "#737373", whiteSpace: "nowrap" }}
+      >
+        {shortDate(created_at)}
+      </td>
+
       {/* Query */}
-      <p className="mb-3 line-clamp-2 text-sm font-medium leading-6 text-slate-200 group-hover:text-slate-100">
-        {query}
-      </p>
+      <td className="py-4 pr-6 align-top" style={{ maxWidth: "32rem" }}>
+        <p
+          className="line-clamp-2 text-sm leading-6 text-[#d4d4d4]"
+          style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
+        >
+          {query}
+        </p>
+        <p
+          className="mt-1 text-[10px] text-[#404040]"
+          style={{ fontFamily: "var(--font-mono), monospace" }}
+        >
+          {id.slice(0, 8)}
+        </p>
+      </td>
 
-      {/* Metrics row */}
-      <div className="flex flex-wrap items-center gap-2">
-        {confPct != null && (
-          <span className={`rounded border border-slate-700 bg-slate-950/60 px-2 py-0.5 font-mono text-[11px] font-semibold ${metricTone(confPct / 100)}`}>
-            {confPct}% confidence
+      {/* Confidence */}
+      <td className="hidden py-4 pr-6 text-right align-top md:table-cell">
+        {confPct != null ? (
+          <span
+            className="text-sm font-bold tabular-nums"
+            style={{ fontFamily: "var(--font-mono), monospace", color: confColor(confidence!) }}
+          >
+            {confPct}%
           </span>
+        ) : (
+          <span className="text-xs text-[#404040]" style={{ fontFamily: "var(--font-mono), monospace" }}>N/A</span>
         )}
-        {riskPct != null && (
-          <span className={`rounded border px-2 py-0.5 font-mono text-[11px] font-semibold ${
-            riskPct <= 20 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-            : riskPct <= 50 ? "border-amber-500/30 bg-amber-500/10 text-amber-300"
-            : "border-rose-500/30 bg-rose-500/10 text-rose-300"
-          }`}>
-            {riskPct <= 20 ? "low" : riskPct <= 50 ? "medium" : "high"} hallucination risk
-          </span>
-        )}
-        <span className={`rounded border px-2 py-0.5 font-mono text-[11px] font-semibold ${styleForStatus(passStatus)}`}>
-          {text(passStatus)}
-        </span>
-      </div>
+      </td>
 
-      {/* Footer */}
-      <div className="mt-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {model && (
-            <span className="font-mono text-[10px] text-slate-600">{model}</span>
-          )}
-          <span className="font-mono text-[10px] text-slate-700">{id.slice(0, 8)}…</span>
-        </div>
-        <span className="font-mono text-[10px] text-slate-600">
-          {relativeTime(created_at)}
+      {/* Risk */}
+      <td className="hidden py-4 pr-6 text-center align-top lg:table-cell">
+        <span className={`badge ${risk.cls}`}>{risk.label}</span>
+      </td>
+
+      {/* Pass/Fail */}
+      <td className="py-4 text-center align-top">
+        <span className={`badge ${passFailClass(confidence)}`}>
+          {passFailLabel(confidence)}
         </span>
-      </div>
-    </Link>
+      </td>
+    </tr>
   );
 }

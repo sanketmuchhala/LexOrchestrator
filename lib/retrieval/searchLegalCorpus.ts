@@ -77,7 +77,11 @@ function buildCandidates(
     const jBoost = jurisdictionBoost(chunk.jurisdiction, jurisdiction);
     const pBoost = practiceAreaBoost(chunk.practice_area, legalIssue);
 
-    const hybrid = Math.min(1, kwScore * 0.35 + vecScore * 0.45 + jBoost + pBoost);
+    // Primary sources (US Constitution, authoritative law) receive a 0.15 authority boost
+    // so they surface above sample corpus entries when relevance is comparable
+    const authorityBoost = chunk.source_type === "primary" ? 0.15 : 0;
+
+    const hybrid = Math.min(1, kwScore * 0.35 + vecScore * 0.45 + jBoost + pBoost + authorityBoost);
     const rerank = Math.min(1, hybrid + exactTermBonus(keyTerms, chunk.chunk_text));
 
     return { chunk, keywordScore: kwScore, vectorScore: vecScore, hybridScore: hybrid, rerankScore: rerank };
@@ -101,7 +105,7 @@ function toRetrievedSource(
     jurisdiction: chunk.jurisdiction ?? "General",
     keywords: chunk.keywords,
     relevanceScore: parseFloat(rerankScore.toFixed(3)),
-    reason: `Vector: ${pct(vectorScore)}% | Keyword: ${pct(keywordScore)}% | Hybrid: ${pct(hybridScore)}% | Final: ${pct(rerankScore)}%`,
+    reason: `${chunk.source_type === "primary" ? "[Primary Source] " : ""}Vector: ${pct(vectorScore)}% | Keyword: ${pct(keywordScore)}% | Hybrid: ${pct(hybridScore)}% | Final: ${pct(rerankScore)}%`,
     keywordScore: parseFloat(keywordScore.toFixed(3)),
     vectorScore: parseFloat(vectorScore.toFixed(3)),
     hybridScore: parseFloat(hybridScore.toFixed(3)),

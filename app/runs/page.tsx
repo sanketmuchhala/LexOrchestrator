@@ -13,51 +13,77 @@ export default async function RunsPage() {
   const runs = await getRecentRuns(50);
 
   return (
-    <div className="pt-10">
+    <div className="pt-14 appear">
 
-      {/* Page header */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+      {/* Header */}
+      <div className="mb-8 flex items-end justify-between gap-6">
         <div>
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-600">
-            Orchestration Runs
+          <p className="label mb-2" style={{ letterSpacing: "0.28em" }}>
+            Archive
           </p>
-          <h1 className="mt-1.5 text-2xl font-semibold text-slate-100">Research History</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {runs.length > 0
-              ? `${runs.length} saved run${runs.length === 1 ? "" : "s"} - click any to view the full analysis.`
-              : "No runs recorded yet. Start with a query."}
-          </p>
+          <h1
+            className="text-3xl font-semibold tracking-tight text-[#f4f4f4]"
+            style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
+          >
+            Research History
+          </h1>
         </div>
         <Link
           href="/research"
-          className="rounded-lg bg-cyan-300 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
+          className="text-xs font-bold uppercase tracking-[0.2em] transition-colors hover:text-white"
+          style={{ fontFamily: "var(--font-mono), monospace", color: "#737373" }}
         >
-          New Research →
+          New Research
         </Link>
       </div>
 
-      {/* Run list */}
-      {runs.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {runs.map((run) => (
-            <RunCard key={run.id} {...run} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 py-16 text-center">
-          <p className="mb-1 text-sm font-semibold text-slate-400">No runs yet</p>
-          <p className="mb-6 text-sm text-slate-600">
+      <div className="rule mb-0" />
+
+      {runs.length === 0 ? (
+        <div className="py-24 text-center">
+          <p
+            className="text-sm text-[#737373]"
+            style={{ fontFamily: "var(--font-mono), monospace" }}
+          >
             {process.env.NEXT_PUBLIC_SUPABASE_URL
-              ? "Run a query to start building history."
-              : "Database not configured - runs will not be persisted."}
+              ? "No runs recorded yet."
+              : "Database not configured. Configure Supabase to persist runs."}
           </p>
           <Link
             href="/research"
-            className="inline-flex items-center gap-2 rounded-lg bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
+            className="mt-6 inline-block text-xs font-bold uppercase tracking-[0.2em] text-[#f4f4f4] transition hover:text-white"
+            style={{ fontFamily: "var(--font-mono), monospace" }}
           >
-            Start Research →
+            Begin Research
           </Link>
         </div>
+      ) : (
+        <table className="w-full border-collapse">
+          <thead>
+            <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <th className="py-3 pr-6 text-left">
+                <span className="label">Date</span>
+              </th>
+              <th className="py-3 pr-6 text-left">
+                <span className="label">Query</span>
+              </th>
+              <th className="hidden py-3 pr-6 text-right md:table-cell">
+                <span className="label">Confidence</span>
+              </th>
+              <th className="hidden py-3 pr-6 text-center lg:table-cell">
+                <span className="label">Risk</span>
+              </th>
+              <th className="py-3 text-center">
+                <span className="label">Status</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+            {runs.map((run) => (
+              <RunCard key={run.id} {...run} />
+            ))}
+          </tbody>
+        </table>
       )}
 
     </div>

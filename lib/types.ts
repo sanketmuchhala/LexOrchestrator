@@ -149,6 +149,9 @@ export interface LegalChunkFromDB {
   practice_area: string | null;
   document_title?: string;
   disclaimer?: string;
+  // "primary" = US Constitution and other authoritative sources (retrieval priority boost)
+  // "sample" = sample educational corpus
+  source_type?: string;
 }
 
 // Phase 2: vector search result with cosine similarity score
