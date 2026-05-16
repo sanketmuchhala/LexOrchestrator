@@ -84,6 +84,47 @@ export async function runLitigationWorkflow(
     await dispatchAndLog(intakeResult, workflowRunId, allEvents);
     const intake = intakeResult.output as unknown as IntakeAgentOutput;
 
+    // Step 3b: Save case file summary artifact if uploadedText was provided
+    if (input.uploadedText && input.uploadedText.trim().length > 0) {
+      const uploadedText = input.uploadedText.trim();
+      const charCount = uploadedText.length;
+      const headingLines = uploadedText
+        .split("\n")
+        .filter((l) => l.trim().toUpperCase() === l.trim() && l.trim().length > 4 && l.trim().length < 80)
+        .slice(0, 5);
+
+      const summaryContent = [
+        `UPLOADED CASE MATERIAL`,
+        `Character count: ${charCount.toLocaleString()}${charCount >= 100_000 ? " (truncated to limit)" : ""}`,
+        "",
+        headingLines.length > 0 ? `Detected headings:\n${headingLines.map((h) => `  - ${h}`).join("\n")}` : "",
+        "",
+        "[Preview -- first 1,500 characters]",
+        uploadedText.slice(0, 1500),
+        uploadedText.length > 1500 ? `\n[... ${(uploadedText.length - 1500).toLocaleString()} additional characters]` : "",
+      ]
+        .filter((l) => l !== "")
+        .join("\n");
+
+      await saveDraftArtifact(
+        workflowRunId,
+        {
+          title: "Case File Summary",
+          sections: [],
+          draftText: summaryContent,
+          citations: [],
+          artifactType: "case_file_summary",
+        },
+        "IntakeAgent",
+        {
+          source: "uploaded_text",
+          characterCount: charCount,
+          documentRole: (input.metadata?.documentRole as string | undefined) ?? "case_file",
+          truncated: charCount >= 100_000,
+        }
+      );
+    }
+
     // Step 4: Retrieval Agent
     const retrievalResult = await runLitigationRetrievalAgent(ctx, intake);
     await dispatchAndLog(retrievalResult, workflowRunId, allEvents);

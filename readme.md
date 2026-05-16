@@ -224,7 +224,8 @@ npm run check:all
 - Citation verification is limited to locally indexed opinions. Citations not in the corpus return `not_found`.
 - Local rules review is drafting guidance only. It is not a compliance certification or a substitute for counsel reviewing the actual local rules.
 - Judge Brief output is argument preparation signal only. It does not predict outcomes or reflect current judicial preferences.
-- No file uploads yet.
+- File upload supports `.txt` and `.md` only. PDF and DOCX are planned (Phase 15).
+- Uploaded case files are factual source material only -- not legal authority and not cited as such.
 - No PDF or DOCX export yet.
 - No lawyer-grade validation or legal advice claim.
 - No live CourtListener dependency required for the demo.
@@ -237,7 +238,7 @@ npm run check:all
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the phased plan through Phase 22.
 
 Next priorities:
-- File upload intake (Phase 13)
+- PDF and DOCX upload (Phase 15 -- Phase 13 added .txt/.md intake)
 - Real CourtListener / CAP ingestion (Phase 14)
 - Citation verification upgrade with eyecite or Python worker (Phase 15)
 - Editable motion editor (Phase 16)

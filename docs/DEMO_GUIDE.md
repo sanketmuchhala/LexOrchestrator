@@ -40,6 +40,10 @@ The app works without any env vars. With Supabase configured, workflow runs pers
 
 ### Step 1 -- Draft form (`/draft`)
 
+**Optional: upload a case file.** Select a document role (Complaint, Deposition, etc.), then click "Choose file" and select a `.txt` or `.md` file. The server extracts the text and shows a preview with character count. The extracted text is passed to the workflow as factual case material. It is not treated as legal authority.
+
+
+
 - The page shows a form: motion type, jurisdiction, court, judge, facts, desired output.
 - Click **Load Demo** in the top right corner.
 - This populates the canonical fixture: SDNY, motion to dismiss, Judge Rakoff, Aurora Analytics v. Northstar Retail Systems.

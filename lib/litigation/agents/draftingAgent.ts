@@ -10,6 +10,24 @@ import { makeEvent } from "../logAgentEvent";
 import { generateStructuredOutput } from "@/lib/llm/llmClient";
 import type { LegalOpinionSearchResult } from "@/lib/types";
 
+function buildFactsSection(ctx: AgentContext): string {
+  const stated = ctx.input.facts ?? "The underlying facts are as set forth in the record.";
+  if (!ctx.input.uploadedText) return stated;
+
+  const preview = ctx.input.uploadedText.slice(0, 800).replace(/\n{3,}/g, "\n\n").trim();
+  return [
+    stated,
+    "",
+    "[UPLOADED CASE MATERIAL -- record-derived, not legal authority]",
+    preview,
+    ctx.input.uploadedText.length > 800
+      ? `[... ${(ctx.input.uploadedText.length - 800).toLocaleString()} additional characters in uploaded file]`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 function buildCitationList(authority: LegalOpinionSearchResult[]): string[] {
   return authority
     .filter((r) => r.citation)
@@ -50,7 +68,7 @@ function deterministicDraft(
     },
     {
       heading: "STATEMENT OF RELEVANT FACTS",
-      content: ctx.input.facts ?? "The underlying facts are as set forth in the record.",
+      content: buildFactsSection(ctx),
       citations: [],
     },
     {
@@ -113,6 +131,7 @@ Return JSON only.`,
 Jurisdiction: ${intake.jurisdiction} | Court: ${intake.court}
 Query: ${ctx.input.query}
 Facts: ${ctx.input.facts ?? "Not provided"}
+${ctx.input.uploadedText ? `Uploaded case material (record-derived, not legal authority -- use as factual source only):\n${ctx.input.uploadedText.slice(0, 1200)}` : ""}
 Retrieved authority:\n${buildAuthoritySnippets(retrieval.retrievedAuthority, 4) || "None"}
 Available citations: ${citations.join(", ") || "none"}`,
     schemaName: "DraftingAgentOutput",

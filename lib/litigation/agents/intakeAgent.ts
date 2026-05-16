@@ -50,7 +50,7 @@ function deterministicIntake(input: AgentContext["input"]): IntakeAgentOutput {
   const missingInputs: string[] = [];
   if (!input.facts) missingInputs.push("facts");
   if (!input.motionType) missingInputs.push("motionType");
-  if (!input.uploadedText) missingInputs.push("uploadedText");
+  // uploadedText is optional case material -- not flagged as missing
 
   return {
     motionType,

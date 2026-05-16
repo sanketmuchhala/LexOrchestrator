@@ -19,6 +19,7 @@ export interface DraftWorkspace extends WorkflowRunDetail {
   adversarialReview: WorkflowArtifactRow | null;
   localRulesArtifact: WorkflowArtifactRow | null;
   judgeBriefArtifact: WorkflowArtifactRow | null;
+  caseFileArtifact: WorkflowArtifactRow | null;
   fullEval: FullWorkflowEval | null;
 }
 
@@ -37,6 +38,9 @@ export async function getDraftWorkspace(id: string): Promise<DraftWorkspace> {
   const judgeBriefArtifact =
     base.artifacts.find((a) => artifactType(a) === "judge_brief") ?? null;
 
+  const caseFileArtifact =
+    base.artifacts.find((a) => artifactType(a) === "case_file_summary") ?? null;
+
   const fullEval =
     base.workflow != null
       ? computeWorkflowEval(base.workflow, base.events, base.artifacts, base.citationReports)
@@ -48,6 +52,7 @@ export async function getDraftWorkspace(id: string): Promise<DraftWorkspace> {
     adversarialReview,
     localRulesArtifact,
     judgeBriefArtifact,
+    caseFileArtifact,
     fullEval,
   };
 }
