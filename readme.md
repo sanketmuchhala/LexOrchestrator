@@ -1,410 +1,264 @@
 # LexOrchestrator
 
-**Multi-Agent Litigation Reliability Engine - Phase 2**
+LexOrchestrator is a litigation workflow agent demo. It takes a legal drafting request through eight sequential specialist agents -- intake, retrieval, drafting, citation verification, adversarial review, local rules review, judge brief preparation, and eval scoring -- and surfaces the results in a structured workspace UI.
 
-LexOrchestrator is a full-stack multi-agent AI system for legal research reliability. It routes legal queries through a sequential agent pipeline - intake classification, RAG retrieval, citation validation, adversarial review, hallucination risk scoring, and eval reporting - before producing a final cited answer.
+This is a portfolio project demonstrating multi-agent orchestration, hybrid RAG retrieval, citation verification, and workflow eval. It is not a production legal service and does not provide legal advice.
 
-This is a prototype for litigation AI reliability architecture. It is not a production legal service and does not provide legal advice.
-
-> ⚠️ **Disclaimer**: All corpus entries are sample educational content only. Not real legal authority, case law, or professional legal advice.
+> All corpus entries and demo judge data are fictional or sample educational content only. Not real legal authority or professional legal advice.
 
 ---
 
-## What LexOrchestrator Is
+## What It Does
 
-LexOrchestrator is a Next.js litigation workflow demo that runs legal research and drafting requests through retrieval, drafting, citation verification, adversarial review, local rules review, judge brief generation, and eval scoring. It is designed to demonstrate orchestration and reliability checks, not to provide legal advice or guarantee legal accuracy.
+**Draft workflow.** Submit a motion description, jurisdiction, court, and judge name. The eight-agent pipeline runs sequentially and produces a structured motion outline grounded in retrieved authority.
 
-The original seven-agent research pipeline remains available. The litigation draft flow is a parallel workflow under `/draft`, `/workflows`, `/evals`, and `/api/litigation/workflows`.
+**Authority retrieval.** A hybrid RAG search over indexed court opinions combines keyword scoring (0.35), vector cosine similarity (0.45), and authority boosts for jurisdiction, court, citation presence, and recency.
+
+**Citation verification.** Every citation in the draft is checked against indexed opinions for existence, quote accuracy, pin cite, proposition support, and treatment status.
+
+**Judge brief.** If a judge name is provided, the system looks up cached profile data derived from indexed opinions and returns style notes, citation preferences, and argument guidance. Preparation signal only -- not outcome prediction.
+
+**Local rules review.** A static rules module checks the draft against required sections for the target jurisdiction (SDNY, Federal generic, New York State generic) and surfaces missing sections and formatting warnings.
+
+**Adversarial review.** A red-team agent generates the opposing-counsel critique: strongest weaknesses, unsupported claims, and likely counterarguments.
+
+**Eval dashboard.** A weighted confidence formula combines citation pass rate, faithfulness, retrieval coverage, local rules completeness, adversarial safety, and judge coverage into a single overallConfidence score with pass/warn/fail verdict.
+
+**MCP tool server.** A stdio MCP server exposes nine tools for search, citation extract/verify, workflow run, status, artifacts, judge brief, eval summary, and local rules profile.
+
+---
 
 ## Demo Workflow
 
-1. Visit `/draft`.
-2. Click **Load Demo** to populate the canonical SDNY motion-to-dismiss fixture.
-3. Submit the draft workflow.
-4. Review `/draft/[id]` for the draft preview, verification inspector, Judge Brief, Local Rules Review, Adversarial Review, and Eval Summary.
-5. Use the cross-links to inspect `/workflows/[id]` and `/evals/[id]`.
-6. Run the MCP smoke test before a demo.
+1. Run pre-demo checks:
+   ```bash
+   npm run check:demo
+   npm run smoke:demo-path
+   npm run smoke:mcp
+   ```
 
-## How To Run Locally
+2. Start the dev server:
+   ```bash
+   npm run dev
+   ```
 
-```bash
-npm install
-npm run dev
-```
+3. Open `http://localhost:3000/draft`.
 
-Open `http://localhost:3000/draft`.
+4. Click **Load Demo** to populate the canonical SDNY motion-to-dismiss fixture (Aurora Analytics v. Northstar Retail Systems, defendant-side, Judge Rakoff).
 
-## Required Optional Env Vars
+5. Submit. The workflow runs all eight agents and redirects to `/draft/[id]`.
 
-The app degrades to deterministic fallback behavior when external services are absent.
+6. On the draft workspace:
+   - Left column: Document Preview (motion outline), Authority Retrieved (citations)
+   - Right column: Verification Inspector, Judge Brief, Adversarial Review, Local Rules Notes, Eval Summary
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-OPENAI_API_KEY=
-OPENROUTER_API_KEY=
-LLM_MODEL=
-EMBEDDING_MODEL=
-```
+7. Click **Technical Inspection** to open `/workflows/[id]` -- agent event feed, raw artifact list, citation report table.
 
-Supabase enables persisted workflow runs, seeded demo judge profiles, citation report storage, and dashboard history. An LLM key improves generation quality; without one, fallback output is used.
+8. Click **Full Eval** to open `/evals/[id]` -- eight score bars, citation quality, retrieval quality, artifact quality, agent runtime.
 
-## Demo Commands
-
-```bash
-npm run seed:litigation-demo
-npm run check:demo
-npm run smoke:demo-path
-```
-
-## MCP Server Command
-
-```bash
-npm run smoke:mcp
-npm run mcp:server
-```
-
-`npm run mcp:server` starts the stdio MCP server for compatible MCP clients. It is not an SSE server.
-
-## Quality Checks
-
-```bash
-npm run check:safety
-npm run lint
-npx tsc --noEmit
-npm run build
-npm run check:demo
-```
-
-`npm run check:all` runs the core safety, lint, type, build, and demo-readiness checks. Longer smoke tests stay separate.
-
-## Known Limitations
-
-- Demo fixture facts and seeded judge data are fictional or demo-safe.
-- Citation verification is limited to locally indexed opinions and extractor coverage.
-- Local rules review is drafting guidance only, not a compliance certification.
-- Judge Brief output is argument preparation only and does not predict outcomes.
-- No file uploads, auth-gated matters, or production legal compliance workflow are included.
+9. From `/evals`, navigate to the dashboard at `/evals` to see aggregate metrics across runs.
 
 ---
 
-## What Is Real in Phase 2
+## Routes
 
-| Capability | Status |
-|-----------|--------|
-| Supabase/Postgres persistence (runs, traces, citations, eval scores) | ✅ Real |
-| **pgvector hybrid RAG** (cosine similarity + keyword + jurisdiction boost) | ✅ Real (Phase 2) |
-| **Embedding backfill script** (`npm run embed:legal`) | ✅ Real (Phase 2) |
-| **Retrieval quality metrics** in eval report (method, vectorSearchUsed, avgHybridScore) | ✅ Real (Phase 2) |
-| OpenAI-compatible LLM calls (intake, citation validation, adversarial review, synthesis) | ✅ Real (with mock fallback) |
-| Deterministic hallucination risk scoring | ✅ Real |
-| Tool registry (MCP-inspired, 4 tools) | ✅ Real |
-| Sequential orchestration with per-step tracing | ✅ Real |
-| Run history API (`GET /api/runs`, `GET /api/runs/[id]`) | ✅ Real |
-| Eval report with groundedness, citation accuracy, reliability score, pass/fail | ✅ Real |
-| Auth / user accounts | ❌ Future |
-| Pinecone / external vector store | ❌ Future |
-| Document upload | ❌ Future |
+| Route | Purpose |
+|---|---|
+| `/` | Landing page |
+| `/research` | Seven-agent research pipeline (legacy) |
+| `/runs` | Research run history |
+| `/runs/[id]` | Research run detail |
+| `/draft` | New draft form |
+| `/draft/[id]` | Draft workspace: document, verification inspector, judge brief, local rules, adversarial, eval |
+| `/workflows` | Litigation workflow run list |
+| `/workflows/[id]` | Technical inspection: agent events, artifacts, citations |
+| `/evals` | Eval dashboard: aggregate quality metrics |
+| `/evals/[id]` | Per-run eval: eight score bars, citation/retrieval/artifact/runtime panels |
 
 ---
 
-## Phase 2: Hybrid RAG Architecture
+## Architecture
 
-### Retrieval Pipeline
+Two parallel pipelines run side by side. Neither modifies the other.
 
+**Legacy pipeline** (`lib/orchestrator/runOrchestration.ts`): Seven agents -- intake, retrieval, citation validation, adversarial, hallucination monitor, final synthesis, eval. Powers `/research` and `/runs`.
+
+**Litigation workflow** (`lib/litigation/runLitigationWorkflow.ts`): Eight specialist agents run sequentially. Each agent receives the full context built by prior agents.
+
+| Agent | Role |
+|---|---|
+| Intake Agent | Normalizes request: motionType, jurisdiction, keyFacts, legalIssues |
+| Retrieval Agent | Hybrid RAG search over `legal_opinion_chunks` |
+| Drafting Agent | Generates motion outline grounded in retrieved authority |
+| Citation Agent | Verifies all citations in draft via the Phase 3 verifier |
+| Adversarial Agent | Opposing-counsel critique: weaknesses, unsupported claims, counterarguments |
+| Local Rules Agent | Section detection and formatting warnings for the target jurisdiction |
+| Judge Brief Agent | Looks up cached judge profiles; returns preparation guidance |
+| Eval Agent | Deterministic scoring: computes `FullWorkflowEval` from in-memory agent outputs |
+
+Agents with no upstream data dependency (adversarial, local rules, judge brief) can be parallelized in a future phase.
+
+---
+
+## Data Model
+
+| Table | Purpose |
+|---|---|
+| `legal_opinions` | Court opinions metadata (CourtListener / CAP / demo) |
+| `legal_opinion_chunks` | Chunked opinion text with pgvector embeddings |
+| `legal_citation_edges` | Opinion-to-opinion citation graph |
+| `legal_judges` | Judge metadata |
+| `judge_profiles` | Cached judge analysis for Judge Brief |
+| `litigation_workflow_runs` | One row per workflow run; updated with final scores |
+| `litigation_agent_events` | Streamable event feed per agent step |
+| `draft_artifacts` | Generated motion sections, memos, red-team outputs, eval artifacts |
+| `citation_verification_reports` | Per-citation existence/quote/proposition/treatment results |
+
+---
+
+## MCP Server
+
+A stdio MCP server exposes nine litigation tools.
+
+```bash
+npm run mcp:server    # start stdio MCP server (waits for protocol input)
+npm run smoke:mcp     # directly test tool modules; no client required
 ```
-Query → generateQueryEmbedding → vectorSearchLegalChunks (pgvector RPC)
-                                          ↓
-Query → keyTerms → searchLegalChunksFromDB → keyword scoring
-                                          ↓
-                               Merge candidates by citation_id
-                                          ↓
-                  hybridScore = keyword(0.35) + vector(0.45) + jurisdiction(0.10) + practiceArea(0.10)
-                                          ↓
-                               Reranker: exact term bonus (+0.05/match)
-                                          ↓
-                               Top 5 by rerankScore → RetrievedSource[]
-```
 
-**Fallback chain:**
-1. `hybrid_rag` - pgvector similarity + keyword (requires embeddings in DB)
-2. `keyword_fallback` - keyword scoring only (if vector search fails or no embeddings)
-3. `memory_fallback` - in-memory corpus (if Supabase unavailable)
+**Tools exposed:**
 
-### Scoring Weights
+| Tool | Description |
+|---|---|
+| `search_legal_opinions` | Hybrid RAG search over indexed opinions |
+| `extract_citations` | Regex-based U.S. citation extractor |
+| `verify_citation` | Existence and accuracy check for a single citation |
+| `run_litigation_workflow` | Full eight-agent workflow |
+| `get_workflow_status` | Workflow status and agent event feed |
+| `get_draft_artifacts` | Draft artifacts by run ID |
+| `get_judge_brief` | Cached judge preparation guidance |
+| `get_eval_summary` | Full quality evaluation for a completed run |
+| `get_local_rules_profile` | Local rules profile for jurisdiction and court |
 
-| Signal | Weight |
-|--------|--------|
-| Vector cosine similarity | 0.45 |
-| Keyword overlap (TF-style) | 0.35 |
-| Jurisdiction match boost | 0.10 |
-| Practice area match boost | 0.10 |
-| Exact term rerank bonus | +0.05 per term (capped at 0.15) |
-
-### Per-Source Score Fields (in API response)
+**Claude Desktop config** (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
 ```json
 {
-  "citationId": "SAMPLE-003",
-  "vectorScore": 0.847,
-  "keywordScore": 0.612,
-  "hybridScore": 0.748,
-  "rerankScore": 0.798,
-  "finalScore": 0.798,
-  "rankPosition": 1,
-  "retrievalMethod": "hybrid_rag",
-  "reason": "Vector: 85% | Keyword: 61% | Hybrid: 75% | Final: 80%"
-}
-```
-
-### Retrieval Quality in Eval Report
-
-```json
-{
-  "retrievalQuality": {
-    "retrievalMethod": "hybrid_rag",
-    "vectorSearchUsed": true,
-    "fallbackUsed": false,
-    "averageHybridScore": 0.683,
-    "topSourceScore": 0.798,
-    "sourceCount": 5
+  "mcpServers": {
+    "lexorchestrator": {
+      "command": "npx",
+      "args": ["tsx", "/ABSOLUTE/PATH/TO/REPO/mcp/server.ts"],
+      "env": {
+        "NEXT_PUBLIC_SUPABASE_URL": "your-supabase-url",
+        "SUPABASE_SERVICE_ROLE_KEY": "your-service-role-key",
+        "OPENROUTER_API_KEY": "your-openrouter-key"
+      }
+    }
   }
 }
 ```
 
 ---
 
-## Architecture
-
-```mermaid
-graph TD
-    Q[User Query] --> IA[Intake Agent<br/>LLM + fallback]
-    IA -->|keyTerms, legalIssue| TR[Tool Registry]
-    TR -->|searchLegalCorpus| RA[Retrieval Agent<br/>DB + in-memory fallback]
-    RA -->|Retrieved Sources| TR2[Tool Registry]
-    TR2 -->|validateCitationSupport| CV[Citation Validator<br/>LLM + fallback]
-    CV -->|Claim Scores| AR[Adversarial Review<br/>LLM + fallback]
-    AR -->|Risk Assessment| TR3[Tool Registry]
-    TR3 -->|scoreHallucinationRisk| HR[Hallucination Risk Monitor<br/>Deterministic]
-    HR --> FS[Final Synthesis<br/>LLM + fallback]
-    FS --> EE[Eval Engine<br/>Deterministic]
-    EE --> DB[(Supabase/Postgres)]
-    EE --> R[Phase1OrchestratorResult]
-
-    style IA fill:#4f46e5,color:#fff
-    style RA fill:#7c3aed,color:#fff
-    style CV fill:#0891b2,color:#fff
-    style AR fill:#dc2626,color:#fff
-    style HR fill:#b45309,color:#fff
-    style FS fill:#059669,color:#fff
-    style EE fill:#d97706,color:#fff
-    style DB fill:#0f172a,color:#94a3b8
-```
-
----
-
-## Database Schema
-
-Seven tables in Supabase/Postgres:
-
-| Table | Purpose |
-|-------|---------|
-| `legal_documents` | Parent records for corpus entries |
-| `legal_chunks` | Searchable text units with `citation_id` (SAMPLE-XXX) |
-| `orchestration_runs` | One row per query - status, confidence, hallucination risk |
-| `agent_traces` | One row per agent step per run - input/output summaries, payloads |
-| `retrieval_results` | Which chunks were retrieved for each run |
-| `citation_validations` | Per-claim support status (verified/partial/unsupported) |
-| `eval_reports` | Reliability metrics - groundedness, citation accuracy, pass/fail |
-
-Apply migrations in order:
-1. Paste `supabase/migrations/001_lexorchestrator_phase1.sql` into the Supabase SQL Editor
-2. Paste `supabase/migrations/002_hybrid_rag_pgvector.sql` to enable pgvector and hybrid RAG
-
-> **Note on HNSW index:** Requires pgvector ≥ 0.5.0 (available on Supabase hosted). If it fails, see the IVFFlat alternative commented out in the migration file.
-
----
-
-## Environment Variables
-
-Create `.env.local` in the project root:
-
-```env
-# Supabase (required for persistence)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-
-# LLM (optional - falls back to deterministic mock if absent)
-OPENAI_API_KEY=sk-...
-LLM_MODEL=gpt-4o-mini
-
-# Embeddings - Phase 2 (optional - falls back to hash-based vectors if absent)
-EMBEDDING_MODEL=text-embedding-3-small
-```
-
-**Fallback behavior when keys are missing:**
-- No `SUPABASE_*`: app runs, pipeline completes, returns `persisted: false`
-- No `OPENAI_API_KEY`: agents use deterministic mock outputs, retrieval uses hash-based embeddings (not semantically meaningful), full pipeline still works
-- No embeddings in DB: retrieval falls back to `keyword_fallback`, `evalReport.retrievalQuality.vectorSearchUsed = false`
-
----
-
-## Local Development
-
-### Prerequisites
-- Node.js 18+
-- npm 9+
-- Supabase project (free tier works)
-
-### Setup
+## Local Setup
 
 ```bash
-git clone https://github.com/your-username/LexOrchestrator.git
+git clone https://github.com/sanketmuchhala/LexOrchestrator.git
 cd LexOrchestrator
 npm install
-cp .env.local.example .env.local   # fill in your keys
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open `http://localhost:3000`. All routes work without any env vars; agents fall back to deterministic outputs.
 
-### Apply Database Migrations
+**Optional env vars** (`.env.local`):
 
-1. Paste `supabase/migrations/001_lexorchestrator_phase1.sql` into Supabase SQL Editor
-2. Paste `supabase/migrations/002_hybrid_rag_pgvector.sql` to enable pgvector + hybrid RAG
-
-### Seed Legal Corpus
-
-```bash
-npm run seed:legal
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENROUTER_API_KEY=
+OPENAI_API_KEY=
+LLM_MODEL=
+EMBEDDING_MODEL=
 ```
 
-Seeds 12 sample educational chunks into `legal_documents` and `legal_chunks`. Idempotent.
+Without keys: workflow runs complete with deterministic fallback output, no DB persistence, no semantic search.
+With Supabase only: persistence, dashboard history, judge profile lookup.
+With an LLM key: full agent quality.
 
-### Generate Embeddings (Phase 2)
+**Seed demo data:**
 
 ```bash
-npm run embed:legal
+npm run seed:litigation-demo   # 3 demo opinions, 1 judge, 2 judge profiles
 ```
-
-Backfills pgvector embeddings for all chunks where `embedding IS NULL`. Requires `OPENAI_API_KEY`. Safe to re-run - skips already-embedded rows. After this, queries use `hybrid_rag` retrieval instead of `keyword_fallback`.
 
 ---
 
-## API Reference
+## Quality Checks
 
-### `POST /api/orchestrate`
+```bash
+npm run check:safety    # scans for forbidden terms and secret patterns
+npm run check:demo      # verifies fixture, routes, MCP, and module presence
+npm run lint            # ESLint across app/ components/ lib/ scripts/ mcp/
+npx tsc --noEmit        # TypeScript strict mode type check
+npm run build           # production build must pass before commit
 
-Runs the full 7-agent pipeline. Returns a `Phase1OrchestratorResult`.
+# Smoke tests
+npm run smoke:legal-search
+npm run smoke:citations
+npm run smoke:litigation-workflow
+npm run smoke:judge-brief
+npm run smoke:local-rules
+npm run smoke:workflow-eval
+npm run smoke:mcp
+npm run smoke:demo-path
 
-```json
-// Request
-{ "query": "What are the evidentiary standards for expert testimony in federal court?" }
-
-// Response shape
-{
-  "runId": "uuid",
-  "query": "...",
-  "intake": { "legalIssue", "jurisdiction", "riskLevel", "keyTerms", ... },
-  "retrievedSources": [{ "citationId", "title", "text", "relevanceScore", "keywordScore", "vectorScore", "hybridScore", "rerankScore", "finalScore", "rankPosition", "retrievalMethod", "reason" }],
-  "citationValidation": { "claims": [{ "claim", "citationId", "supportStatus", "supportScore", "explanation" }], "overallScore", ... },
-  "hallucinationRisk": { "riskScore", "riskLevel", "factors", "unsupportedCitationCount" },
-  "adversarialReview": { "weaknesses", "missingAuthority", "counterarguments", "overallRisk", "summary" },
-  "finalAnswer": { "answer", "citations", "confidenceScore", "riskFlags", "unresolvedQuestions" },
-  "evalReport": { "groundednessScore", "citationAccuracyScore", "hallucinationRiskScore", "retrievalCoverage", "finalAnswerConfidence", "overallReliability", "passFail", "retrievalQuality": { "retrievalMethod", "vectorSearchUsed", "fallbackUsed", "averageHybridScore", "topSourceScore", "sourceCount" } },
-  "executionTrace": [{ "agent", "durationMs", "status" }],
-  "persisted": true,
-  "modelUsed": "gpt-4o-mini"
-}
+# Run everything
+npm run check:all
 ```
 
-### `GET /api/runs`
+---
 
-Returns the 20 most recent orchestration runs.
+## Known Limitations
 
-### `GET /api/runs/[id]`
+- Demo fixture facts and judge profiles are fictional or educational only.
+- Citation verification is limited to locally indexed opinions. Citations not in the corpus return `not_found`.
+- Local rules review is drafting guidance only. It is not a compliance certification or a substitute for counsel reviewing the actual local rules.
+- Judge Brief output is argument preparation signal only. It does not predict outcomes or reflect current judicial preferences.
+- No file uploads yet.
+- No PDF or DOCX export yet.
+- No lawyer-grade validation or legal advice claim.
+- No live CourtListener dependency required for the demo.
+- The seven-agent research pipeline (`/research`) and the litigation workflow (`/draft`) are separate; research runs do not appear in the workflow dashboard.
 
-Returns full run detail: orchestration run + all agent traces + retrieval results + citation validations + eval report.
+---
+
+## Roadmap
+
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the phased plan through Phase 22.
+
+Next priorities:
+- File upload intake (Phase 13)
+- Real CourtListener / CAP ingestion (Phase 14)
+- Citation verification upgrade with eyecite or Python worker (Phase 15)
+- Editable motion editor (Phase 16)
+- PDF / DOCX export (Phase 17)
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16+ (App Router, Turbopack) |
+|---|---|
+| Framework | Next.js 16 (App Router, Turbopack) |
 | Language | TypeScript (strict) |
-| Styling | Tailwind CSS |
-| Database | Supabase / Postgres |
-| LLM | OpenAI-compatible API (gpt-4o-mini default) |
-| Agents | Async TypeScript functions with LLM + deterministic fallback |
-| Tool Registry | MCP-inspired, 4 tools |
+| Styling | Tailwind CSS + CSS custom properties |
+| Database | Supabase (Postgres + pgvector) |
+| LLM | OpenAI SDK via OpenRouter or OpenAI direct |
+| MCP | `@modelcontextprotocol/sdk` v1.29, stdio transport |
+| Fonts | IBM Plex Mono, EB Garamond |
 
 ---
 
-## Demo Query
+## Architecture Diagram
 
-> **"What are the evidentiary standards for admitting expert testimony in federal civil litigation?"**
-
-With keys configured:
-- Intake (GPT): `evidence / Federal / medium risk`
-- Retrieval (DB): SAMPLE-003 (Daubert), SAMPLE-004, SAMPLE-011 (Frye)
-- Citation Validator (GPT): `verified` support for core admissibility claims
-- Adversarial (GPT): Daubert/Frye circuit split, ipse dixit risk
-- Hallucination Risk: score ≤ 0.2 (low)
-- Synthesis (GPT): cited 3-paragraph analysis
-- Eval: `pass` - high groundedness, low hallucination risk
-- All persisted to Supabase
-
----
-
-## Future Roadmap
-
-- [ ] **pgvector semantic retrieval** - replace keyword scoring with cosine similarity
-- [ ] **Pinecone integration** - external vector store for large corpora
-- [ ] **Real citation parser** - validate against Westlaw/Lexis APIs
-- [ ] **Judge simulation agent** - 8th agent modeling court disposition
-- [ ] **Streaming via SSE** - real-time per-agent reveal in the UI
-- [ ] **MCP server** - expose tool registry as a real MCP endpoint
-- [ ] **Eval dataset** - labeled queries with ground-truth citation outcomes
-- [ ] **Document upload** - user-supplied briefs as retrieval corpus
-- [ ] **Clio / iManage integration** - connect to practice management systems
-- [ ] **Multi-user auth** - Supabase RLS for user-scoped runs
-- [ ] **Confidence calibration** - fine-tune weights against expert-labeled data
-
----
-
-## Project Structure
-
-```
-supabase/
-  migrations/
-    001_lexorchestrator_phase1.sql    DB schema
-scripts/
-  seed-legal-corpus.ts               Seeds 12 sample chunks
-app/
-  layout.tsx / page.tsx / globals.css
-  api/
-    orchestrate/route.ts             POST - runs full pipeline
-    runs/route.ts                    GET - recent run list
-    runs/[id]/route.ts               GET - run detail
-lib/
-  types.ts                           All shared interfaces
-  db/supabaseServer.ts               Server-only Supabase client + helpers
-  llm/llmClient.ts                   OpenAI wrapper with mock fallback
-  retrieval/searchLegalCorpus.ts     DB-backed retrieval with in-memory fallback
-  tools/toolRegistry.ts              MCP-inspired tool registry (4 tools)
-  agents/
-    intakeAgent.ts                   Query classification (LLM + fallback)
-    retrievalAgent.ts                Corpus retrieval (DB + fallback)
-    citationValidator.ts             Claim support scoring (LLM + fallback)
-    hallucinationRiskAgent.ts        Numeric risk scoring (deterministic)
-    adversarialReview.ts             Opposing counsel sim (LLM + fallback)
-    finalSynthesis.ts                Cited answer generation (LLM + fallback)
-  orchestrator/
-    pipeline.ts                      Sync mock pipeline (v1, kept for reference)
-    runOrchestration.ts              Async DB+LLM pipeline (Phase 1 live path)
-  evals/evalEngine.ts                Reliability scoring + pass/fail
-  data/legalCorpus.ts                In-memory corpus (retrieval fallback)
-```
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

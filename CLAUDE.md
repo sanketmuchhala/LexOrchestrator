@@ -47,6 +47,36 @@ Phase 11 is demo stability and production polish only. Do not add uploads, auth-
 
 ---
 
+## Phase 12 Documentation Package
+
+Documentation and positioning only. No product code changes.
+
+### Files added
+
+| File | Purpose |
+|---|---|
+| `readme.md` | Full project README: what it does, demo workflow, routes, architecture, data model, MCP, setup, limitations, roadmap |
+| `docs/README.md` | Docs index with links to all doc files |
+| `docs/ARCHITECTURE.md` | System overview, agent topology, Mermaid data-flow diagram, retrieval formula, eval formula, persistence model, security |
+| `docs/DEMO_GUIDE.md` | Pre-demo checklist, step-by-step click guide, failure fallback plan, what not to say |
+| `docs/DEMO_VIDEO_SCRIPT.md` | 4-5 minute video script with narration cues and screen guidance |
+| `docs/INTERVIEW_TALKING_POINTS.md` | 30-second pitch, 90-second technical explanation, per-feature talking points, tradeoffs |
+| `docs/ROADMAP.md` | Phases 13-22: upload, CourtListener, eyecite, motion editor, export, observability, auth, deployment, portfolio polish |
+
+### Architecture diagram
+
+`docs/ARCHITECTURE.md` contains a Mermaid `flowchart TD` diagram showing the eight-agent data flow from draft request through all agents to the draft workspace.
+
+### Language constraints carried over from all phases
+
+- No claim of legal advice
+- No claim of hallucination-free output
+- No claim of full local-rule compliance
+- No claim of outcome prediction
+- No mention of target employer
+
+---
+
 ## Design System — "Federal Court Documents meets Financial Terminal"
 
 True black aesthetic. Every new UI component must follow this:
