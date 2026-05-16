@@ -6,7 +6,7 @@ import type {
   TextVerificationResponse,
   TextVerificationSummary,
 } from "./types";
-import { extractCitations } from "./extractCitations";
+import { extractCitationsWithBestAvailableProvider } from "./citationExtractorAdapter";
 import { verifyCitation } from "./verifyCitation";
 import { saveCitationVerificationReport } from "./saveCitationVerificationReport";
 
@@ -22,7 +22,7 @@ export async function verifyCitationsInText(
   input: VerifyTextInput
 ): Promise<TextVerificationResponse> {
   // Step 1: extract citations from text
-  const extracted = extractCitations(input.text);
+  const extracted = await extractCitationsWithBestAvailableProvider(input.text);
 
   if (extracted.length === 0) {
     return {

@@ -133,6 +133,61 @@ npm run smoke:upload-intake   # extraction tests, size/type limit tests, workflo
 
 ---
 
+## Phase 15 Citation Worker
+
+Adds an optional Python/eyecite worker alongside the existing TypeScript regex extractor. The TypeScript app routes citation extraction through an adapter that prefers the worker when available and falls back to regex automatically.
+
+### Python worker (`workers/citation/`)
+
+| File | Purpose |
+|---|---|
+| `app.py` | FastAPI app: `GET /health`, `POST /extract`. Wraps `eyecite.get_citations()`. Returns normalized citation list with `source: "eyecite"`. |
+| `requirements.txt` | `fastapi`, `uvicorn[standard]`, `eyecite` |
+| `README.md` | Setup, run, health check, extraction example, limitations |
+
+Start worker:
+```bash
+source workers/citation/.venv/bin/activate
+npm run worker:citation   # or: uvicorn workers.citation.app:app --host 127.0.0.1 --port 8015
+```
+
+Enable in app: set `CITATION_WORKER_URL=http://127.0.0.1:8015` in `.env.local`.
+
+### TypeScript adapter (`lib/citations/citationExtractorAdapter.ts`)
+
+`extractCitationsWithBestAvailableProvider(text)` -- async. Calls worker when `CITATION_WORKER_URL` is set; falls back to `extractCitations` (regex) on timeout/error/missing env var. Sets `extractorSource: "eyecite"` or `"regex"` on each result.
+
+Timeout: 2 seconds. No crash if worker is down.
+
+### Updated callers (all use adapter now)
+
+- `app/api/citations/extract/route.ts`
+- `lib/citations/verifyCitationsInText.ts`
+- `mcp/tools/extractCitationsTool.ts`
+
+### New API route
+
+`GET /api/citations/worker-health` -- returns `{ configured, healthy, extractor, message }`.
+
+### Type changes
+
+`CitationExtractionResult` and `CitationVerificationResult` both gain optional `extractorSource?: "eyecite" | "regex" | "fallback"`. Existing consumers are unaffected (optional field).
+
+### Smoke commands
+
+```bash
+npm run smoke:citation-worker         # adapter fallback test; passes without worker
+npm run smoke:citation-worker-direct  # direct worker test; requires worker on port 8015
+```
+
+### Language constraints
+
+- eyecite improves extraction; it does not constitute legal validation or Shepardization.
+- `extractorSource` in results is a quality signal, not a completeness guarantee.
+- Treatment verification remains limited to locally indexed opinions.
+
+---
+
 ## Design System — "Federal Court Documents meets Financial Terminal"
 
 True black aesthetic. Every new UI component must follow this:

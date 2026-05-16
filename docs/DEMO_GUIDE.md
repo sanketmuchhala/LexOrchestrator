@@ -1,5 +1,21 @@
 # LexOrchestrator Demo Guide
 
+## Optional: Enable eyecite Worker
+
+If you want to demo improved citation extraction via the eyecite worker, run it before the demo:
+
+```bash
+source workers/citation/.venv/bin/activate
+npm run worker:citation   # starts on http://127.0.0.1:8015
+```
+
+Add to `.env.local`:
+```
+CITATION_WORKER_URL=http://127.0.0.1:8015
+```
+
+The worker is optional. Everything works without it.
+
 ## Pre-Demo Checklist
 
 Run these before every demo session:

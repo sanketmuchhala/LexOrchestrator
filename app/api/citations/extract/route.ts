@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { extractCitations } from "@/lib/citations/extractCitations";
+import { extractCitationsWithBestAvailableProvider } from "@/lib/citations/citationExtractorAdapter";
 
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
@@ -17,6 +17,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Text must be under 50000 characters." }, { status: 400 });
   }
 
-  const citations = extractCitations(text);
+  const citations = await extractCitationsWithBestAvailableProvider(text);
   return NextResponse.json({ citations });
 }
