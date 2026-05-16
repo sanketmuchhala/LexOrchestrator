@@ -188,6 +188,66 @@ npm run smoke:citation-worker-direct  # direct worker test; requires worker on p
 
 ---
 
+## Phase 16 Editable Motion Editor
+
+Upgrades `/draft/[id]` from a read-only document preview to a textarea-based editable drafting workspace with version tracking and citation re-verification.
+
+### New modules
+
+| Path | Purpose |
+|---|---|
+| `lib/drafts/types.ts` | `DraftRevision`, `DraftSaveInput`, `DraftSaveResult`, `DraftVerificationRunResult`, `EditableDraft` |
+| `lib/drafts/getEditableDraft.ts` | Load latest editable content (prefers latest revision if exists, falls back to artifact content) |
+| `lib/drafts/saveDraftRevision.ts` | Update artifact content in-place + insert revision row; ephemeral fallback without DB |
+| `lib/drafts/listDraftRevisions.ts` | Return revision history sorted newest-first |
+| `lib/drafts/verifyDraftRevision.ts` | Run `verifyCitationsInText` on edited content, persist result to artifact |
+
+### DB changes (migration 008)
+
+- New `draft_revisions` table: `id`, `workflow_run_id`, `draft_artifact_id`, `version`, `content`, `edit_summary`, `verification_status`, `citation_summary`, `created_by`, `created_at`, `metadata`
+- `WorkflowArtifactRow` gains optional `version?: number`
+- `getLitigationWorkflowArtifacts` SELECT now includes `version`
+- New helpers: `updateDraftArtifactContent`, `updateDraftArtifactVerification`, `insertDraftRevisionRecord`, `getDraftRevisionsByArtifactId`
+- No changes to `draft_artifacts` schema or type constraint
+
+### API routes added
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/api/drafts/[id]` | GET | Load editable draft (content, version, revisions) |
+| `/api/drafts/[id]` | PATCH | Save revision; optional `verifyAfterSave: true` |
+| `/api/drafts/[id]/verify` | POST | Re-run citation verification on latest or provided content |
+
+### Components added
+
+- `EditableMotionEditor.tsx` -- client component; textarea editor with Cmd/Ctrl+S, Save, Save+Verify buttons, dirty indicator, verification summary inline display
+- `DraftRevisionHistory.tsx` -- client component; version list with verification status badges; collapses to toggle after 3 entries
+
+### Draft workspace changes (`app/draft/[id]/page.tsx`)
+
+- Left column: § 02 Motion Draft (EditableMotionEditor), § 03 Revision History, § 04 Authority Retrieved
+- Right column: § 05 Verification Inspector, § 04b Judge Brief, § 04c Case File (conditional), § 05 Adversarial Review, § 06 Local Rules, § 07 Eval Summary
+- Save+Verify calls `router.refresh()` to reload Verification Inspector from updated DB data
+
+### Eval behavior note
+
+The eval panel (§ 07) reflects the original workflow-run eval. Manual revisions update citation verification status on the artifact, but the full `FullWorkflowEval` (confidence, faithfulness, etc.) is not recomputed on each edit. A note in this area clarifies this limitation.
+
+### Smoke command
+
+```bash
+npm run smoke:draft-editor   # save revision, list history, verify citations, edge cases
+```
+
+### Limitations
+
+- Textarea only; no rich-text formatting
+- Eval dashboard scores reflect original workflow run, not manual revisions
+- Restore-to-previous-version not yet implemented
+- Draft revisions table requires migration 008 to be applied in Supabase
+
+---
+
 ## Design System — "Federal Court Documents meets Financial Terminal"
 
 True black aesthetic. Every new UI component must follow this:

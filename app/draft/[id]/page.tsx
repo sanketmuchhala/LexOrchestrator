@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDraftWorkspace } from "@/lib/litigation/getDraftWorkspace";
+import { listDraftRevisions } from "@/lib/drafts/listDraftRevisions";
 import DraftWorkspaceHeader from "@/components/draft/DraftWorkspaceHeader";
-import DocumentPreview from "@/components/draft/DocumentPreview";
+import EditableMotionEditor from "@/components/draft/EditableMotionEditor";
+import DraftRevisionHistory from "@/components/draft/DraftRevisionHistory";
 import VerificationInspector from "@/components/draft/VerificationInspector";
 import AuthorityPanel from "@/components/draft/AuthorityPanel";
 import AdversarialReviewPanel from "@/components/draft/AdversarialReviewPanel";
@@ -66,6 +68,11 @@ export default async function DraftWorkspacePage({ params }: Props) {
   const { id } = await params;
   const workspace = await getDraftWorkspace(id);
   const { workflow, events, primaryDraft, adversarialReview, localRulesArtifact, judgeBriefArtifact, caseFileArtifact, citationReports, fullEval } = workspace;
+
+  // Load revision history server-side for initial render
+  const initialRevisions = primaryDraft
+    ? await listDraftRevisions(primaryDraft.id)
+    : [];
 
   return (
     <div className="pt-10 pb-32 appear">
@@ -178,16 +185,35 @@ export default async function DraftWorkspacePage({ params }: Props) {
             className="gap-6"
             style={{ display: "grid", gridTemplateColumns: "1fr 22rem", alignItems: "start" }}
           >
-            {/* ── Left: Document ── */}
+            {/* ── Left: Editor ── */}
             <div className="space-y-8 min-w-0">
               <section>
-                <SectionTitle n="02">Document Preview</SectionTitle>
-                <PanelCard>
-                  <DocumentPreview
-                    artifact={primaryDraft}
-                    finalOutput={workflow.final_output}
+                <SectionTitle n="02">Motion Draft</SectionTitle>
+                {primaryDraft ? (
+                  <EditableMotionEditor
+                    initialContent={primaryDraft.content}
+                    draftArtifactId={primaryDraft.id}
+                    workflowRunId={id}
+                    workflow={workflow}
                   />
-                </PanelCard>
+                ) : (
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+                    No draft artifact available for this workflow run.
+                  </p>
+                )}
+              </section>
+
+              <section>
+                <SectionTitle n="03">Revision History</SectionTitle>
+                {primaryDraft ? (
+                  <DraftRevisionHistory
+                    initialRevisions={initialRevisions}
+                  />
+                ) : (
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+                    No revisions yet.
+                  </p>
+                )}
               </section>
 
               <section>
@@ -199,7 +225,7 @@ export default async function DraftWorkspacePage({ params }: Props) {
             {/* ── Right: Inspector + secondary panels ── */}
             <div className="space-y-6" style={{ minWidth: 0 }}>
               <section>
-                <SectionTitle n="03">Verification Inspector</SectionTitle>
+                <SectionTitle n="05">Verification Inspector</SectionTitle>
                 <div style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
                   <VerificationInspector
                     reports={citationReports}

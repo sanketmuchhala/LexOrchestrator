@@ -19,6 +19,7 @@
     "smoke:workflow-eval": "tsx scripts/smoke-test-workflow-eval.ts",
     "smoke:mcp": "tsx scripts/smoke-test-mcp-tools.ts",
     "smoke:upload-intake": "tsx scripts/smoke-test-upload-intake.ts",
+    "smoke:draft-editor": "tsx scripts/smoke-test-draft-editor.ts",
     "smoke:citation-worker": "tsx scripts/smoke-test-citation-worker.ts",
     "smoke:citation-worker-direct": "tsx scripts/smoke-test-citation-worker-direct.ts",
     "smoke:demo-path": "tsx scripts/smoke-test-demo-path.ts",

@@ -872,6 +872,7 @@ export interface WorkflowArtifactRow {
   created_by_agent: string | null;
   created_at: string;
   metadata: Record<string, unknown>;
+  version?: number;
 }
 
 export interface WorkflowCitationReportRow {
@@ -946,7 +947,7 @@ export async function getLitigationWorkflowArtifacts(
 
   const { data, error } = await client
     .from("draft_artifacts")
-    .select("id, workflow_run_id, artifact_type, title, content, citations, verification_status, created_by_agent, created_at, metadata")
+    .select("id, workflow_run_id, artifact_type, title, content, citations, verification_status, created_by_agent, created_at, metadata, version")
     .eq("workflow_run_id", workflowRunId)
     .order("created_at", { ascending: true });
 
@@ -1135,4 +1136,120 @@ export async function insertCaseFileUploadRecord(data: {
 
   if (error) console.warn("[DB] insertCaseFileUploadRecord failed:", error.message);
   return id;
+}
+
+// ─── Draft revision tracking (Phase 16) ───────────────────────────────────────
+
+export interface DraftRevisionRow {
+  id: string;
+  workflowRunId: string;
+  draftArtifactId: string | null;
+  version: number;
+  content: string;
+  editSummary: string | null;
+  verificationStatus: string | null;
+  citationSummary: Record<string, unknown>;
+  createdBy: string;
+  createdAt: string;
+  metadata: Record<string, unknown>;
+}
+
+export async function updateDraftArtifactContent(
+  artifactId: string,
+  content: string,
+  newVersion: number
+): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const { error } = await client
+    .from("draft_artifacts")
+    .update({ content, version: newVersion })
+    .eq("id", artifactId);
+
+  if (error) console.warn("[DB] updateDraftArtifactContent failed:", error.message);
+}
+
+export async function updateDraftArtifactVerification(
+  artifactId: string,
+  verificationStatus: string,
+  citationSummary: Record<string, unknown>
+): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const { error } = await client
+    .from("draft_artifacts")
+    .update({ verification_status: verificationStatus, metadata: { citationSummary } })
+    .eq("id", artifactId);
+
+  if (error) console.warn("[DB] updateDraftArtifactVerification failed:", error.message);
+}
+
+export async function insertDraftRevisionRecord(data: {
+  workflowRunId: string;
+  draftArtifactId: string;
+  version: number;
+  content: string;
+  editSummary?: string;
+  verificationStatus?: string;
+  citationSummary?: Record<string, unknown>;
+  createdBy?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<string> {
+  const id = crypto.randomUUID();
+  const client = getClient();
+  if (!client) return id;
+
+  const { error } = await client.from("draft_revisions").insert({
+    id,
+    workflow_run_id: data.workflowRunId,
+    draft_artifact_id: data.draftArtifactId,
+    version: data.version,
+    content: data.content,
+    edit_summary: data.editSummary ?? null,
+    verification_status: data.verificationStatus ?? null,
+    citation_summary: data.citationSummary ?? {},
+    created_by: data.createdBy ?? "user",
+    metadata: data.metadata ?? {},
+  });
+
+  if (error) console.warn("[DB] insertDraftRevisionRecord failed:", error.message);
+  return id;
+}
+
+export async function getDraftRevisionsByArtifactId(
+  artifactId: string,
+  limit = 50
+): Promise<DraftRevisionRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("draft_revisions")
+    .select(
+      "id, workflow_run_id, draft_artifact_id, version, content, edit_summary, verification_status, citation_summary, created_by, created_at, metadata"
+    )
+    .eq("draft_artifact_id", artifactId)
+    .order("version", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.warn("[DB] getDraftRevisionsByArtifactId failed:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    workflowRunId: row.workflow_run_id as string,
+    draftArtifactId: row.draft_artifact_id as string | null,
+    version: row.version as number,
+    content: row.content as string,
+    editSummary: row.edit_summary as string | null,
+    verificationStatus: row.verification_status as string | null,
+    citationSummary: (row.citation_summary as Record<string, unknown>) ?? {},
+    createdBy: (row.created_by as string) ?? "user",
+    createdAt: row.created_at as string,
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
+  }));
 }

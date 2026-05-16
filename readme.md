@@ -14,6 +14,8 @@ This is a portfolio project demonstrating multi-agent orchestration, hybrid RAG 
 
 **Authority retrieval.** A hybrid RAG search over indexed court opinions combines keyword scoring (0.35), vector cosine similarity (0.45), and authority boosts for jurisdiction, court, citation presence, and recency.
 
+**Draft editing.** The draft workspace (`/draft/[id]`) is editable. Save a revision with Cmd/Ctrl+S or the Save button. Click "Save + Verify" to re-run citation verification on the edited text. Revision history is tracked and displayed.
+
 **Citation verification.** Every citation in the draft is checked against indexed opinions for existence, quote accuracy, pin cite, proposition support, and treatment status. An optional Python worker using eyecite can be enabled for improved extraction (see [workers/citation/README.md](workers/citation/README.md)); the app falls back to the built-in regex extractor when the worker is unavailable.
 
 **Judge brief.** If a judge name is provided, the system looks up cached profile data derived from indexed opinions and returns style notes, citation preferences, and argument guidance. Preparation signal only -- not outcome prediction.
