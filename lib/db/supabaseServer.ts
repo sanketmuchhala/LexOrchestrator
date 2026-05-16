@@ -1102,3 +1102,37 @@ export async function insertJudgeProfile(data: {
 
   if (error) console.warn("[DB] insertJudgeProfile failed:", error.message);
 }
+
+// ─── Case file uploads (Phase 13) ─────────────────────────────────────────────
+
+export async function insertCaseFileUploadRecord(data: {
+  workflowRunId?: string;
+  fileName: string;
+  fileType?: string;
+  fileSizeBytes?: number;
+  documentRole: string;
+  status: string;
+  extractedText: string | null;
+  extractionError: string | null;
+  metadata?: Record<string, unknown>;
+}): Promise<string> {
+  const id = crypto.randomUUID();
+  const client = getClient();
+  if (!client) return id;
+
+  const { error } = await client.from("case_file_uploads").insert({
+    id,
+    workflow_run_id: data.workflowRunId ?? null,
+    file_name: data.fileName,
+    file_type: data.fileType ?? null,
+    file_size_bytes: data.fileSizeBytes ?? null,
+    document_role: data.documentRole,
+    status: data.status,
+    extracted_text: data.extractedText,
+    extraction_error: data.extractionError,
+    metadata: data.metadata ?? {},
+  });
+
+  if (error) console.warn("[DB] insertCaseFileUploadRecord failed:", error.message);
+  return id;
+}

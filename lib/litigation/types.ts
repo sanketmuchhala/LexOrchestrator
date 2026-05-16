@@ -55,7 +55,7 @@ export interface DraftArtifactOutput {
   sections: DraftSection[];
   draftText: string;
   citations: string[];
-  artifactType: "motion_section" | "memo" | "red_team_memo" | "judge_brief" | "local_rules_check" | "full_draft" | "outline";
+  artifactType: "motion_section" | "memo" | "red_team_memo" | "judge_brief" | "local_rules_check" | "full_draft" | "outline" | "case_file_summary";
 }
 
 export interface CitationSummary {

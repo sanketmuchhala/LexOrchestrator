@@ -77,6 +77,62 @@ Documentation and positioning only. No product code changes.
 
 ---
 
+## Phase 13 Case File Upload Intake
+
+Adds upload intake supporting `.txt` and `.md` files. Uploaded content is treated as factual case material, not legal authority.
+
+### New modules
+
+| Path | Purpose |
+|---|---|
+| `lib/uploads/types.ts` | `CaseFileDocumentRole`, `CaseFileUploadInput`, `CaseFileUploadResult`, `ExtractedCaseFile` |
+| `lib/uploads/extractTextFromUpload.ts` | Text extraction: `extractTextFromUpload(File)`, `extractTextFromBuffer(ArrayBuffer, ...)`. Max 5 MB, max 100k chars. `.txt`/`.md` only. PDF/DOCX return `skipped` with a clear message. |
+| `lib/uploads/saveCaseFileUpload.ts` | Persists upload record to `case_file_uploads` table (requires migration 007). Gracefully returns ephemeral object when DB unavailable. |
+
+### DB changes (migration 007)
+
+- New table `case_file_uploads`: stores metadata and extracted text. No binary file storage.
+- `draft_artifacts.artifact_type` constraint updated to add `case_file_summary`.
+
+### API route
+
+`POST /api/uploads/case-file` -- multipart/form-data. Fields: `file` (required), `documentRole` (optional, default `case_file`), `workflowRunId` (optional).
+Returns `{ upload: CaseFileUploadResult, extractedText: string }`.
+Returns structured 400 for unsupported types, oversized files, missing file. No stack traces.
+
+### Agent changes
+
+- `intakeAgent.ts`: `uploadedText` removed from `missingInputs` (it is optional).
+- `draftingAgent.ts`: `buildFactsSection()` helper includes uploaded text with `[UPLOADED CASE MATERIAL]` label. LLM prompt includes up to 1,200 chars of uploaded text as factual source.
+- `runLitigationWorkflow.ts`: Step 3b saves `case_file_summary` artifact when `uploadedText` is present.
+- `getDraftWorkspace.ts`: `caseFileArtifact` field added to `DraftWorkspace`.
+
+### UI changes
+
+- `DraftLauncherForm.tsx`: file input, document role select, upload button, extracted text preview with character count. `uploadedText` passed to workflow on submit.
+- `CaseFilePanel.tsx`: new panel showing role, character count, truncation status, and preview of uploaded text.
+- `app/draft/[id]/page.tsx`: `CaseFilePanel` rendered as § 04c when `caseFileArtifact` is present.
+
+### Separation of concerns
+
+- Uploaded case files = factual/record source material
+- `legal_opinion_chunks` = legal authority for retrieval
+- The draft clearly labels uploaded content as `[UPLOADED CASE MATERIAL]`, not as cited authority.
+
+### Smoke command
+
+```bash
+npm run smoke:upload-intake   # extraction tests, size/type limit tests, workflow with uploadedText
+```
+
+### Limitations
+
+- `.txt` and `.md` only. PDF and DOCX are planned for a future phase.
+- File blobs are not stored; only extracted text and metadata.
+- Max 5 MB per file, max 100,000 extracted characters.
+
+---
+
 ## Design System — "Federal Court Documents meets Financial Terminal"
 
 True black aesthetic. Every new UI component must follow this:

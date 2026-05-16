@@ -18,6 +18,7 @@
     "smoke:local-rules": "tsx scripts/smoke-test-local-rules.ts",
     "smoke:workflow-eval": "tsx scripts/smoke-test-workflow-eval.ts",
     "smoke:mcp": "tsx scripts/smoke-test-mcp-tools.ts",
+    "smoke:upload-intake": "tsx scripts/smoke-test-upload-intake.ts",
     "smoke:demo-path": "tsx scripts/smoke-test-demo-path.ts",
     "mcp:server": "tsx mcp/server.ts",
     "check:safety": "tsx scripts/check-safety.ts",

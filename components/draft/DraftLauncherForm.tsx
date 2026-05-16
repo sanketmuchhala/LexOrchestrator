@@ -60,6 +60,25 @@ function Field({
   );
 }
 
+const DOCUMENT_ROLES = [
+  { value: "case_file",   label: "General Case File" },
+  { value: "complaint",   label: "Complaint" },
+  { value: "deposition",  label: "Deposition Transcript" },
+  { value: "affidavit",   label: "Affidavit" },
+  { value: "exhibit",     label: "Exhibit" },
+  { value: "motion",      label: "Prior Motion" },
+  { value: "other",       label: "Other" },
+];
+
+interface UploadState {
+  fileName: string;
+  extractedText: string;
+  characterCount: number;
+  truncated: boolean;
+  documentRole: string;
+  error: string | null;
+}
+
 export default function DraftLauncherForm() {
   const router = useRouter();
   const [running, setRunning] = useState(false);
@@ -73,6 +92,11 @@ export default function DraftLauncherForm() {
   const [facts, setFacts]               = useState("");
   const [desiredOutput, setDesiredOutput] = useState("");
 
+  const [uploadState, setUploadState] = useState<UploadState | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [documentRole, setDocumentRole] = useState("case_file");
+  const fileInputRef = useState<HTMLInputElement | null>(null);
+
   function loadDemo() {
     setMatterName("Aurora Analytics LLC v. Northstar Retail Systems");
     setMotionType(demoMotionType);
@@ -81,7 +105,62 @@ export default function DraftLauncherForm() {
     setJudgeName(demoJudgeName);
     setFacts(demoFacts);
     setDesiredOutput(demoDesiredOutput);
+    setUploadState(null);
     setError(null);
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadState(null);
+
+    const form = new FormData();
+    form.append("file", file);
+    form.append("documentRole", documentRole);
+
+    try {
+      const res = await fetch("/api/uploads/case-file", { method: "POST", body: form });
+      const data = await res.json() as {
+        upload?: { fileName: string; extractedTextLength: number; truncated: boolean };
+        extractedText?: string;
+        error?: string;
+      };
+
+      if (!res.ok || data.error) {
+        setUploadState({
+          fileName: file.name,
+          extractedText: "",
+          characterCount: 0,
+          truncated: false,
+          documentRole,
+          error: data.error ?? "Upload failed.",
+        });
+      } else {
+        setUploadState({
+          fileName: data.upload?.fileName ?? file.name,
+          extractedText: data.extractedText ?? "",
+          characterCount: data.upload?.extractedTextLength ?? 0,
+          truncated: data.upload?.truncated ?? false,
+          documentRole,
+          error: null,
+        });
+      }
+    } catch {
+      setUploadState({
+        fileName: file.name,
+        extractedText: "",
+        characterCount: 0,
+        truncated: false,
+        documentRole,
+        error: "Network error during upload.",
+      });
+    } finally {
+      setUploading(false);
+      // Reset file input so the same file can be re-uploaded if needed
+      e.target.value = "";
+    }
   }
 
   const query = [
@@ -115,6 +194,8 @@ export default function DraftLauncherForm() {
           judgeName: judgeName.trim() || undefined,
           facts: facts.trim(),
           desiredOutput: desiredOutput.trim() || undefined,
+          uploadedText: uploadState?.extractedText || undefined,
+          metadata: uploadState ? { documentRole: uploadState.documentRole } : undefined,
           workflowType: "motion_draft",
         }),
       });
@@ -210,6 +291,128 @@ export default function DraftLauncherForm() {
           required
         />
       </Field>
+
+      {/* ── Case file upload ─────────────────────────────────────────────── */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.25rem" }}>
+        <p className="label mb-3" style={{ letterSpacing: "0.18em" }}>
+          Case file (optional)
+        </p>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", marginBottom: "0.75rem" }}>
+          Upload a .txt or .md document. The extracted text is used as factual case material, not legal authority.
+        </p>
+
+        <div className="grid gap-3 md:grid-cols-2 mb-3">
+          <div>
+            <label className="label mb-1 block" style={{ letterSpacing: "0.14em" }}>
+              Document role
+            </label>
+            <select
+              value={documentRole}
+              onChange={(e) => setDocumentRole(e.target.value)}
+              disabled={uploading || running}
+              style={inputBase}
+            >
+              {DOCUMENT_ROLES.map((r) => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label mb-1 block" style={{ letterSpacing: "0.14em" }}>
+              File
+            </label>
+            <label
+              style={{
+                display: "block",
+                fontFamily: "var(--font-mono)",
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: uploading || running ? "#404040" : "#d4d4d4",
+                background: "#0a0a0a",
+                border: "1px solid rgba(255,255,255,0.08)",
+                padding: "0.5rem 0.75rem",
+                cursor: uploading || running ? "default" : "pointer",
+                userSelect: "none",
+              }}
+            >
+              {uploading ? "Uploading..." : "Choose file"}
+              <input
+                type="file"
+                accept=".txt,.md,.markdown"
+                disabled={uploading || running}
+                onChange={handleFileUpload}
+                ref={(el) => { fileInputRef[0] = el; }}
+                style={{ display: "none" }}
+              />
+            </label>
+          </div>
+        </div>
+
+        {uploadState && !uploadState.error && (
+          <div
+            style={{
+              border: "1px solid rgba(255,255,255,0.06)",
+              padding: "0.75rem",
+              marginTop: "0.5rem",
+            }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#f4f4f4" }}>
+                {uploadState.fileName}
+              </span>
+              <div className="flex items-center gap-2">
+                {uploadState.truncated && (
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#fbbf24" }}>
+                    truncated
+                  </span>
+                )}
+                <span className="badge badge-pass">extracted</span>
+                <button
+                  type="button"
+                  onClick={() => setUploadState(null)}
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "10px",
+                    color: "#737373",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  remove
+                </button>
+              </div>
+            </div>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", marginBottom: "0.5rem" }}>
+              {uploadState.characterCount.toLocaleString()} characters extracted
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--font-serif), Georgia, serif",
+                fontSize: "12px",
+                color: "#737373",
+                lineHeight: "1.6",
+                whiteSpace: "pre-wrap",
+                maxHeight: "5rem",
+                overflow: "hidden",
+              }}
+            >
+              {uploadState.extractedText.slice(0, 280)}
+              {uploadState.extractedText.length > 280 ? "..." : ""}
+            </p>
+          </div>
+        )}
+
+        {uploadState?.error && (
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#f87171", marginTop: "0.5rem" }}>
+            {uploadState.error}
+          </p>
+        )}
+      </div>
 
       {error && (
         <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#f87171" }}>
