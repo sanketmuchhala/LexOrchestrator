@@ -21,3 +21,9 @@ mirofish-endpoint.md
 # Private research and planning notes
 research/
 docs/private-notes/
+
+# Python virtual environments
+.venv/
+venv/
+__pycache__/
+*.pyc

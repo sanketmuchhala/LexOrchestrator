@@ -1,20 +1,20 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { extractCitations } from "@/lib/citations/extractCitations";
+import { extractCitationsWithBestAvailableProvider } from "@/lib/citations/citationExtractorAdapter";
 
 export function register(server: McpServer): void {
   server.registerTool(
     "extract_citations",
     {
       description:
-        "Extract U.S. legal citations from freeform text using regex patterns. Handles U.S., S. Ct., F.2d/3d/4th, F. Supp., N.Y., A.D., and Misc. reporters.",
+        "Extract U.S. legal citations from freeform text. Uses the eyecite worker when available (set CITATION_WORKER_URL), falls back to the built-in regex extractor. Each result includes extractorSource indicating which provider was used.",
       inputSchema: {
         text: z.string().min(1).describe("Legal text to extract citations from"),
       },
     },
     async ({ text }) => {
       try {
-        const citations = extractCitations(text);
+        const citations = await extractCitationsWithBestAvailableProvider(text);
         return {
           content: [
             {

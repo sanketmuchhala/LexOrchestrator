@@ -154,6 +154,25 @@ All tool callbacks return `{ content: [{ type: "text", text: JSON.stringify(...)
 
 ---
 
+## Citation Extraction Topology (Phase 15)
+
+All citation extraction is routed through `lib/citations/citationExtractorAdapter.ts`:
+
+```
+App code (route, agent, MCP tool)
+  → extractCitationsWithBestAvailableProvider(text)
+      ├── CITATION_WORKER_URL set?
+      │     ├── Yes → POST workers/citation/app.py /extract (2s timeout)
+      │     │           ├── Success → citations with extractorSource: "eyecite"
+      │     │           └── Failure → fall through to regex
+      │     └── No  → fall through to regex
+      └── extractCitations(text) → citations with extractorSource: "regex"
+```
+
+`CITATION_WORKER_URL` is the only env var needed to enable the eyecite path. When unset or when the worker is unreachable, the app uses the regex extractor silently. No crash, no configuration change required.
+
+Worker health: `GET /api/citations/worker-health`
+
 ## Key Files
 
 ```
@@ -164,8 +183,9 @@ lib/db/supabaseServer.ts                 All DB reads/writes (server-only)
 lib/types.ts                             Shared TypeScript interfaces
 lib/retrieval/searchLegalOpinions.ts     Hybrid RAG for litigation workflow
 lib/retrieval/searchLegalCorpus.ts       Hybrid RAG for legacy pipeline
-lib/citations/extractCitations.ts        Regex citation extractor
-lib/citations/verifyCitation.ts          Single citation verifier
+lib/citations/extractCitations.ts            Regex citation extractor (always available)
+lib/citations/citationExtractorAdapter.ts    Adapter: eyecite worker or regex fallback
+lib/citations/verifyCitation.ts              Single citation verifier
 lib/litigation/runLitigationWorkflow.ts  Eight-agent workflow entry point
 lib/litigation/evals/computeWorkflowEval.ts  Weighted confidence formula
 lib/litigation/localRules/               Static rules profiles

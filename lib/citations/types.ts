@@ -3,6 +3,8 @@
 
 // ─── Extraction ──────────────────────────────────────────────────────────────
 
+export type CitationExtractorSource = "eyecite" | "regex" | "fallback";
+
 export interface CitationExtractionResult {
   rawText: string;
   normalizedCitation: string;
@@ -10,6 +12,7 @@ export interface CitationExtractionResult {
   endIndex: number;
   surroundingText: string;
   confidence: number;
+  extractorSource?: CitationExtractorSource;
 }
 
 // ─── Verification input/output ───────────────────────────────────────────────
@@ -52,6 +55,7 @@ export interface CitationVerificationResult {
   matchedCaseName?: string;
   matchedCitation?: string;
   confidence: number;
+  extractorSource?: CitationExtractorSource;
   explanation: string;
   evidence: VerificationEvidence[];
   report: Record<string, unknown>;

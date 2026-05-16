@@ -57,7 +57,7 @@ Phases 0-12 are complete. This document covers the planned next phases.
 
 ---
 
-## Phase 16: Motion Editor
+## Phase 16: Motion Editor (Complete)
 
 **Goal:** Editable inline motion editor on the draft workspace.
 
