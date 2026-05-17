@@ -619,6 +619,7 @@ export async function insertLitigationWorkflowRun(data: {
   inputSummary?: string;
   userId?: string;
   organizationId?: string;
+  matterId?: string;
   metadata?: Record<string, unknown>;
 }): Promise<string> {
   const client = getClient();
@@ -636,6 +637,7 @@ export async function insertLitigationWorkflowRun(data: {
       input_summary: data.inputSummary ?? null,
       user_id: data.userId ?? null,
       organization_id: data.organizationId ?? null,
+      matter_id: data.matterId ?? null,
       metadata: data.metadata ?? {},
     })
     .select("id")
@@ -847,6 +849,7 @@ export interface WorkflowRunRow {
   confidence: number | null;
   faithfulness_score: number | null;
   citation_pass_rate: number | null;
+  matter_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -905,7 +908,7 @@ export async function listLitigationWorkflowRuns(limit = 50): Promise<WorkflowRu
 
   const { data, error } = await client
     .from("litigation_workflow_runs")
-    .select("id, workflow_type, status, jurisdiction, court, motion_type, input_summary, confidence, faithfulness_score, citation_pass_rate, created_at, updated_at")
+    .select("id, workflow_type, status, jurisdiction, court, motion_type, input_summary, confidence, faithfulness_score, citation_pass_rate, matter_id, created_at, updated_at")
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -922,7 +925,7 @@ export async function getLitigationWorkflowRun(id: string): Promise<WorkflowRunR
 
   const { data, error } = await client
     .from("litigation_workflow_runs")
-    .select("id, workflow_type, status, jurisdiction, court, motion_type, input_summary, final_output, confidence, faithfulness_score, citation_pass_rate, created_at, updated_at")
+    .select("id, workflow_type, status, jurisdiction, court, motion_type, input_summary, final_output, confidence, faithfulness_score, citation_pass_rate, matter_id, created_at, updated_at")
     .eq("id", id)
     .single();
 
@@ -1162,6 +1165,7 @@ export async function insertJudgeProfile(data: {
 
 export async function insertCaseFileUploadRecord(data: {
   workflowRunId?: string;
+  matterId?: string;
   fileName: string;
   fileType?: string;
   fileSizeBytes?: number;
@@ -1178,6 +1182,7 @@ export async function insertCaseFileUploadRecord(data: {
   const { error } = await client.from("case_file_uploads").insert({
     id,
     workflow_run_id: data.workflowRunId ?? null,
+    matter_id: data.matterId ?? null,
     file_name: data.fileName,
     file_type: data.fileType ?? null,
     file_size_bytes: data.fileSizeBytes ?? null,
@@ -1306,4 +1311,210 @@ export async function getDraftRevisionsByArtifactId(
     createdAt: row.created_at as string,
     metadata: (row.metadata as Record<string, unknown>) ?? {},
   }));
+}
+
+// ─── Matters (Phase 20) ───────────────────────────────────────────────────────
+
+export interface MatterRow {
+  id: string;
+  organization_id: string | null;
+  user_id: string | null;
+  title: string;
+  client_name: string | null;
+  matter_type: string | null;
+  jurisdiction: string | null;
+  court: string | null;
+  judge_id: string | null;
+  status: string;
+  description: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MatterFileRow {
+  id: string;
+  matter_id: string;
+  case_file_upload_id: string | null;
+  title: string;
+  file_role: string;
+  extracted_text_preview: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export async function insertMatterRecord(data: {
+  organizationId?: string;
+  userId?: string;
+  title: string;
+  clientName?: string;
+  matterType?: string;
+  jurisdiction?: string;
+  court?: string;
+  judgeId?: string;
+  description?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<string> {
+  const id = crypto.randomUUID();
+  const client = getClient();
+  if (!client) return id;
+
+  const { error } = await client.from("matters").insert({
+    id,
+    organization_id: data.organizationId ?? null,
+    user_id: data.userId ?? null,
+    title: data.title,
+    client_name: data.clientName ?? null,
+    matter_type: data.matterType ?? null,
+    jurisdiction: data.jurisdiction ?? null,
+    court: data.court ?? null,
+    judge_id: data.judgeId ?? null,
+    description: data.description ?? null,
+    metadata: data.metadata ?? {},
+  });
+
+  if (error) console.warn("[DB] insertMatterRecord failed:", error.message);
+  return id;
+}
+
+export async function updateMatterRecord(
+  id: string,
+  data: Partial<{
+    title: string;
+    clientName: string;
+    matterType: string;
+    jurisdiction: string;
+    court: string;
+    status: string;
+    description: string;
+    metadata: Record<string, unknown>;
+  }>
+): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const patch: Record<string, unknown> = {};
+  if (data.title !== undefined) patch.title = data.title;
+  if (data.clientName !== undefined) patch.client_name = data.clientName;
+  if (data.matterType !== undefined) patch.matter_type = data.matterType;
+  if (data.jurisdiction !== undefined) patch.jurisdiction = data.jurisdiction;
+  if (data.court !== undefined) patch.court = data.court;
+  if (data.status !== undefined) patch.status = data.status;
+  if (data.description !== undefined) patch.description = data.description;
+  if (data.metadata !== undefined) patch.metadata = data.metadata;
+
+  const { error } = await client.from("matters").update(patch).eq("id", id);
+  if (error) console.warn("[DB] updateMatterRecord failed:", error.message);
+}
+
+export async function getMatterById(id: string): Promise<MatterRow | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const { data, error } = await client
+    .from("matters")
+    .select("id, organization_id, user_id, title, client_name, matter_type, jurisdiction, court, judge_id, status, description, metadata, created_at, updated_at")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return null;
+  return { ...data, metadata: (data.metadata as Record<string, unknown>) ?? {} } as MatterRow;
+}
+
+export async function listMatterRecords(limit = 50): Promise<MatterRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("matters")
+    .select("id, organization_id, user_id, title, client_name, matter_type, jurisdiction, court, judge_id, status, description, metadata, created_at, updated_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.warn("[DB] listMatterRecords failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => ({
+    ...row,
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
+  })) as MatterRow[];
+}
+
+export async function getMatterWorkflowRuns(matterId: string): Promise<WorkflowRunRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("litigation_workflow_runs")
+    .select("id, workflow_type, status, jurisdiction, court, motion_type, input_summary, final_output, confidence, faithfulness_score, citation_pass_rate, matter_id, created_at, updated_at")
+    .eq("matter_id", matterId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.warn("[DB] getMatterWorkflowRuns failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as WorkflowRunRow[];
+}
+
+export async function getMatterFiles(matterId: string): Promise<MatterFileRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("matter_files")
+    .select("id, matter_id, case_file_upload_id, title, file_role, extracted_text_preview, metadata, created_at")
+    .eq("matter_id", matterId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.warn("[DB] getMatterFiles failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => ({
+    ...row,
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
+  })) as MatterFileRow[];
+}
+
+export async function insertMatterFile(data: {
+  matterId: string;
+  caseFileUploadId?: string;
+  title: string;
+  fileRole?: string;
+  extractedTextPreview?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<string> {
+  const id = crypto.randomUUID();
+  const client = getClient();
+  if (!client) return id;
+
+  const { error } = await client.from("matter_files").insert({
+    id,
+    matter_id: data.matterId,
+    case_file_upload_id: data.caseFileUploadId ?? null,
+    title: data.title,
+    file_role: data.fileRole ?? "case_file",
+    extracted_text_preview: data.extractedTextPreview ?? null,
+    metadata: data.metadata ?? {},
+  });
+
+  if (error) console.warn("[DB] insertMatterFile failed:", error.message);
+  return id;
+}
+
+export async function linkWorkflowRunToMatter(
+  workflowRunId: string,
+  matterId: string
+): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const { error } = await client
+    .from("litigation_workflow_runs")
+    .update({ matter_id: matterId })
+    .eq("id", workflowRunId);
+
+  if (error) console.warn("[DB] linkWorkflowRunToMatter failed:", error.message);
 }

@@ -20,6 +20,7 @@ export async function createWorkflowRun(
     inputSummary: input.query.slice(0, 500),
     userId: input.userId,
     organizationId: input.organizationId,
+    matterId: input.matterId,
     metadata: input.metadata ?? {},
   });
 

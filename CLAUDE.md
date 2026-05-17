@@ -425,6 +425,96 @@ npm run smoke:observability   # mock data tests + real DB if available
 
 ---
 
+## Phase 20 Matters and Saved Workspaces
+
+Adds a matter workspace layer that groups workflow runs, uploads, and drafts under a single named legal matter.
+
+### Auth state
+
+No auth is wired. `user_id` and `organization_id` on `matters` are nullable. The app remains fully demo-first. RLS uses service_role bypass (same pattern as litigation tables). Auth-gated per-user policies and Supabase Auth integration are future work.
+
+### Migration (`supabase/migrations/009_matters_workspaces.sql`)
+
+- New table `matters`: id, organization_id (nullable), user_id (nullable), title, client_name, matter_type, jurisdiction, court, judge_id (FK), status, description, metadata, timestamps
+- New table `matter_files`: id, matter_id, case_file_upload_id, title, file_role, extracted_text_preview
+- `matter_id` nullable FK added to: `litigation_workflow_runs`, `draft_artifacts`, `case_file_uploads`, `draft_revisions`
+- RLS enabled on both new tables; service_role-only policy (no open select for private matter data)
+
+### DB additions (`lib/db/supabaseServer.ts`)
+
+- `MatterRow`, `MatterFileRow` interfaces
+- `insertMatterRecord`, `updateMatterRecord`, `getMatterById`, `listMatterRecords`
+- `getMatterWorkflowRuns(matterId)`, `getMatterFiles(matterId)`, `insertMatterFile`
+- `linkWorkflowRunToMatter(workflowRunId, matterId)`
+- `matter_id` field added to `WorkflowRunRow`; both SELECT queries updated
+- `insertLitigationWorkflowRun` accepts `matterId`
+- `insertCaseFileUploadRecord` accepts `matterId`
+
+### Library (`lib/matters/`)
+
+| File | Purpose |
+|---|---|
+| `types.ts` | `Matter`, `MatterFile`, `MatterWorkspace`, `CreateMatterInput`, `UpdateMatterInput`, `MatterWorkflowSummary`, `MatterQualitySignals` |
+| `createMatter.ts` | Inserts matter; `buildEphemeralMatter` for no-DB context |
+| `getMatter.ts` | Fetches single matter by ID |
+| `listMatters.ts` | Lists matters newest-first |
+| `updateMatter.ts` | Updates matter fields |
+| `linkWorkflowToMatter.ts` | Sets matter_id on a workflow run |
+| `getMatterWorkspace.ts` | Loads matter + workflows + files + quality signals |
+
+### Workflow and upload linkage
+
+- `LitigationWorkflowInput` gains `matterId?: string`
+- `createWorkflowRun` passes it to `insertLitigationWorkflowRun`
+- `/api/litigation/workflows` accepts `matterId` in request body
+- `CaseFileUploadInput` gains `matterId?: string`
+- `saveCaseFileUpload` calls `insertMatterFile` automatically when `matterId` is set and extraction succeeded
+- `/api/uploads/case-file` accepts `matterId` as form field
+
+### Routes added
+
+| Route | Type | Purpose |
+|---|---|---|
+| `/matters` | Server | List matters |
+| `/matters/new` | Client | Create matter form |
+| `/matters/[id]` | Server | 6-section workspace |
+| `GET /api/matters` | API | List matters |
+| `POST /api/matters` | API | Create matter |
+| `GET /api/matters/[id]` | API | Workspace data |
+| `PATCH /api/matters/[id]` | API | Update matter |
+
+### Workspace sections (`/matters/[id]`)
+
+- § 01 Matter Summary -- title, client, type, jurisdiction, status, description
+- § 02 Start Draft Workflow -- compact launcher pre-filled with matter context, attaches matterId
+- § 03 Matter Files -- file upload + list of attached files
+- § 04 Drafts and Workflows -- all workflows with draft/inspection/eval/trace links
+- § 05 Recent Quality Signals -- confidence, citation pass rate, faithfulness from latest completed workflow
+- § 06 Notes -- matter description (shown only when present)
+
+### Components (`components/matters/`)
+
+`MatterListTable`, `MatterForm`, `MatterSummaryPanel`, `MatterDraftLauncher`, `MatterFilesPanel`, `MatterWorkflowTable`, `MatterQualityPanel`
+
+### Cross-links
+
+"Matter" link added to `/draft/[id]`, `/workflows/[id]`, `/evals/[id]`, `/traces/[id]` breadcrumbs when `workflow.matter_id` is set. "Matters" added to main navigation.
+
+### Smoke command
+
+```bash
+npm run smoke:matters   # ephemeral matter, createMatter, getMatterWorkspace, listMatters
+```
+
+### Limitations
+
+- Auth not wired; per-user data isolation is future work
+- No matter deletion (safe default -- would cascade to linked workflows/files)
+- No matter-level export or reporting
+- No collaboration (comments, sharing)
+
+---
+
 ## Design System — "Federal Court Documents meets Financial Terminal"
 
 True black aesthetic. Every new UI component must follow this:

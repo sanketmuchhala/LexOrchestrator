@@ -54,6 +54,7 @@ async function main() {
       "smoke:draft-export",
       "smoke:trace-builder",
       "smoke:observability",
+      "smoke:matters",
     ]) {
       report(scripts[script] ? "pass" : "fail", `script ${script}`, scripts[script] ?? "missing");
     }
@@ -77,6 +78,10 @@ async function main() {
   requireFile("observability page", "app/observability/page.tsx");
   requireFile("observability metrics", "lib/observability/metrics.ts");
   requireFile("buildWorkflowPerformance", "lib/observability/buildWorkflowPerformance.ts");
+  requireFile("matters list page", "app/matters/page.tsx");
+  requireFile("matters workspace page", "app/matters/[id]/page.tsx");
+  requireFile("matters migration", "supabase/migrations/009_matters_workspaces.sql");
+  requireFile("getMatterWorkspace", "lib/matters/getMatterWorkspace.ts");
 
   if (exists("lib/litigation/localRules/rules.ts")) {
     const rules = read("lib/litigation/localRules/rules.ts");

@@ -41,6 +41,15 @@ export default async function WorkflowDetailPage({ params }: Props) {
           &larr; Workflow Runs
         </Link>
         <div className="flex items-center gap-3">
+          {workflow?.matter_id && (
+            <Link
+              href={`/matters/${workflow.matter_id}`}
+              style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
+              className="transition-colors hover:text-white"
+            >
+              Matter &rarr;
+            </Link>
+          )}
           <Link
             href={`/draft/${id}`}
             style={{
