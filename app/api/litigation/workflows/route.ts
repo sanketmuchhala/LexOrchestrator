@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
     desiredOutput: typeof body.desiredOutput === "string" ? body.desiredOutput : undefined,
     userId: typeof body.userId === "string" ? body.userId : undefined,
     organizationId: typeof body.organizationId === "string" ? body.organizationId : undefined,
+    matterId: typeof body.matterId === "string" ? body.matterId : undefined,
     metadata:
       body.metadata !== null && typeof body.metadata === "object"
         ? (body.metadata as Record<string, unknown>)

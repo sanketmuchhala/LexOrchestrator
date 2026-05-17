@@ -36,6 +36,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     : "case_file";
 
   const workflowRunId = (formData.get("workflowRunId") as string | null) ?? undefined;
+  const matterId = (formData.get("matterId") as string | null) ?? undefined;
 
   let buffer: ArrayBuffer;
   try {
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         fileSizeBytes: file.size,
         documentRole,
         workflowRunId,
+        matterId,
       },
       extracted
     );

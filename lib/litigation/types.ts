@@ -44,6 +44,7 @@ export interface LitigationWorkflowInput {
   desiredOutput?: string;
   userId?: string;
   organizationId?: string;
+  matterId?: string;
   metadata?: Record<string, unknown>;
 }
 

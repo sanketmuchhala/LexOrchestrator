@@ -13,6 +13,7 @@ export interface CaseFileUploadInput {
   fileSizeBytes: number;
   documentRole: CaseFileDocumentRole;
   workflowRunId?: string;
+  matterId?: string;
 }
 
 export type CaseFileExtractionStatus = "extracted" | "error" | "skipped";

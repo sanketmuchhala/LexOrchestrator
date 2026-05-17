@@ -133,20 +133,26 @@ Phases 0-12 are complete. This document covers the planned next phases.
 
 ---
 
-## Phase 20: Auth, Matters, and Saved Workspaces
+## Phase 20: Matters and Saved Workspaces (Complete)
 
-**Goal:** User accounts, matter organization, and saved draft history.
+**Goal:** Matter workspace layer to organize workflows, uploads, drafts, and evaluations.
 
-**Why it matters:** The current system is single-user with no persistence beyond the DB. A production surface needs attorneys to log in, organize work by matter, and access prior drafts.
+**Why it matters:** Without matters, every workflow run is an isolated operation. Grouping by matter gives attorneys a workspace to track all work on a case in one place.
 
 **Deliverables:**
-- Supabase Auth integration (email/password or OAuth)
-- `matters` table: case name, docket number, jurisdiction, court, assigned attorneys
-- Draft and workflow runs scoped to matter and user
-- Matter dashboard: `/matters` and `/matters/[id]`
-- RLS policies enforcing user-scoped data access
+- `matters` and `matter_files` tables (migration 009)
+- `matter_id` nullable FK added to `litigation_workflow_runs`, `draft_artifacts`, `case_file_uploads`, `draft_revisions`
+- `/matters` list page, `/matters/new` create form, `/matters/[id]` workspace with 6 sections
+- `MatterDraftLauncher` client component pre-fills jurisdiction/court from matter and attaches `matterId` to workflow
+- `MatterFilesPanel` client component for uploading `.txt`/`.md` files to a matter
+- Upload and workflow API routes accept optional `matterId`
+- `saveCaseFileUpload` creates a `matter_files` row automatically when `matterId` is provided
+- "Matter" cross-link added to `/draft/[id]`, `/workflows/[id]`, `/evals/[id]`, `/traces/[id]`
+- "Matters" added to main navigation
+- Auth is not required -- `user_id` and `organization_id` remain nullable; demo mode fully supported
+- RLS uses service_role pattern matching existing tables; per-user policies are future work
 
-**Not included:** Clio/iManage integration, multi-tenant organizations, billing.
+**Not included:** Supabase Auth integration, RLS auth-gated policies, Clio/iManage integration, billing, collaboration.
 
 ---
 

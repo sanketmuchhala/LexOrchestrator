@@ -16,6 +16,8 @@ This is a portfolio project demonstrating multi-agent orchestration, hybrid RAG 
 
 **Draft editing.** The draft workspace (`/draft/[id]`) is editable. Save a revision with Cmd/Ctrl+S or the Save button. Click "Save + Verify" to re-run citation verification on the edited text. Revision history is tracked and displayed.
 
+**Matter workspaces.** `/matters` groups related workflow runs, uploads, and drafts under a single matter. Create a matter, launch draft workflows from it, upload case files, and view all quality signals in one place. Workflows and uploads automatically link to the matter when `matterId` is provided. Auth is not required -- `user_id` and `organization_id` are nullable. Auth-gated per-user policies are future work.
+
 **Observability dashboard.** `/observability` aggregates performance across recent workflow runs: p50/p95 duration, average token count, agent breakdown, and hotspots (slowest run, most failure-prone agent). Token and cost values depend on provider response data; estimates are labeled as such. No external tracing integration is active.
 
 **Agent trace.** Every workflow run has a trace view at `/traces/[id]`. The trace shows all agent events in chronological order with tool inputs, outputs, latency, and metadata. A per-agent breakdown shows which agents completed, failed, how long each took, and which artifacts each created. The § 06 Replay Snapshot records the context needed to reproduce or debug the run. Traces are read-only; replay execution is not active.
@@ -246,7 +248,7 @@ npm run check:all
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the phased plan through Phase 22.
 
-Completed through Phase 19 (Workflow Observability Dashboard). Next priorities:
+Completed through Phase 20 (Matters and Saved Workspaces). Next priorities:
 - Real CourtListener / CAP ingestion (Phase 14)
 - PDF and DOCX file upload for case files (planned)
 - Agent trace replay and debugging view (Phase 18)

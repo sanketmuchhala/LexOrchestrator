@@ -1,4 +1,4 @@
-import { insertCaseFileUploadRecord, DB_AVAILABLE } from "@/lib/db/supabaseServer";
+import { insertCaseFileUploadRecord, insertMatterFile, DB_AVAILABLE } from "@/lib/db/supabaseServer";
 import type { CaseFileUploadInput, CaseFileUploadResult, CaseFileExtractionStatus } from "./types";
 import type { ExtractedCaseFile } from "./types";
 
@@ -11,6 +11,7 @@ export async function saveCaseFileUpload(
 
   const id = await insertCaseFileUploadRecord({
     workflowRunId: input.workflowRunId,
+    matterId: input.matterId,
     fileName: input.fileName,
     fileType: input.fileType,
     fileSizeBytes: input.fileSizeBytes,
@@ -20,6 +21,16 @@ export async function saveCaseFileUpload(
     extractionError: extracted.extractionError ?? null,
     metadata: { truncated: extracted.truncated, characterCount: extracted.characterCount },
   });
+
+  if (input.matterId && status !== "error") {
+    await insertMatterFile({
+      matterId: input.matterId,
+      caseFileUploadId: id,
+      title: input.fileName,
+      fileRole: input.documentRole,
+      extractedTextPreview: preview || undefined,
+    });
+  }
 
   return {
     id,

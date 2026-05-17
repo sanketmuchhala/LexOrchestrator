@@ -66,6 +66,15 @@ export default async function TraceDetailPage({ params }: Props) {
           &larr; Workflows
         </Link>
         <div className="flex items-center gap-3 flex-wrap">
+          {trace.workflow?.matter_id && (
+            <Link
+              href={`/matters/${trace.workflow.matter_id}`}
+              style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
+              className="transition-colors hover:text-white"
+            >
+              Matter &rarr;
+            </Link>
+          )}
           <Link
             href={`/draft/${id}`}
             style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}

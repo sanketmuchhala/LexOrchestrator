@@ -236,6 +236,32 @@ The trace is read-only. Replay execution is not implemented. The `TraceTimeline.
 
 `getLitigationWorkflowEventsBatch` is a single `WHERE workflow_run_id IN (...)` query, avoiding N+1 round-trips for dashboard loads.
 
+---
+
+## Matter Workspace Topology (Phase 20)
+
+```
+/matters/[id] (server render)
+  -> getMatterWorkspace(matterId)
+       -> getMatterById(id)
+       -> getMatterWorkflowRuns(matterId)    // litigation_workflow_runs WHERE matter_id = id
+       -> getMatterFiles(matterId)           // matter_files WHERE matter_id = id
+       -> buildQualitySignals(workflows)     // derive from most recent completed workflow
+       -> MatterWorkspace { matter, workflows, files, qualitySignals }
+
+POST /api/litigation/workflows { matterId: "..." }
+  -> insertLitigationWorkflowRun with matter_id set
+
+POST /api/uploads/case-file (FormData with matterId)
+  -> insertCaseFileUploadRecord with matter_id set
+  -> insertMatterFile automatically when matterId present and extraction succeeded
+
+PATCH /api/matters/[id]
+  -> updateMatterRecord (title, status, description, etc.)
+```
+
+Auth is not wired. `user_id` and `organization_id` on `matters` are nullable. RLS uses service_role bypass (same pattern as other litigation tables). Auth-gated per-user policies are future work.
+
 ## Key Files
 
 ```
