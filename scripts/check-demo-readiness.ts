@@ -51,6 +51,7 @@ async function main() {
       "mcp:server",
       "check:demo",
       "smoke:demo-path",
+      "smoke:draft-export",
     ]) {
       report(scripts[script] ? "pass" : "fail", `script ${script}`, scripts[script] ?? "missing");
     }
@@ -63,6 +64,10 @@ async function main() {
   requireFile("citation text verifier", "lib/citations/verifyCitationsInText.ts");
   requireFile("eval computation", "lib/litigation/evals/computeWorkflowEval.ts");
   requireFile("MCP server entrypoint", "mcp/server.ts");
+  requireFile("PDF export module", "lib/exports/exportPdf.ts");
+  requireFile("DOCX export module", "lib/exports/exportDocx.ts");
+  requireFile("export API route", "app/api/drafts/[id]/export/route.ts");
+  requireFile("DraftExportControls", "components/draft/DraftExportControls.tsx");
 
   if (exists("lib/litigation/localRules/rules.ts")) {
     const rules = read("lib/litigation/localRules/rules.ts");

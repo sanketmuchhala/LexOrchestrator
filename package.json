@@ -23,6 +23,7 @@
     "smoke:citation-worker": "tsx scripts/smoke-test-citation-worker.ts",
     "smoke:citation-worker-direct": "tsx scripts/smoke-test-citation-worker-direct.ts",
     "smoke:demo-path": "tsx scripts/smoke-test-demo-path.ts",
+    "smoke:draft-export": "tsx scripts/smoke-test-draft-export.ts",
     "mcp:server": "tsx mcp/server.ts",
     "worker:citation": "uvicorn workers.citation.app:app --host 127.0.0.1 --port 8015",
     "check:safety": "tsx scripts/check-safety.ts",
@@ -32,8 +33,10 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@supabase/supabase-js": "^2.105.4",
+    "docx": "^9.6.1",
     "next": "^16.2.6",
     "openai": "^6.37.0",
+    "pdfkit": "^0.18.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -41,6 +44,7 @@
     "@eslint/eslintrc": "^3.3.5",
     "@types/dotenv": "^6.1.1",
     "@types/node": "^20",
+    "@types/pdfkit": "^0.17.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.5.0",

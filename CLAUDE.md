@@ -248,6 +248,56 @@ npm run smoke:draft-editor   # save revision, list history, verify citations, ed
 
 ---
 
+## Phase 17 Draft Export (PDF, DOCX, TXT)
+
+Adds server-side export of the latest saved draft revision to three formats. Content is pulled from the same priority chain used by the editor: latestRevision.content -> primaryDraft.content -> workflow.final_output.
+
+### New modules (`lib/exports/`)
+
+| Path | Purpose |
+|---|---|
+| `types.ts` | `ExportFormat`, `DraftExportOptions`, `DraftExportInput`, `DraftExportPayload`, `DraftExportResult`, `DocumentSection`, `CitationExportSummary` |
+| `buildDraftExportPayload.ts` | Calls `getDraftWorkspace` + `getEditableDraft` in parallel; parses content into `DocumentSection[]`; returns full payload |
+| `exportTxt.ts` | Synchronous Buffer; cover block + ruled separator + sections + optional appendices |
+| `exportDocx.ts` | Uses `docx` package; Times New Roman 12pt; `await Packer.toBuffer(doc)` |
+| `exportPdf.ts` | Uses `pdfkit` via dynamic import (server-only); LETTER size, 72pt margins, page numbers |
+| `exportDraft.ts` | Orchestrator; routes to format-specific exporter; builds fileName and mimeType |
+
+### API route
+
+`GET /api/drafts/[id]/export?format=(pdf|docx|txt)&includeMetadata=true&includeVerificationSummary=true&includeJudgeBrief=false&includeLocalRulesReview=false&includeAdversarialReview=false`
+
+Returns binary response with `Content-Disposition: attachment`. Returns 400 for invalid format, 500 on failure (no stack traces).
+
+### Component added
+
+`DraftExportControls.tsx` -- "use client"; three `<a href download>` anchor tags (PDF, DOCX, TXT); three checkboxes (Judge Brief, Local Rules, Adversarial); URL rebuilds on checkbox change via `useMemo`.
+
+### Draft workspace changes (`app/draft/[id]/page.tsx`)
+
+- Added § 04 Export (DraftExportControls) in left column, between Revision History and Authority Retrieved
+- Authority Retrieved renumbered from § 04 to § 05
+
+### Libraries used
+
+- `docx@9.6.1` -- `Packer.toBuffer()` returns `Promise<Buffer>` directly
+- `pdfkit@0.18.0` -- Node.js stream API; must not be imported on the client side
+- `@types/pdfkit@0.17.6`
+
+### Smoke command
+
+```bash
+npm run smoke:draft-export   # exportTxt/exportDocx/exportPdf directly + exportDraft orchestrator + MIME/fileName validation
+```
+
+### Limitations
+
+- Exports are demo-grade only; not guaranteed court-filing ready
+- pdfkit must remain server-side only (dynamic import)
+- Cover page and citation summary are always included; appendices are opt-in
+
+---
+
 ## Design System — "Federal Court Documents meets Financial Terminal"
 
 True black aesthetic. Every new UI component must follow this:

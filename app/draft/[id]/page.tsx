@@ -5,6 +5,7 @@ import { listDraftRevisions } from "@/lib/drafts/listDraftRevisions";
 import DraftWorkspaceHeader from "@/components/draft/DraftWorkspaceHeader";
 import EditableMotionEditor from "@/components/draft/EditableMotionEditor";
 import DraftRevisionHistory from "@/components/draft/DraftRevisionHistory";
+import DraftExportControls from "@/components/draft/DraftExportControls";
 import VerificationInspector from "@/components/draft/VerificationInspector";
 import AuthorityPanel from "@/components/draft/AuthorityPanel";
 import AdversarialReviewPanel from "@/components/draft/AdversarialReviewPanel";
@@ -217,7 +218,15 @@ export default async function DraftWorkspacePage({ params }: Props) {
               </section>
 
               <section>
-                <SectionTitle n="04">Authority Retrieved</SectionTitle>
+                <SectionTitle n="04">Export</SectionTitle>
+                <DraftExportControls
+                  workflowRunId={id}
+                  version={initialRevisions[0]?.version ?? primaryDraft?.version ?? 1}
+                />
+              </section>
+
+              <section>
+                <SectionTitle n="05">Authority Retrieved</SectionTitle>
                 <AuthorityPanel artifact={primaryDraft} />
               </section>
             </div>

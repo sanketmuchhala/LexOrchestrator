@@ -74,20 +74,22 @@ Phases 0-12 are complete. This document covers the planned next phases.
 
 ---
 
-## Phase 17: Export to PDF / DOCX
+## Phase 17: Export to PDF / DOCX (Complete)
 
-**Goal:** One-click export of the motion draft to PDF or DOCX.
+**Goal:** One-click export of the motion draft to PDF, DOCX, or TXT.
 
 **Why it matters:** Attorneys file in court, not in a browser. The output needs to leave the system in a format that can be filed, shared, or edited in Word.
 
 **Deliverables:**
-- PDF export via Puppeteer or `@react-pdf/renderer`
-- DOCX export via `docx` package
-- Correct legal document formatting: header, page numbers, case caption
-- Export button on `/draft/[id]`
-- Download via `/api/draft/[id]/export?format=pdf`
+- PDF export via `pdfkit` (LETTER, page numbers, cover block)
+- DOCX export via `docx` package (Times New Roman 12pt, HeadingLevel.HEADING_1 for sections)
+- TXT export (UTF-8, ruled separators, same content priority chain)
+- Optional appendices: citation verification summary, judge brief, local rules review, adversarial review
+- `DraftExportControls` component on `/draft/[id]` with checkboxes for appendices
+- Download via `GET /api/drafts/[id]/export?format=(pdf|docx|txt)`
+- Content pulled from latest saved revision; falls back to artifact content then workflow output
 
-**Not included:** E-filing integration, court-specific CM/ECF formatting.
+**Not included:** E-filing integration, court-specific CM/ECF formatting, rich-text preservation.
 
 ---
 
