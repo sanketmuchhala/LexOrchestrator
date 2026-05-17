@@ -36,8 +36,8 @@ export default async function RunDetailPage({ params }: Props) {
       <div className="mb-10 flex items-center justify-between">
         <Link
           href="/runs"
-          style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040", letterSpacing: "0.16em" }}
-          className="uppercase transition-colors hover:text-white"
+          style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)", letterSpacing: "0.16em" }}
+          className="uppercase transition-colors hover:text-black"
         >
           &larr; Research History
         </Link>
@@ -48,8 +48,8 @@ export default async function RunDetailPage({ params }: Props) {
             fontSize: "11px",
             fontWeight: 700,
             letterSpacing: "0.2em",
-            color: "#000",
-            background: "#f4f4f4",
+            color: "#000000",
+            background: "var(--text-1)",
             padding: "0.375rem 0.875rem",
             textDecoration: "none",
           }}
@@ -73,7 +73,7 @@ export default async function RunDetailPage({ params }: Props) {
             fontSize: "clamp(1.4rem, 3vw, 2rem)",
             fontWeight: 500,
             lineHeight: 1.45,
-            color: "#f4f4f4",
+            color: "var(--text-1)",
             letterSpacing: "-0.01em",
             maxWidth: "52rem",
           }}
@@ -84,7 +84,7 @@ export default async function RunDetailPage({ params }: Props) {
         {/* Meta strip */}
         <div
           className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.25rem" }}
+          style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "1.25rem" }}
         >
           {/* Status */}
           <span
@@ -143,7 +143,7 @@ export default async function RunDetailPage({ params }: Props) {
             <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span className="label">Model</span>
               <span
-                style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}
+                style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}
               >
                 {run.model}
               </span>
@@ -152,7 +152,7 @@ export default async function RunDetailPage({ params }: Props) {
 
           {/* Timestamp */}
           <span
-            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040", marginLeft: "auto" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)", marginLeft: "auto" }}
           >
             {new Date(run.created_at).toLocaleDateString("en-US", {
               month: "short", day: "numeric", year: "numeric",

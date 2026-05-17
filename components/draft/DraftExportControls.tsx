@@ -15,7 +15,7 @@ const btnBase: React.CSSProperties = {
   textTransform: "uppercase",
   textDecoration: "none",
   padding: "0.375rem 0.875rem",
-  border: "1px solid rgba(255,255,255,0.12)",
+  border: "1px solid rgba(0,0,0,0.12)",
   display: "inline-block",
   cursor: "pointer",
 };
@@ -33,8 +33,8 @@ function ExportLink({
       download
       style={{
         ...btnBase,
-        color: "#d4d4d4",
-        background: "#0a0a0a",
+        color: "var(--text-2)",
+        background: "var(--s1)",
       }}
     >
       {label}
@@ -60,7 +60,7 @@ function CheckOption({
         cursor: "pointer",
         fontFamily: "var(--font-mono), monospace",
         fontSize: "10px",
-        color: "#737373",
+        color: "var(--text-2)",
         letterSpacing: "0.12em",
         textTransform: "uppercase",
         userSelect: "none",
@@ -124,7 +124,7 @@ export default function DraftExportControls({ workflowRunId, version: _version }
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#404040",
+          color: "var(--text-3)",
           lineHeight: "1.5",
         }}
       >

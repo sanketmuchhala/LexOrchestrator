@@ -22,15 +22,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function SectionTitle({ n, children }: { n: string; children: string }) {
   return (
     <div className="mb-5 flex items-center gap-4">
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.2em" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.2em" }}>
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -57,11 +57,11 @@ export default async function TraceDetailPage({ params }: Props) {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "11px",
-            color: "#404040",
+            color: "var(--text-3)",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
           }}
-          className="transition-colors hover:text-white"
+          className="transition-colors hover:text-black"
         >
           &larr; Workflows
         </Link>
@@ -69,30 +69,30 @@ export default async function TraceDetailPage({ params }: Props) {
           {trace.workflow?.matter_id && (
             <Link
               href={`/matters/${trace.workflow.matter_id}`}
-              style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-              className="transition-colors hover:text-white"
+              style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+              className="transition-colors hover:text-black"
             >
               Matter &rarr;
             </Link>
           )}
           <Link
             href={`/draft/${id}`}
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-            className="transition-colors hover:text-white"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-black"
           >
             Draft Workspace &rarr;
           </Link>
           <Link
             href={`/workflows/${id}`}
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-            className="transition-colors hover:text-white"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-black"
           >
             Workflow Inspection &rarr;
           </Link>
           <Link
             href={`/evals/${id}`}
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-            className="transition-colors hover:text-white"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-black"
           >
             Eval &rarr;
           </Link>
@@ -101,18 +101,18 @@ export default async function TraceDetailPage({ params }: Props) {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
-              color: "#404040",
+              color: "var(--text-3)",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
-            className="transition-colors hover:text-white"
+            className="transition-colors hover:text-black"
           >
             Export TXT &rarr;
           </Link>
           <Link
             href="/observability"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-            className="transition-colors hover:text-white"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-black"
           >
             Observe &rarr;
           </Link>
@@ -128,24 +128,24 @@ export default async function TraceDetailPage({ params }: Props) {
             fontSize: "clamp(1.1rem, 2.5vw, 1.5rem)",
             fontWeight: 500,
             lineHeight: 1.5,
-            color: "#f4f4f4",
+            color: "var(--text-1)",
             maxWidth: "52rem",
             marginBottom: "0.5rem",
           }}
         >
           {trace.workflow?.input_summary ?? `Workflow ${id.slice(0, 8)}`}
         </h1>
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}>{id}</p>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}>{id}</p>
       </div>
 
       {noData ? (
         <div className="py-24 text-center">
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#737373" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-2)" }}>
             {process.env.NEXT_PUBLIC_SUPABASE_URL
               ? "Workflow run not found."
               : "Database not configured. Traces are not available without Supabase."}
           </p>
-          <p className="mt-2" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+          <p className="mt-2" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
             Run ID: {id}
           </p>
         </div>

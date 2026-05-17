@@ -79,17 +79,17 @@ export default function ResearchWorkspace() {
             placeholder="Describe the legal issue, jurisdiction, and specific question..."
             rows={5}
             maxLength={1200}
-            className="w-full resize-none bg-[#0a0a0a] px-4 py-4 text-sm leading-7 text-[#f4f4f4] placeholder-[#404040] outline-none transition"
+            className="w-full resize-none bg-[var(--s1)] px-4 py-4 text-sm leading-7 text-[var(--text-1)] placeholder-[var(--text-3)] outline-none transition"
             style={{
               fontFamily: "var(--font-mono), monospace",
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid rgba(0,0,0,0.09)",
               borderRadius: "2px",
             }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)")}
-            onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(0,0,0,0.18)")}
+            onBlur={(e)  => (e.currentTarget.style.borderColor = "rgba(0,0,0,0.09)")}
           />
           <div
-            className="mt-2 flex items-center justify-between text-[10px] text-[#404040]"
+            className="mt-2 flex items-center justify-between text-[10px] text-[var(--text-3)]"
             style={{ fontFamily: "var(--font-mono), monospace" }}
           >
             <span>CMD+ENTER to submit</span>
@@ -103,9 +103,9 @@ export default function ResearchWorkspace() {
           className="w-full py-3 text-xs font-bold uppercase tracking-[0.2em] transition-colors disabled:cursor-not-allowed"
           style={{
             fontFamily: "var(--font-mono), monospace",
-            background: query.trim().length >= 5 ? "#f4f4f4" : "#111111",
-            color: query.trim().length >= 5 ? "#000" : "#404040",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: query.trim().length >= 5 ? "var(--text-1)" : "var(--s2)",
+            color: query.trim().length >= 5 ? "#ffffff" : "var(--text-3)",
+            border: "1px solid rgba(0,0,0,0.09)",
             borderRadius: "2px",
           }}
         >
@@ -139,16 +139,16 @@ export default function ResearchWorkspace() {
               className="flex w-full items-start gap-5 px-4 py-3.5 text-left transition-colors"
               style={{
                 fontFamily: "var(--font-mono), monospace",
-                background: "#0a0a0a",
+                background: "var(--s1)",
                 border: "none",
-                borderBottom: "1px solid rgba(255,255,255,0.04)",
+                borderBottom: "1px solid rgba(0,0,0,0.05)",
                 cursor: "pointer",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#111111")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#0a0a0a")}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--s2)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--s1)")}
             >
-              <span className="shrink-0 text-[11px] font-bold text-[#404040]">{n}</span>
-              <span className="text-xs leading-5 text-[#737373]">{q}</span>
+              <span className="shrink-0 text-[11px] font-bold text-[var(--text-3)]">{n}</span>
+              <span className="text-xs leading-5 text-[var(--text-2)]">{q}</span>
             </button>
           ))}
         </div>

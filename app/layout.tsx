@@ -29,8 +29,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${ibmPlexMono.variable} ${ebGaramond.variable}`}
     >
       <body
-        className="bg-black text-[#f4f4f4] antialiased"
-        style={{ fontFamily: "var(--font-mono), 'Courier New', monospace" }}
+        className="antialiased"
+        style={{ background: "var(--bg)", color: "var(--text-1)", fontFamily: "var(--font-mono), 'Courier New', monospace" }}
       >
         <Navigation />
         <main className="mx-auto max-w-5xl px-6 pb-32 pt-0">

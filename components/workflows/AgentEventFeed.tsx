@@ -10,18 +10,18 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#404040",
+          color: "var(--text-3)",
           letterSpacing: "0.2em",
         }}
       >
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -37,7 +37,7 @@ function eventTypeColor(eventType: string): string {
   if (eventType === "run_failed") return "#f87171";
   if (eventType === "tool_call" || eventType === "tool_result") return "#60a5fa";
   if (eventType === "draft_chunk") return "#fbbf24";
-  return "#404040";
+  return "var(--text-3)";
 }
 
 function eventTypeBadge(eventType: string): string {
@@ -99,17 +99,21 @@ export default function AgentEventFeed({
       </SectionTitle>
 
       {isLive && polling && (
-        <div
-          className="mb-4 flex items-center gap-2"
-          style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#737373" }}
-        >
-          <span className="pulse-dot" />
-          Polling every 2.5 s
+        <div className="mb-6 flex flex-col items-center gap-3 py-4">
+          <div className="relative flex items-center justify-center" style={{ width: 72, height: 72 }}>
+            <div className="agent-orb" style={{ width: 48, height: 48 }} aria-hidden="true" />
+            <div className="agent-orb-ring" style={{ inset: "-12px", animationDelay: "0s" }} aria-hidden="true" />
+            <div className="agent-orb-ring" style={{ inset: "-12px", animationDelay: "0.55s" }} aria-hidden="true" />
+            <div className="agent-orb-ring" style={{ inset: "-12px", animationDelay: "1.1s" }} aria-hidden="true" />
+          </div>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+            Agents thinking...
+          </p>
         </div>
       )}
 
       {events.length === 0 ? (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
           No agent events recorded.
         </p>
       ) : (
@@ -129,7 +133,7 @@ export default function AgentEventFeed({
                   borderLeft: `2px solid ${lineColor}`,
                   borderBottom: isLast
                     ? "none"
-                    : "1px solid rgba(255,255,255,0.04)",
+                    : "1px solid rgba(0,0,0,0.05)",
                 }}
               >
                 {/* Agent name */}
@@ -139,7 +143,7 @@ export default function AgentEventFeed({
                       fontFamily: "var(--font-mono)",
                       fontSize: "11px",
                       fontWeight: 600,
-                      color: "#737373",
+                      color: "var(--text-2)",
                     }}
                   >
                     {ev.agent_name}
@@ -149,7 +153,7 @@ export default function AgentEventFeed({
                       style={{
                         fontFamily: "var(--font-mono)",
                         fontSize: "10px",
-                        color: "#404040",
+                        color: "var(--text-3)",
                         marginTop: "2px",
                       }}
                     >
@@ -168,7 +172,7 @@ export default function AgentEventFeed({
                       style={{
                         fontFamily: "var(--font-mono)",
                         fontSize: "10px",
-                        color: "#404040",
+                        color: "var(--text-3)",
                         marginTop: "4px",
                       }}
                     >
@@ -180,7 +184,7 @@ export default function AgentEventFeed({
                       style={{
                         fontFamily: "var(--font-mono)",
                         fontSize: "10px",
-                        color: "#404040",
+                        color: "var(--text-3)",
                         marginTop: "2px",
                       }}
                     >
@@ -197,7 +201,7 @@ export default function AgentEventFeed({
                         fontFamily: "var(--font-serif), Georgia, serif",
                         fontSize: "13px",
                         lineHeight: "1.6",
-                        color: "#a3a3a3",
+                        color: "var(--text-2)",
                       }}
                     >
                       {ev.message}
@@ -208,7 +212,7 @@ export default function AgentEventFeed({
                       style={{
                         fontFamily: "var(--font-mono)",
                         fontSize: "10px",
-                        color: "#404040",
+                        color: "var(--text-3)",
                         marginTop: "2px",
                       }}
                     >

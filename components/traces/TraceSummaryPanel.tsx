@@ -3,11 +3,11 @@ import type { WorkflowRunRow } from "@/lib/db/supabaseServer";
 
 function statCell(label: string, value: string | number) {
   return (
-    <div style={{ borderRight: "1px solid rgba(255,255,255,0.06)", paddingRight: "1.25rem", marginRight: "1.25rem" }}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "0.25rem" }}>
+    <div style={{ borderRight: "1px solid rgba(0,0,0,0.07)", paddingRight: "1.25rem", marginRight: "1.25rem" }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "0.25rem" }}>
         {label}
       </div>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: "18px", color: "#f4f4f4", fontWeight: 700 }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: "18px", color: "var(--text-1)", fontWeight: 700 }}>
         {value}
       </div>
     </div>
@@ -40,23 +40,23 @@ export default function TraceSummaryPanel({ workflow, summary, snapshot }: Props
     : "N/A";
 
   return (
-    <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
+    <div style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "1.25rem" }}>
       <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#737373" }}>Status</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)" }}>Status</span>
         {statusBadge(snapshot.status)}
         {workflow?.motion_type && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}>
             {workflow.motion_type.replace(/_/g, " ")}
           </span>
         )}
         {workflow?.jurisdiction && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}>
             {workflow.jurisdiction}
           </span>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-0" style={{ borderLeft: "1px solid rgba(255,255,255,0.06)", paddingLeft: "1.25rem", marginLeft: "0" }}>
+      <div className="flex flex-wrap gap-0" style={{ borderLeft: "1px solid rgba(0,0,0,0.07)", paddingLeft: "1.25rem", marginLeft: "0" }}>
         {statCell("Events", summary.totalEvents)}
         {statCell("Agents Seen", summary.agentsSeen.length)}
         {statCell("Completed", summary.agentsCompleted.length)}
@@ -80,8 +80,8 @@ export default function TraceSummaryPanel({ workflow, summary, snapshot }: Props
       )}
 
       {summary.slowestAgent && (
-        <p style={{ marginTop: "0.75rem", fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}>
-          Slowest agent: <span style={{ color: "#737373" }}>{summary.slowestAgent}</span>
+        <p style={{ marginTop: "0.75rem", fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}>
+          Slowest agent: <span style={{ color: "var(--text-2)" }}>{summary.slowestAgent}</span>
         </p>
       )}
     </div>

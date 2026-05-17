@@ -55,7 +55,7 @@ function CitationCard({ report }: { report: WorkflowCitationReportRow }) {
     <div
       style={{
         padding: "0.75rem",
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
+        borderBottom: "1px solid rgba(0,0,0,0.05)",
       }}
     >
       <div className="mb-1.5 flex items-start justify-between gap-2">
@@ -92,7 +92,7 @@ function DraftCitationCard({ citation }: { citation: string }) {
     <div
       style={{
         padding: "0.625rem 0.75rem",
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
+        borderBottom: "1px solid rgba(0,0,0,0.05)",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -138,9 +138,9 @@ export default function VerificationInspector({
       {hasReports && (
         <div
           className="mb-3 flex flex-wrap gap-3 px-3 py-2"
-          style={{ background: "#0a0a0a", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ background: "var(--s1)", borderBottom: "1px solid rgba(0,0,0,0.07)" }}
         >
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#737373" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)" }}>
             {reports.length} citation{reports.length !== 1 ? "s" : ""} checked
           </span>
           {(() => {
@@ -172,7 +172,7 @@ export default function VerificationInspector({
         <div>
           <p
             className="px-3 py-2"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
           >
             Citations found in draft — not verified against indexed opinions.
           </p>
@@ -185,13 +185,13 @@ export default function VerificationInspector({
       {isEmpty && (
         <div className="py-8 text-center">
           <p
-            style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}
           >
             No citations detected in this draft.
           </p>
           <p
             className="mt-1"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
           >
             Citation verification runs when the draft contains recognizable legal citations.
           </p>

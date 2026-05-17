@@ -84,7 +84,7 @@ function CitationList({ citations }: { citations: Record<string, unknown>[] }) {
   return (
     <div
       className="mt-8 pt-6"
-      style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
     >
       <p className="label mb-3">Citations Referenced</p>
       <div className="flex flex-wrap gap-2">
@@ -104,7 +104,7 @@ function renderBlock(block: Block, i: number, isFirst: boolean) {
         style={{
           marginTop: isFirst ? 0 : "2.25rem",
           paddingTop: isFirst ? 0 : "1.5rem",
-          borderTop: isFirst ? "none" : "1px solid rgba(255,255,255,0.06)",
+          borderTop: isFirst ? "none" : "1px solid rgba(0,0,0,0.07)",
         }}
       >
         <p
@@ -113,7 +113,7 @@ function renderBlock(block: Block, i: number, isFirst: boolean) {
             fontSize: "10px",
             fontWeight: 700,
             letterSpacing: "0.22em",
-            color: "#737373",
+            color: "var(--text-2)",
             textTransform: "uppercase",
           }}
         >
@@ -132,7 +132,7 @@ function renderBlock(block: Block, i: number, isFirst: boolean) {
           fontSize: "11px",
           fontWeight: 600,
           letterSpacing: "0.1em",
-          color: "#737373",
+          color: "var(--text-2)",
           marginTop: "1.25rem",
         }}
       >
@@ -149,7 +149,7 @@ function renderBlock(block: Block, i: number, isFirst: boolean) {
           fontFamily: "var(--font-mono)",
           fontSize: "11px",
           lineHeight: "1.65",
-          color: "#404040",
+          color: "var(--text-3)",
           padding: "0.5rem 0.875rem",
           borderLeft: "2px solid rgba(251,191,36,0.3)",
           background: "rgba(251,191,36,0.03)",
@@ -167,7 +167,7 @@ function renderBlock(block: Block, i: number, isFirst: boolean) {
         fontFamily: "var(--font-serif), Georgia, serif",
         fontSize: "15.5px",
         lineHeight: "1.9",
-        color: "#d4d4d4",
+        color: "var(--text-2)",
         letterSpacing: "0.01em",
       }}
     >
@@ -192,9 +192,9 @@ export default function DocumentPreview({
     return (
       <div
         className="flex items-center justify-center py-16"
-        style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ border: "1px solid rgba(0,0,0,0.07)" }}
       >
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
           No draft artifact recorded for this workflow run.
         </p>
       </div>

@@ -16,11 +16,11 @@ export default function NewMatterPage() {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "11px",
-            color: "#404040",
+            color: "var(--text-3)",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
           }}
-          className="transition-colors hover:text-white"
+          className="transition-colors hover:text-black"
         >
           &larr; Matters
         </Link>
@@ -29,13 +29,13 @@ export default function NewMatterPage() {
       <div className="mb-8">
         <p className="label mb-2" style={{ letterSpacing: "0.28em" }}>New</p>
         <h1
-          className="text-3xl font-semibold tracking-tight text-[#f4f4f4]"
+          className="text-3xl font-semibold tracking-tight text-[var(--text-1)]"
           style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
         >
           Create Matter
         </h1>
         <p
-          className="mt-2 text-xs text-[#737373]"
+          className="mt-2 text-xs text-[var(--text-2)]"
           style={{ fontFamily: "var(--font-mono), monospace" }}
         >
           Create a matter workspace to organize workflows, uploads, and drafts for a legal matter.

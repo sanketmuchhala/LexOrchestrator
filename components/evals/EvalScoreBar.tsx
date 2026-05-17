@@ -37,7 +37,7 @@ export default function EvalScoreBar({
       <div
         style={{
           height: "2px",
-          background: "rgba(255,255,255,0.06)",
+          background: "rgba(0,0,0,0.07)",
           position: "relative",
           overflow: "hidden",
         }}

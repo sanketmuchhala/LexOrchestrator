@@ -32,11 +32,11 @@ export default async function WorkflowDetailPage({ params }: Props) {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "11px",
-            color: "#404040",
+            color: "var(--text-3)",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
           }}
-          className="transition-colors hover:text-white"
+          className="transition-colors hover:text-black"
         >
           &larr; Workflow Runs
         </Link>
@@ -44,8 +44,8 @@ export default async function WorkflowDetailPage({ params }: Props) {
           {workflow?.matter_id && (
             <Link
               href={`/matters/${workflow.matter_id}`}
-              style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-              className="transition-colors hover:text-white"
+              style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+              className="transition-colors hover:text-black"
             >
               Matter &rarr;
             </Link>
@@ -55,11 +55,11 @@ export default async function WorkflowDetailPage({ params }: Props) {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
-              color: "#404040",
+              color: "var(--text-3)",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
-            className="transition-colors hover:text-white"
+            className="transition-colors hover:text-black"
           >
             Draft Workspace &rarr;
           </Link>
@@ -68,11 +68,11 @@ export default async function WorkflowDetailPage({ params }: Props) {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
-              color: "#404040",
+              color: "var(--text-3)",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
-            className="transition-colors hover:text-white"
+            className="transition-colors hover:text-black"
           >
             Eval &rarr;
           </Link>
@@ -81,11 +81,11 @@ export default async function WorkflowDetailPage({ params }: Props) {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
-              color: "#404040",
+              color: "var(--text-3)",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
-            className="transition-colors hover:text-white"
+            className="transition-colors hover:text-black"
           >
             Trace &rarr;
           </Link>
@@ -96,8 +96,8 @@ export default async function WorkflowDetailPage({ params }: Props) {
               fontSize: "11px",
               fontWeight: 700,
               letterSpacing: "0.2em",
-              color: "#000",
-              background: "#f4f4f4",
+              color: "#000000",
+              background: "var(--text-1)",
               padding: "0.375rem 0.875rem",
               textTransform: "uppercase",
               textDecoration: "none",
@@ -112,7 +112,7 @@ export default async function WorkflowDetailPage({ params }: Props) {
       {workflow === null ? (
         <div className="py-24 text-center">
           <p
-            style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#737373" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-2)" }}
           >
             {process.env.NEXT_PUBLIC_SUPABASE_URL
               ? "Workflow run not found."
@@ -120,7 +120,7 @@ export default async function WorkflowDetailPage({ params }: Props) {
           </p>
           <p
             className="mt-2"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}
           >
             Run ID: {id}
           </p>
@@ -138,7 +138,7 @@ export default async function WorkflowDetailPage({ params }: Props) {
                 fontSize: "clamp(1.1rem, 2.5vw, 1.6rem)",
                 fontWeight: 500,
                 lineHeight: 1.5,
-                color: "#f4f4f4",
+                color: "var(--text-1)",
                 maxWidth: "52rem",
               }}
             >
@@ -146,7 +146,7 @@ export default async function WorkflowDetailPage({ params }: Props) {
             </h1>
             <p
               className="mt-2"
-              style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}
+              style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}
             >
               {workflow.id}
             </p>

@@ -18,7 +18,7 @@ function passFailLabel(confidence: number | null): string {
 }
 
 function scoreColor(v: number | null): string {
-  if (v == null) return "#404040";
+  if (v == null) return "var(--text-3)";
   if (v >= 0.7) return "#34d399";
   if (v >= 0.4) return "#fbbf24";
   return "#f87171";
@@ -40,25 +40,25 @@ function EvalRow({ run }: { run: WorkflowRunRow }) {
     <tr
       onClick={() => router.push(`/evals/${run.id}`)}
       className="cursor-pointer"
-      style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "#0a0a0a")}
+      style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--s1)")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
       <td
         className="py-3.5 pr-5 align-top"
-        style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373", whiteSpace: "nowrap" }}
+        style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)", whiteSpace: "nowrap" }}
       >
         {shortDate(run.created_at)}
       </td>
       <td className="py-3.5 pr-5 align-top">
         <p
-          style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+          style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
         >
           {run.id.slice(0, 8)}
         </p>
         {run.motion_type && (
           <p
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#737373", marginTop: "2px" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)", marginTop: "2px" }}
           >
             {run.motion_type.replace(/_/g, " ")}
           </p>
@@ -66,7 +66,7 @@ function EvalRow({ run }: { run: WorkflowRunRow }) {
       </td>
       <td
         className="hidden py-3.5 pr-5 align-top md:table-cell"
-        style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}
+        style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}
       >
         {run.jurisdiction ?? "—"}
         {run.court ? ` / ${run.court}` : ""}
@@ -84,7 +84,7 @@ function EvalRow({ run }: { run: WorkflowRunRow }) {
             {Math.round(run.confidence * 100)}%
           </span>
         ) : (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>—</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>—</span>
         )}
       </td>
       <td className="hidden py-3.5 pr-5 text-right align-top lg:table-cell tabular-nums">
@@ -99,7 +99,7 @@ function EvalRow({ run }: { run: WorkflowRunRow }) {
             {Math.round(run.citation_pass_rate * 100)}%
           </span>
         ) : (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>—</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>—</span>
         )}
       </td>
       <td className="py-3.5 text-center align-top">
@@ -114,7 +114,7 @@ function EvalRow({ run }: { run: WorkflowRunRow }) {
 export default function RecentEvalTable({ runs }: { runs: WorkflowRunRow[] }) {
   if (runs.length === 0) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
         No workflow runs recorded.
       </p>
     );
@@ -123,7 +123,7 @@ export default function RecentEvalTable({ runs }: { runs: WorkflowRunRow[] }) {
   return (
     <table className="w-full border-collapse">
       <thead>
-        <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
           <th className="pb-3 pr-5 text-left"><span className="label">Date</span></th>
           <th className="pb-3 pr-5 text-left"><span className="label">Run</span></th>
           <th className="hidden pb-3 pr-5 text-left md:table-cell"><span className="label">Jurisdiction</span></th>

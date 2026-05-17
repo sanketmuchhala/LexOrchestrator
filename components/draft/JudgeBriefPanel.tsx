@@ -20,9 +20,9 @@ function GuidanceList({ items }: { items: string[] }) {
             fontFamily: "var(--font-serif), Georgia, serif",
             fontSize: "13px",
             lineHeight: "1.7",
-            color: "#a3a3a3",
+            color: "var(--text-2)",
             paddingLeft: "1rem",
-            borderLeft: "2px solid rgba(255,255,255,0.06)",
+            borderLeft: "2px solid rgba(0,0,0,0.07)",
           }}
         >
           {item.replace(/^\[DEMO FIXTURE DATA\]\s*/i, "")}
@@ -55,7 +55,7 @@ function JudgeBriefContent({ brief }: { brief: JudgeBriefResult }) {
       {/* Judge identity */}
       <div
         className="mb-4 pb-4"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
       >
         <div className="flex flex-wrap items-center gap-2 mb-2">
           <span className={`badge ${matchStatusBadge(brief.matchStatus)}`}>
@@ -69,7 +69,7 @@ function JudgeBriefContent({ brief }: { brief: JudgeBriefResult }) {
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "10px",
-                color: "#404040",
+                color: "var(--text-3)",
               }}
             >
               {brief.sourceOpinionCount} opinion
@@ -84,7 +84,7 @@ function JudgeBriefContent({ brief }: { brief: JudgeBriefResult }) {
               fontFamily: "var(--font-serif), Georgia, serif",
               fontSize: "15px",
               fontWeight: 500,
-              color: "#f4f4f4",
+              color: "var(--text-1)",
             }}
           >
             {brief.judgeName}
@@ -95,7 +95,7 @@ function JudgeBriefContent({ brief }: { brief: JudgeBriefResult }) {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "11px",
-              color: "#737373",
+              color: "var(--text-2)",
               marginTop: "2px",
             }}
           >
@@ -106,7 +106,7 @@ function JudgeBriefContent({ brief }: { brief: JudgeBriefResult }) {
         {brief.confidence > 0 && (
           <p
             className="mt-2"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
           >
             Confidence: {Math.round(brief.confidence * 100)}%
           </p>
@@ -115,7 +115,7 @@ function JudgeBriefContent({ brief }: { brief: JudgeBriefResult }) {
 
       {/* Not found / not requested */}
       {(brief.matchStatus === "not_found" || brief.matchStatus === "not_requested") && (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
           {brief.matchStatus === "not_requested"
             ? "No judge was specified for this workflow run."
             : `Judge profile unavailable. The workflow continued without judge-specific guidance.`}
@@ -166,7 +166,7 @@ function JudgeBriefContent({ brief }: { brief: JudgeBriefResult }) {
       {brief.limitations.length > 0 && (
         <div
           className="mt-4 pt-3"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
+          style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
         >
           <p className="label mb-1" style={{ fontSize: "9px" }}>
             Limitations
@@ -177,7 +177,7 @@ function JudgeBriefContent({ brief }: { brief: JudgeBriefResult }) {
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "10px",
-                color: "#404040",
+                color: "var(--text-3)",
                 lineHeight: "1.6",
               }}
             >
@@ -197,7 +197,7 @@ export default function JudgeBriefPanel({
 }) {
   if (!artifact) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
         No Judge Brief was generated for this workflow. Provide a judge name or ID when
         launching the draft to enable judge-specific preparation.
       </p>
@@ -211,7 +211,7 @@ export default function JudgeBriefPanel({
 
   if (!brief) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
         Judge Brief artifact exists but structured data is unavailable.
       </p>
     );

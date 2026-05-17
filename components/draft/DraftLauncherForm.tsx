@@ -23,9 +23,9 @@ const MOTION_TYPES = [
 const inputBase: React.CSSProperties = {
   fontFamily: "var(--font-mono), monospace",
   fontSize: "12px",
-  color: "#f4f4f4",
-  background: "#0a0a0a",
-  border: "1px solid rgba(255,255,255,0.08)",
+  color: "var(--text-1)",
+  background: "var(--s1)",
+  border: "1px solid rgba(0,0,0,0.09)",
   padding: "0.5rem 0.75rem",
   width: "100%",
   outline: "none",
@@ -293,11 +293,11 @@ export default function DraftLauncherForm() {
       </Field>
 
       {/* ── Case file upload ─────────────────────────────────────────────── */}
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.25rem" }}>
+      <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "1.25rem" }}>
         <p className="label mb-3" style={{ letterSpacing: "0.18em" }}>
           Case file (optional)
         </p>
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", marginBottom: "0.75rem" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", marginBottom: "0.75rem" }}>
           Upload a .txt or .md document. The extracted text is used as factual case material, not legal authority.
         </p>
 
@@ -330,9 +330,9 @@ export default function DraftLauncherForm() {
                 fontWeight: 700,
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
-                color: uploading || running ? "#404040" : "#d4d4d4",
-                background: "#0a0a0a",
-                border: "1px solid rgba(255,255,255,0.08)",
+                color: uploading || running ? "var(--text-3)" : "var(--text-2)",
+                background: "var(--s1)",
+                border: "1px solid rgba(0,0,0,0.09)",
                 padding: "0.5rem 0.75rem",
                 cursor: uploading || running ? "default" : "pointer",
                 userSelect: "none",
@@ -354,13 +354,13 @@ export default function DraftLauncherForm() {
         {uploadState && !uploadState.error && (
           <div
             style={{
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: "1px solid rgba(0,0,0,0.07)",
               padding: "0.75rem",
               marginTop: "0.5rem",
             }}
           >
             <div className="flex items-center justify-between mb-2">
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#f4f4f4" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-1)" }}>
                 {uploadState.fileName}
               </span>
               <div className="flex items-center gap-2">
@@ -376,7 +376,7 @@ export default function DraftLauncherForm() {
                   style={{
                     fontFamily: "var(--font-mono)",
                     fontSize: "10px",
-                    color: "#737373",
+                    color: "var(--text-2)",
                     background: "none",
                     border: "none",
                     cursor: "pointer",
@@ -387,14 +387,14 @@ export default function DraftLauncherForm() {
                 </button>
               </div>
             </div>
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", marginBottom: "0.5rem" }}>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", marginBottom: "0.5rem" }}>
               {uploadState.characterCount.toLocaleString()} characters extracted
             </p>
             <p
               style={{
                 fontFamily: "var(--font-serif), Georgia, serif",
                 fontSize: "12px",
-                color: "#737373",
+                color: "var(--text-2)",
                 lineHeight: "1.6",
                 whiteSpace: "pre-wrap",
                 maxHeight: "5rem",
@@ -422,9 +422,9 @@ export default function DraftLauncherForm() {
 
       <div
         className="flex flex-wrap items-center justify-between gap-4 pt-2"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
       >
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
           {running ? "Running eight-agent workflow. This may take a moment..." : "Eight agents will retrieve authority, draft, and verify citations."}
         </p>
         <div className="flex flex-wrap items-center gap-3">
@@ -438,9 +438,9 @@ export default function DraftLauncherForm() {
               fontWeight: 700,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: "#d4d4d4",
-              background: "#0a0a0a",
-              border: "1px solid rgba(255,255,255,0.12)",
+              color: "var(--text-2)",
+              background: "var(--s1)",
+              border: "1px solid rgba(0,0,0,0.12)",
               padding: "0.5rem 1rem",
               cursor: running ? "default" : "pointer",
               flexShrink: 0,
@@ -457,9 +457,9 @@ export default function DraftLauncherForm() {
               fontWeight: 700,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: running ? "#737373" : "#000",
-              background: running ? "#111" : "#f4f4f4",
-              border: "1px solid rgba(255,255,255,0.12)",
+              color: running ? "var(--text-3)" : "#000000",
+              background: running ? "var(--s2)" : "var(--text-1)",
+              border: "1px solid rgba(0,0,0,0.12)",
               padding: "0.5rem 1.5rem",
               cursor: running ? "default" : "pointer",
               flexShrink: 0,

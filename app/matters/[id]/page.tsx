@@ -21,11 +21,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function SectionTitle({ n, children }: { n: string; children: string }) {
   return (
     <div className="mb-5 flex items-center gap-4">
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.2em" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.2em" }}>
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#737373", letterSpacing: "0.24em", textTransform: "uppercase" }}>
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)", letterSpacing: "0.24em", textTransform: "uppercase" }}>
         {children}
       </span>
     </div>
@@ -43,16 +43,16 @@ export default async function MatterWorkspacePage({ params }: Props) {
       <div className="mb-8 flex items-center justify-between flex-wrap gap-3">
         <Link
           href="/matters"
-          style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040", letterSpacing: "0.16em", textTransform: "uppercase" }}
-          className="transition-colors hover:text-white"
+          style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)", letterSpacing: "0.16em", textTransform: "uppercase" }}
+          className="transition-colors hover:text-black"
         >
           &larr; Matters
         </Link>
         <div className="flex items-center gap-3">
           <Link
             href="/observability"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-            className="transition-colors hover:text-white"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-black"
           >
             Observe &rarr;
           </Link>
@@ -61,12 +61,12 @@ export default async function MatterWorkspacePage({ params }: Props) {
 
       {workspace === null ? (
         <div className="py-24 text-center">
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#737373" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-2)" }}>
             {process.env.NEXT_PUBLIC_SUPABASE_URL
               ? "Matter not found."
               : "Database not configured. Matter workspaces require Supabase."}
           </p>
-          <p className="mt-2" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+          <p className="mt-2" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
             Matter ID: {id}
           </p>
         </div>
@@ -88,7 +88,7 @@ export default async function MatterWorkspacePage({ params }: Props) {
             {/* § 02 Start Draft Workflow */}
             <section>
               <SectionTitle n="02">Start Draft Workflow</SectionTitle>
-              <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem", maxWidth: "48rem" }}>
+              <div style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "1.25rem", maxWidth: "48rem" }}>
                 <MatterDraftLauncher matter={workspace.matter} />
               </div>
             </section>
@@ -115,8 +115,8 @@ export default async function MatterWorkspacePage({ params }: Props) {
             {workspace.matter.description && (
               <section>
                 <SectionTitle n="06">Notes</SectionTitle>
-                <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
-                  <p style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: "14px", color: "#737373", lineHeight: 1.75, maxWidth: "52rem" }}>
+                <div style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "1.25rem" }}>
+                  <p style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: "14px", color: "var(--text-2)", lineHeight: 1.75, maxWidth: "52rem" }}>
                     {workspace.matter.description}
                   </p>
                 </div>

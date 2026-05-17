@@ -2,16 +2,16 @@ export default function ObservabilityNotes() {
   return (
     <div
       style={{
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: "1px solid rgba(0,0,0,0.07)",
         padding: "1.25rem",
-        borderLeft: "2px solid rgba(255,255,255,0.08)",
+        borderLeft: "2px solid rgba(0,0,0,0.09)",
       }}
     >
       <p
         style={{
           fontFamily: "var(--font-serif), Georgia, serif",
           fontSize: "14px",
-          color: "#737373",
+          color: "var(--text-2)",
           lineHeight: 1.75,
           maxWidth: "52rem",
         }}
@@ -25,7 +25,7 @@ export default function ObservabilityNotes() {
         style={{
           fontFamily: "var(--font-serif), Georgia, serif",
           fontSize: "14px",
-          color: "#737373",
+          color: "var(--text-2)",
           lineHeight: 1.75,
           maxWidth: "52rem",
           marginTop: "0.75rem",
@@ -39,7 +39,7 @@ export default function ObservabilityNotes() {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "9px",
-          color: "#404040",
+          color: "var(--text-3)",
           letterSpacing: "0.12em",
           marginTop: "1rem",
         }}

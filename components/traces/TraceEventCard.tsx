@@ -28,7 +28,7 @@ export default function TraceEventCard({ event, index }: Props) {
   return (
     <div
       style={{
-        borderLeft: "1px solid rgba(255,255,255,0.06)",
+        borderLeft: "1px solid rgba(0,0,0,0.07)",
         paddingLeft: "0.875rem",
         paddingTop: "0.5rem",
         paddingBottom: "0.5rem",
@@ -36,13 +36,13 @@ export default function TraceEventCard({ event, index }: Props) {
     >
       {/* Header row */}
       <div className="flex flex-wrap items-center gap-2" style={{ marginBottom: hasDetails ? "0.25rem" : 0 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", minWidth: "1.5rem" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", minWidth: "1.5rem" }}>
           {String(index + 1).padStart(2, "0")}
         </span>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", letterSpacing: "0.08em" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", letterSpacing: "0.08em" }}>
           {shortTime(event.createdAt)}
         </span>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#f4f4f4" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-1)" }}>
           {event.agentName}
         </span>
         <span className={`badge ${eventTypeBadgeClass(event.eventType)}`} style={{ fontFamily: "var(--font-mono)", fontSize: "9px" }}>
@@ -54,12 +54,12 @@ export default function TraceEventCard({ event, index }: Props) {
           </span>
         )}
         {event.latencyMs != null && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", marginLeft: "auto" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", marginLeft: "auto" }}>
             {event.latencyMs}ms
           </span>
         )}
         {event.tokenCount != null && event.tokenCount > 0 && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)" }}>
             {event.tokenCount.toLocaleString()} tok
           </span>
         )}
@@ -67,7 +67,7 @@ export default function TraceEventCard({ event, index }: Props) {
 
       {/* Message */}
       {event.message && (
-        <p style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: "13px", color: "#737373", lineHeight: 1.5, marginTop: "0.25rem" }}>
+        <p style={{ fontFamily: "var(--font-serif), Georgia, serif", fontSize: "13px", color: "var(--text-2)", lineHeight: 1.5, marginTop: "0.25rem" }}>
           {event.message}
         </p>
       )}

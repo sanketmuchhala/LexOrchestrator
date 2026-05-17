@@ -22,7 +22,7 @@ export default async function RunsPage() {
             Archive
           </p>
           <h1
-            className="text-3xl font-semibold tracking-tight text-[#f4f4f4]"
+            className="text-3xl font-semibold tracking-tight text-[var(--text-1)]"
             style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
           >
             Research History
@@ -30,8 +30,8 @@ export default async function RunsPage() {
         </div>
         <Link
           href="/research"
-          className="text-xs font-bold uppercase tracking-[0.2em] transition-colors hover:text-white"
-          style={{ fontFamily: "var(--font-mono), monospace", color: "#737373" }}
+          className="text-xs font-bold uppercase tracking-[0.2em] transition-colors hover:text-black"
+          style={{ fontFamily: "var(--font-mono), monospace", color: "var(--text-2)" }}
         >
           New Research
         </Link>
@@ -42,7 +42,7 @@ export default async function RunsPage() {
       {runs.length === 0 ? (
         <div className="py-24 text-center">
           <p
-            className="text-sm text-[#737373]"
+            className="text-sm text-[var(--text-2)]"
             style={{ fontFamily: "var(--font-mono), monospace" }}
           >
             {process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -51,7 +51,7 @@ export default async function RunsPage() {
           </p>
           <Link
             href="/research"
-            className="mt-6 inline-block text-xs font-bold uppercase tracking-[0.2em] text-[#f4f4f4] transition hover:text-white"
+            className="mt-6 inline-block text-xs font-bold uppercase tracking-[0.2em] text-[var(--text-1)] transition hover:text-black"
             style={{ fontFamily: "var(--font-mono), monospace" }}
           >
             Begin Research
@@ -60,7 +60,7 @@ export default async function RunsPage() {
       ) : (
         <table className="w-full border-collapse">
           <thead>
-            <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
               <th className="py-3 pr-6 text-left">
                 <span className="label">Date</span>
               </th>
@@ -78,7 +78,7 @@ export default async function RunsPage() {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+          <tbody className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
             {runs.map((run) => (
               <RunCard key={run.id} {...run} />
             ))}

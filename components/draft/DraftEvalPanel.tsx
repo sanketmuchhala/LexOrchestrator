@@ -22,7 +22,7 @@ export default function DraftEvalPanel({ workflow, fullEval }: Props) {
 
   if (!hasData && !fullEval) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
         No eval data recorded for this workflow run.
       </p>
     );
@@ -58,7 +58,7 @@ export default function DraftEvalPanel({ workflow, fullEval }: Props) {
       {summary?.warnings && summary.warnings.length > 0 && (
         <div
           className="pt-2"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
         >
           <p className="label mb-2">Warnings</p>
           {summary.warnings.slice(0, 3).map((w, i) => (
@@ -80,9 +80,9 @@ export default function DraftEvalPanel({ workflow, fullEval }: Props) {
 
       <div
         className="flex items-center justify-between pt-2"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
       >
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}>
           Internal quality signal only.
         </p>
         <Link
@@ -90,12 +90,12 @@ export default function DraftEvalPanel({ workflow, fullEval }: Props) {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "10px",
-            color: "#737373",
+            color: "var(--text-2)",
             letterSpacing: "0.12em",
             textDecoration: "none",
             textTransform: "uppercase",
           }}
-          className="transition-colors hover:text-white"
+          className="transition-colors hover:text-black"
         >
           Full Eval &rarr;
         </Link>

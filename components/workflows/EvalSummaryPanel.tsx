@@ -7,18 +7,18 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#404040",
+          color: "var(--text-3)",
           letterSpacing: "0.2em",
         }}
       >
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -56,7 +56,7 @@ export default function EvalSummaryPanel({ workflow }: { workflow: WorkflowRunRo
       {hasScores && (
         <div
           className="mb-6 flex flex-wrap gap-8 px-5 py-4"
-          style={{ border: "1px solid rgba(255,255,255,0.06)", background: "#0a0a0a" }}
+          style={{ border: "1px solid rgba(0,0,0,0.07)", background: "var(--s1)" }}
         >
           {workflow.confidence != null && (
             <div>
@@ -122,7 +122,7 @@ export default function EvalSummaryPanel({ workflow }: { workflow: WorkflowRunRo
           <p className="label mb-3">Final Output</p>
           <div
             className="px-5 py-4"
-            style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ border: "1px solid rgba(0,0,0,0.07)" }}
           >
             {workflow.final_output!.split(/\n\n+/).map((para, i) => (
               <p
@@ -132,7 +132,7 @@ export default function EvalSummaryPanel({ workflow }: { workflow: WorkflowRunRo
                   fontFamily: "var(--font-serif), Georgia, serif",
                   fontSize: "14px",
                   lineHeight: "1.8",
-                  color: "#a3a3a3",
+                  color: "var(--text-2)",
                 }}
               >
                 {para}
@@ -142,7 +142,7 @@ export default function EvalSummaryPanel({ workflow }: { workflow: WorkflowRunRo
         </div>
       ) : (
         !hasScores && (
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
             No eval data recorded for this workflow run.
           </p>
         )

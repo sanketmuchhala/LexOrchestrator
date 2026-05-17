@@ -17,8 +17,8 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
     <tr
       onClick={() => router.push(`/workflows/${run.id}`)}
       className="cursor-pointer"
-      style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "#0a0a0a")}
+      style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--s1)")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
       <td
@@ -26,7 +26,7 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "11px",
-          color: "#737373",
+          color: "var(--text-2)",
           whiteSpace: "nowrap",
         }}
       >
@@ -35,14 +35,14 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
 
       <td className="py-4 pr-6 align-top" style={{ maxWidth: "28rem" }}>
         <p
-          className="line-clamp-2 text-sm leading-6 text-[#d4d4d4]"
+          className="line-clamp-2 text-sm leading-6 text-[var(--text-2)]"
           style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
         >
           {run.input_summary ?? "No summary"}
         </p>
         <p
           className="mt-1"
-          style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+          style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
         >
           {run.id.slice(0, 8)} &middot; {run.motion_type ?? run.workflow_type}
         </p>
@@ -53,7 +53,7 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "11px",
-            color: "#737373",
+            color: "var(--text-2)",
           }}
         >
           {run.jurisdiction ?? "—"}
@@ -75,7 +75,7 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
           </span>
         ) : (
           <span
-            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}
           >
             —
           </span>
@@ -95,7 +95,7 @@ function WorkflowRow({ run }: { run: WorkflowRunRow }) {
           </span>
         ) : (
           <span
-            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}
           >
             —
           </span>
@@ -117,7 +117,7 @@ export default function WorkflowRunTable({ runs }: { runs: WorkflowRunRow[] }) {
   return (
     <table className="w-full border-collapse">
       <thead>
-        <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
           <th className="py-3 pr-6 text-left">
             <span className="label">Date</span>
           </th>

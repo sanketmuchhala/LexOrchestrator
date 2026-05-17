@@ -43,7 +43,7 @@ export default function DraftWorkspaceHeader({
 
   return (
     <div
-      style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "1rem", marginBottom: "1.5rem" }}
+      style={{ borderBottom: "1px solid rgba(0,0,0,0.07)", paddingBottom: "1rem", marginBottom: "1.5rem" }}
     >
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
 
@@ -60,7 +60,7 @@ export default function DraftWorkspaceHeader({
         {workflow.motion_type && (
           <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
             <span className="label">Motion</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}>
               {workflow.motion_type.replace(/_/g, " ")}
             </span>
           </span>
@@ -69,7 +69,7 @@ export default function DraftWorkspaceHeader({
         {workflow.jurisdiction && (
           <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
             <span className="label">Jurisdiction</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}>
               {workflow.jurisdiction}
               {workflow.court ? ` / ${workflow.court}` : ""}
             </span>
@@ -79,7 +79,7 @@ export default function DraftWorkspaceHeader({
         {judgeName && (
           <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
             <span className="label">Judge</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}>
               {judgeName}
             </span>
           </span>
@@ -93,7 +93,7 @@ export default function DraftWorkspaceHeader({
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "10px",
-            color: "#404040",
+            color: "var(--text-3)",
             marginLeft: "auto",
           }}
         >

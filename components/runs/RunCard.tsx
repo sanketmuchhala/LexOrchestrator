@@ -56,14 +56,14 @@ export default function RunCard({
     <tr
       onClick={() => router.push(`/runs/${id}`)}
       className="cursor-pointer transition-colors"
-      style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "#0a0a0a")}
+      style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--s1)")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
       {/* Date */}
       <td
         className="py-4 pr-6 align-top"
-        style={{ fontFamily: "var(--font-mono), monospace", fontSize: "11px", color: "#737373", whiteSpace: "nowrap" }}
+        style={{ fontFamily: "var(--font-mono), monospace", fontSize: "11px", color: "var(--text-2)", whiteSpace: "nowrap" }}
       >
         {shortDate(created_at)}
       </td>
@@ -71,13 +71,13 @@ export default function RunCard({
       {/* Query */}
       <td className="py-4 pr-6 align-top" style={{ maxWidth: "32rem" }}>
         <p
-          className="line-clamp-2 text-sm leading-6 text-[#d4d4d4]"
+          className="line-clamp-2 text-sm leading-6 text-[var(--text-2)]"
           style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
         >
           {query}
         </p>
         <p
-          className="mt-1 text-[10px] text-[#404040]"
+          className="mt-1 text-[10px] text-[var(--text-3)]"
           style={{ fontFamily: "var(--font-mono), monospace" }}
         >
           {id.slice(0, 8)}
@@ -94,7 +94,7 @@ export default function RunCard({
             {confPct}%
           </span>
         ) : (
-          <span className="text-xs text-[#404040]" style={{ fontFamily: "var(--font-mono), monospace" }}>N/A</span>
+          <span className="text-xs text-[var(--text-3)]" style={{ fontFamily: "var(--font-mono), monospace" }}>N/A</span>
         )}
       </td>
 

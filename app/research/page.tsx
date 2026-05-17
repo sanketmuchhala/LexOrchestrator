@@ -18,13 +18,13 @@ export default function ResearchPage() {
           Docket No. LEX-2025
         </p>
         <h1
-          className="text-3xl font-semibold tracking-tight text-[#f4f4f4]"
+          className="text-3xl font-semibold tracking-tight text-[var(--text-1)]"
           style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
         >
           Legal Research
         </h1>
         <p
-          className="mt-2 text-xs text-[#737373]"
+          className="mt-2 text-xs text-[var(--text-2)]"
           style={{ fontFamily: "var(--font-mono), monospace" }}
         >
           Submit a query. Seven agents will retrieve, validate, and score the response.

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Design tokens ── */
+/* ── Design tokens — Dark Mode ── */
 :root {
   --bg:         #000000;
   --s1:         #0a0a0a;
@@ -13,7 +13,7 @@
   --text-1:     #f4f4f4;
   --text-2:     #737373;
   --text-3:     #404040;
-  --accent:     #e8e8e8;
+  --accent:     #f4f4f4;
   --emerald:    #34d399;
   --amber:      #fbbf24;
   --red:        #f87171;
@@ -59,12 +59,10 @@
     font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
   }
 
-  /* Rule — the horizontal divider of legal documents */
   .rule {
     border-top: var(--rule);
   }
 
-  /* Uppercase monospace label — used for section identifiers */
   .label {
     font-family: var(--font-mono), monospace;
     font-size: 10px;
@@ -74,7 +72,6 @@
     color: var(--text-3);
   }
 
-  /* Status badge baseline */
   .badge {
     display: inline-block;
     font-family: var(--font-mono), monospace;
@@ -87,42 +84,76 @@
     border-width: 1px;
   }
 
-  .badge-pass    { color: #34d399; border-color: rgba(52,211,153,0.25); background: rgba(52,211,153,0.05); }
-  .badge-fail    { color: #f87171; border-color: rgba(248,113,113,0.25); background: rgba(248,113,113,0.05); }
-  .badge-warn    { color: #fbbf24; border-color: rgba(251,191,36,0.25); background: rgba(251,191,36,0.05); }
-  .badge-neutral { color: #737373; border-color: rgba(115,115,115,0.25); background: transparent; }
-  .badge-blue    { color: #60a5fa; border-color: rgba(96,165,250,0.25); background: rgba(96,165,250,0.05); }
-  .badge-const   { color: #93c5fd; border-color: rgba(147,197,253,0.30); background: rgba(147,197,253,0.06); }
+  .badge-pass    { color: #34d399; border-color: rgba(52,211,153,0.3);  background: rgba(52,211,153,0.08); }
+  .badge-fail    { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.08); }
+  .badge-warn    { color: #fbbf24; border-color: rgba(251,191,36,0.3);  background: rgba(251,191,36,0.08); }
+  .badge-neutral { color: #737373; border-color: rgba(115,115,115,0.2); background: transparent; }
+  .badge-blue    { color: #60a5fa; border-color: rgba(96,165,250,0.25); background: rgba(96,165,250,0.06); }
+  .badge-const   { color: #93c5fd; border-color: rgba(147,197,253,0.3); background: rgba(147,197,253,0.06); }
 
-  /* Score — color-coded percentage values */
   .score-good { color: #34d399; }
   .score-warn { color: #fbbf24; }
   .score-fail { color: #f87171; }
   .score-dim  { color: #404040; }
 }
 
-/* ── Fade-in stagger for page reveals ── */
+/* ── Fade-in stagger ── */
 @keyframes appear {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.appear {
-  animation: appear 0.4s ease-out both;
-}
-
+.appear   { animation: appear 0.45s ease-out both; }
 .appear-1 { animation-delay: 60ms; }
 .appear-2 { animation-delay: 120ms; }
 .appear-3 { animation-delay: 180ms; }
 .appear-4 { animation-delay: 240ms; }
 .appear-5 { animation-delay: 300ms; }
 
-/* ── Pulse for loading states ── */
+/* ── Pulse dot for loading ── */
 @keyframes pulse-dot {
-  0%, 100% { opacity: 0.2; }
+  0%, 100% { opacity: 0.25; }
   50%       { opacity: 1; }
 }
+.pulse-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
 
-.pulse-dot {
-  animation: pulse-dot 1.4s ease-in-out infinite;
+/* ── Agent thinking orb ── */
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 0   0   rgba(99,102,241,0.3); }
+  50%       { transform: scale(1.08); box-shadow: 0 0 60px 16px rgba(99,102,241,0.18); }
+}
+
+@keyframes orb-ring-expand {
+  0%   { transform: scale(0.85); opacity: 0.65; }
+  100% { transform: scale(2.6);  opacity: 0; }
+}
+
+@keyframes orb-gradient-rotate {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.agent-orb {
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #6366f1, #8b5cf6, #06b6d4, #818cf8, #6366f1);
+  animation: orb-breathe 2.4s ease-in-out infinite, orb-gradient-rotate 6s linear infinite;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.agent-orb-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(99, 102, 241, 0.4);
+  animation: orb-ring-expand 2s ease-out infinite;
+  pointer-events: none;
+}
+
+/* ── Card hover lift ── */
+.card-hover {
+  transition: background 0.15s ease;
+}
+.card-hover:hover {
+  background: var(--s1) !important;
 }

@@ -124,7 +124,7 @@ export default function EditableMotionEditor({
       {/* Toolbar */}
       <div
         className="flex flex-wrap items-center justify-between gap-3"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "0.75rem" }}
+        style={{ borderBottom: "1px solid rgba(0,0,0,0.07)", paddingBottom: "0.75rem" }}
       >
         <div className="flex items-center gap-3">
           {isDirty && (
@@ -144,7 +144,7 @@ export default function EditableMotionEditor({
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "10px",
-                color: "#404040",
+                color: "var(--text-3)",
                 letterSpacing: "0.12em",
               }}
             >
@@ -157,7 +157,7 @@ export default function EditableMotionEditor({
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "10px",
-                color: "#737373",
+                color: "var(--text-2)",
                 letterSpacing: "0.12em",
               }}
             >
@@ -177,9 +177,9 @@ export default function EditableMotionEditor({
                 fontWeight: 700,
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
-                color: isSaving || !isDirty ? "#404040" : "#d4d4d4",
-                background: "#0a0a0a",
-                border: "1px solid rgba(255,255,255,0.08)",
+                color: isSaving || !isDirty ? "var(--text-3)" : "var(--text-2)",
+                background: "var(--s1)",
+                border: "1px solid rgba(0,0,0,0.09)",
                 padding: "0.375rem 0.875rem",
                 cursor: isSaving || !isDirty ? "default" : "pointer",
               }}
@@ -195,9 +195,9 @@ export default function EditableMotionEditor({
                 fontWeight: 700,
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
-                color: isSaving || isVerifying ? "#737373" : "#000",
-                background: isSaving || isVerifying ? "#111" : "#f4f4f4",
-                border: "1px solid rgba(255,255,255,0.08)",
+                color: isSaving || isVerifying ? "var(--text-3)" : "#000000",
+                background: isSaving || isVerifying ? "var(--s2)" : "var(--text-1)",
+                border: "1px solid rgba(0,0,0,0.09)",
                 padding: "0.375rem 0.875rem",
                 cursor: isSaving || isVerifying ? "default" : "pointer",
               }}
@@ -217,9 +217,9 @@ export default function EditableMotionEditor({
           fontFamily: "var(--font-serif), Georgia, serif",
           fontSize: "14px",
           lineHeight: "1.85",
-          color: isReadOnly ? "#737373" : "#f4f4f4",
-          background: "#0a0a0a",
-          border: "1px solid rgba(255,255,255,0.08)",
+          color: isReadOnly ? "var(--text-2)" : "var(--text-1)",
+          background: "var(--s1)",
+          border: "1px solid rgba(0,0,0,0.09)",
           padding: "1.25rem",
           width: "100%",
           minHeight: "28rem",
@@ -247,7 +247,7 @@ export default function EditableMotionEditor({
       {verificationSummary && (
         <div
           style={{
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: "1px solid rgba(0,0,0,0.07)",
             padding: "0.75rem",
             display: "flex",
             flexWrap: "wrap",
@@ -270,13 +270,13 @@ export default function EditableMotionEditor({
             </span>
           )}
           <span
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#737373" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)" }}
           >
             {verificationSummary.total} citations &middot; {verificationSummary.pass} pass &middot;{" "}
             {verificationSummary.warn} warn &middot; {verificationSummary.fail} fail
           </span>
           <span
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
           >
             Reload page to update Verification Inspector.
           </span>
@@ -287,7 +287,7 @@ export default function EditableMotionEditor({
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#404040",
+          color: "var(--text-3)",
         }}
       >
         Artifact ID: {draftArtifactId.slice(0, 8)} &middot; Cmd/Ctrl+S to save

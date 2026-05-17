@@ -4,7 +4,7 @@ import EvalScoreBar from "./EvalScoreBar";
 export default function CitationQualityPanel({ metrics }: { metrics: CitationQualityMetrics }) {
   if (metrics.total === 0) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
         No citations were extracted from this draft.
         Citation verification runs when the draft contains recognizable legal citation patterns.
       </p>
@@ -15,9 +15,9 @@ export default function CitationQualityPanel({ metrics }: { metrics: CitationQua
     <div className="space-y-4">
       <div
         className="flex flex-wrap gap-3 px-4 py-3 mb-4"
-        style={{ background: "#0a0a0a", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ background: "var(--s1)", borderBottom: "1px solid rgba(0,0,0,0.07)" }}
       >
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}>
           {metrics.total} citation{metrics.total !== 1 ? "s" : ""} checked
         </span>
         {metrics.pass > 0 && (
@@ -36,7 +36,7 @@ export default function CitationQualityPanel({ metrics }: { metrics: CitationQua
           </span>
         )}
         {metrics.unknown > 0 && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
             {metrics.unknown} unknown
           </span>
         )}
@@ -50,8 +50,8 @@ export default function CitationQualityPanel({ metrics }: { metrics: CitationQua
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#404040",
-          borderTop: "1px solid rgba(255,255,255,0.04)",
+          color: "var(--text-3)",
+          borderTop: "1px solid rgba(0,0,0,0.05)",
         }}
       >
         Citation pass rate depends on the size and coverage of the indexed opinion corpus.

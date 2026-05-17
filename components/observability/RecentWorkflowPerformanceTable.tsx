@@ -22,19 +22,19 @@ function shortDate(iso: string): string {
 const cell: React.CSSProperties = {
   fontFamily: "var(--font-mono)",
   fontSize: "10px",
-  color: "#737373",
+  color: "var(--text-2)",
   padding: "0.5rem 0.75rem",
-  borderBottom: "1px solid rgba(255,255,255,0.04)",
+  borderBottom: "1px solid rgba(0,0,0,0.05)",
   whiteSpace: "nowrap",
 };
 
 const headerCell: React.CSSProperties = {
   ...cell,
   fontSize: "9px",
-  color: "#404040",
+  color: "var(--text-3)",
   letterSpacing: "0.14em",
   textTransform: "uppercase",
-  borderBottom: "1px solid rgba(255,255,255,0.06)",
+  borderBottom: "1px solid rgba(0,0,0,0.07)",
 };
 
 interface Props {
@@ -44,7 +44,7 @@ interface Props {
 export default function RecentWorkflowPerformanceTable({ workflows }: Props) {
   if (workflows.length === 0) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
         No workflow runs available.
       </p>
     );
@@ -66,13 +66,13 @@ export default function RecentWorkflowPerformanceTable({ workflows }: Props) {
               <td style={cell}>{shortDate(wf.startedAt)}</td>
               <td style={{ ...cell, color: "#60a5fa" }}>{wf.workflowRunId.slice(0, 8)}</td>
               <td style={{ ...cell, padding: "0.5rem 0.75rem" }}>{statusBadge(wf.status)}</td>
-              <td style={{ ...cell, color: "#f4f4f4", maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <td style={{ ...cell, color: "var(--text-1)", maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis" }}>
                 {wf.motionType?.replace(/_/g, " ") ?? "—"}
               </td>
               <td style={cell}>{formatDurationMs(wf.durationMs)}</td>
               <td style={cell}>{wf.totalEvents}</td>
               <td style={cell}>{formatTokens(wf.totalTokenCount || null)}</td>
-              <td style={{ ...cell, color: wf.costIsEstimated ? "#404040" : "#737373" }}>
+              <td style={{ ...cell, color: wf.costIsEstimated ? "var(--text-3)" : "var(--text-2)" }}>
                 {formatCost(wf.totalCostUsd || null, wf.costIsEstimated)}
               </td>
               <td style={cell}>
@@ -84,8 +84,8 @@ export default function RecentWorkflowPerformanceTable({ workflows }: Props) {
               <td style={{ ...cell, padding: "0.5rem 0.75rem" }}>
                 <Link
                   href={`/traces/${wf.workflowRunId}`}
-                  style={{ color: "#404040", letterSpacing: "0.1em" }}
-                  className="transition-colors hover:text-white"
+                  style={{ color: "var(--text-3)", letterSpacing: "0.1em" }}
+                  className="transition-colors hover:text-black"
                 >
                   &rarr;
                 </Link>

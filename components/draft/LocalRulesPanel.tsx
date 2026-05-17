@@ -21,7 +21,7 @@ function SectionCheckRow({
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "11px",
-          color: detected ? "#737373" : required ? "#f87171" : "#404040",
+          color: detected ? "var(--text-2)" : required ? "#f87171" : "var(--text-3)",
         }}
       >
         {label}
@@ -31,7 +31,7 @@ function SectionCheckRow({
   );
 }
 
-function NoteList({ items, color = "#a3a3a3" }: { items: string[]; color?: string }) {
+function NoteList({ items, color = "var(--text-3)" }: { items: string[]; color?: string }) {
   if (items.length === 0) return null;
   return (
     <ul className="space-y-1.5">
@@ -72,10 +72,10 @@ function StructuredPanel({ rules }: { rules: LocalRulesAgentOutput }) {
       {/* Profile header */}
       <div
         className="mb-4 flex items-center justify-between pb-3"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
       >
         <span
-          style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}
+          style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}
         >
           {rules.profileLabel}
         </span>
@@ -83,7 +83,7 @@ function StructuredPanel({ rules }: { rules: LocalRulesAgentOutput }) {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "10px",
-            color: "#404040",
+            color: "var(--text-3)",
           }}
         >
           {Math.round(rules.confidence * 100)}% confidence
@@ -101,7 +101,7 @@ function StructuredPanel({ rules }: { rules: LocalRulesAgentOutput }) {
           </span>
         </div>
         <div
-          style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.5rem 0.75rem" }}
+          style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "0.5rem 0.75rem" }}
         >
           {rules.sectionChecks
             .filter((s) => s.required)
@@ -152,7 +152,7 @@ function StructuredPanel({ rules }: { rules: LocalRulesAgentOutput }) {
       {rules.limitations.length > 0 && (
         <div
           className="pt-3"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
+          style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
         >
           <p className="label mb-1" style={{ fontSize: "9px" }}>
             Limitations
@@ -163,7 +163,7 @@ function StructuredPanel({ rules }: { rules: LocalRulesAgentOutput }) {
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "10px",
-                color: "#404040",
+                color: "var(--text-3)",
                 lineHeight: "1.6",
               }}
             >
@@ -198,7 +198,7 @@ function LegacyPanel({ content }: { content: string }) {
 
   if (formattingNotes.length === 0 && ruleWarnings.length === 0) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
         No local rules notes extracted.
       </p>
     );
@@ -234,7 +234,7 @@ export default function LocalRulesPanel({
 }) {
   if (!artifact) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
         No local rules artifact recorded for this workflow run.
       </p>
     );
