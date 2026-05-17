@@ -688,6 +688,8 @@ export async function insertLitigationAgentEvent(data: {
   toolInput?: Record<string, unknown>;
   toolOutput?: Record<string, unknown>;
   latencyMs?: number;
+  tokenCount?: number;
+  costUsd?: number;
   metadata?: Record<string, unknown>;
 }): Promise<void> {
   const client = getClient();
@@ -703,6 +705,8 @@ export async function insertLitigationAgentEvent(data: {
     tool_input: data.toolInput ?? {},
     tool_output: data.toolOutput ?? {},
     latency_ms: data.latencyMs ?? null,
+    token_count: data.tokenCount ?? null,
+    cost_usd: data.costUsd ?? null,
     metadata: data.metadata ?? {},
   });
 
@@ -967,6 +971,26 @@ export async function getLitigationWorkflowEventsWithDetails(
     tool_output: (row.tool_output as Record<string, unknown>) ?? null,
     metadata: (row.metadata as Record<string, unknown>) ?? {},
   })) as WorkflowEventDetailRow[];
+}
+
+export async function getLitigationWorkflowEventsBatch(
+  workflowRunIds: string[]
+): Promise<WorkflowEventRow[]> {
+  if (workflowRunIds.length === 0) return [];
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("litigation_agent_events")
+    .select("id, workflow_run_id, agent_name, event_type, event_status, message, tool_name, latency_ms, token_count, cost_usd, created_at")
+    .in("workflow_run_id", workflowRunIds)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.warn("[DB] getLitigationWorkflowEventsBatch failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as WorkflowEventRow[];
 }
 
 export async function getLitigationWorkflowArtifacts(

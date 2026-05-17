@@ -112,20 +112,24 @@ Phases 0-12 are complete. This document covers the planned next phases.
 
 ---
 
-## Phase 19: Cost, Latency, and Token Observability
+## Phase 19: Workflow Observability Dashboard (Complete)
 
 **Goal:** Per-run and aggregate cost, latency, and token tracking.
 
-**Why it matters:** Production deployment requires cost control. A $0.02 per run vs $0.20 per run difference matters at scale. The current eval dashboard tracks latency but not cost.
+**Why it matters:** Understanding pipeline performance requires visibility into which agents are slow, which runs are expensive, and where failures concentrate -- without requiring external tooling.
 
 **Deliverables:**
-- Token count and cost estimate stored per agent event
-- Aggregate cost dashboard on `/evals`
-- Per-model cost config in `lib/llm/config.ts`
-- Alert threshold for unexpectedly expensive runs
-- Weekly cost summary export
+- `/observability` -- five-section dashboard: performance overview, recent workflows table, agent breakdown, hotspots, notes
+- `lib/observability/` -- types, metrics utilities, `buildWorkflowPerformance`, `getObservabilityDashboardStats`, `timedAgentStep`
+- `components/observability/` -- MetricCard, ObservabilityOverviewCards, RecentWorkflowPerformanceTable, AgentPerformanceTable, ObservabilityHotspots, ObservabilityNotes
+- `tokenCount` and `costUsd` wired through `AgentEventRecord` -> `logAgentEvent` -> DB insert
+- Batch event loader (`getLitigationWorkflowEventsBatch`) for efficient dashboard queries
+- p50/p95 duration and cost percentiles computed in-memory
+- Cost labeled as estimated when derived from token counts rather than recorded actuals
+- Cross-links from /workflows, /evals, /traces/[id] to /observability
+- "Observe" added to main navigation
 
-**Not included:** Multi-tenant cost allocation, billing integration.
+**Not included:** External tracing integrations (LangSmith, Langfuse, Datadog, OpenTelemetry), multi-tenant cost allocation, alert thresholds, billing integration.
 
 ---
 

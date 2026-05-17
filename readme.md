@@ -16,6 +16,8 @@ This is a portfolio project demonstrating multi-agent orchestration, hybrid RAG 
 
 **Draft editing.** The draft workspace (`/draft/[id]`) is editable. Save a revision with Cmd/Ctrl+S or the Save button. Click "Save + Verify" to re-run citation verification on the edited text. Revision history is tracked and displayed.
 
+**Observability dashboard.** `/observability` aggregates performance across recent workflow runs: p50/p95 duration, average token count, agent breakdown, and hotspots (slowest run, most failure-prone agent). Token and cost values depend on provider response data; estimates are labeled as such. No external tracing integration is active.
+
 **Agent trace.** Every workflow run has a trace view at `/traces/[id]`. The trace shows all agent events in chronological order with tool inputs, outputs, latency, and metadata. A per-agent breakdown shows which agents completed, failed, how long each took, and which artifacts each created. The § 06 Replay Snapshot records the context needed to reproduce or debug the run. Traces are read-only; replay execution is not active.
 
 **Draft export.** The § 04 Export section on the draft workspace provides one-click download as PDF, DOCX, or TXT. Optional appendices (Judge Brief, Local Rules, Adversarial Review) can be toggled via checkboxes. Exports use the latest saved revision. Cover page and citation summary are always included. Demo-grade only -- not guaranteed court-filing ready.
@@ -244,7 +246,7 @@ npm run check:all
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the phased plan through Phase 22.
 
-Completed through Phase 18 (Agent Trace Debugging View). Next priorities:
+Completed through Phase 19 (Workflow Observability Dashboard). Next priorities:
 - Real CourtListener / CAP ingestion (Phase 14)
 - PDF and DOCX file upload for case files (planned)
 - Agent trace replay and debugging view (Phase 18)

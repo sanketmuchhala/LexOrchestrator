@@ -15,6 +15,8 @@ export async function logAgentEvent(
     toolInput: event.toolInput,
     toolOutput: event.toolOutput,
     latencyMs: event.latencyMs,
+    tokenCount: event.tokenCount,
+    costUsd: event.costUsd,
     metadata: event.metadata,
   });
 }

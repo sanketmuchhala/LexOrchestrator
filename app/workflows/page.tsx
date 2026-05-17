@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { listWorkflowRuns } from "@/lib/litigation/listWorkflowRuns";
 import WorkflowRunTable from "@/components/workflows/WorkflowRunTable";
 import DemoWorkflowLauncher from "@/components/workflows/DemoWorkflowLauncher";
@@ -35,7 +36,16 @@ export default async function WorkflowsPage() {
             verification, adversarial review, local rules, judge brief, and eval.
           </p>
         </div>
-        <DemoWorkflowLauncher />
+        <div className="flex items-center gap-3">
+          <Link
+            href="/observability"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-white"
+          >
+            Observe &rarr;
+          </Link>
+          <DemoWorkflowLauncher />
+        </div>
       </div>
 
       <div className="rule mb-0" />

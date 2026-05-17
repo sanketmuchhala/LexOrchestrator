@@ -217,6 +217,25 @@ The trace is read-only. Replay execution is not implemented. The `TraceTimeline.
 
 `getLitigationWorkflowEventsWithDetails` is a separate query from `getLitigationWorkflowEvents` (used by the real-time event feed). The detail query adds `tool_input`, `tool_output`, and `metadata` columns which are omitted from the feed to keep live polling responses small.
 
+---
+
+## Observability Topology (Phase 19)
+
+```
+/observability (server render)
+  -> getObservabilityDashboardStats(limit=50)
+       -> listLitigationWorkflowRuns(50)         // workflow metadata + confidence scores
+       -> getLitigationWorkflowEventsBatch(ids)  // all events for those runs in one query
+       -> buildWorkflowPerformance(run, events)  // per-run: duration, latency, tokens, cost, agent groups
+       -> buildAgentBreakdown(performances)       // aggregate by agent name across all runs
+       -> percentile(durations, 50/95)            // p50/p95 from sorted in-memory arrays
+       -> ObservabilityDashboardStats
+```
+
+`cost_usd` on events is populated only when the LLM provider returns it. When absent but `token_count` is present, `estimateCostFromTokens` returns a labeled estimate. Values derived from estimates are marked with `costIsEstimated: true` and displayed with a ~ prefix and "(est.)" label in the UI.
+
+`getLitigationWorkflowEventsBatch` is a single `WHERE workflow_run_id IN (...)` query, avoiding N+1 round-trips for dashboard loads.
+
 ## Key Files
 
 ```
