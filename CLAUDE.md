@@ -298,6 +298,71 @@ npm run smoke:draft-export   # exportTxt/exportDocx/exportPdf directly + exportD
 
 ---
 
+## Phase 18 Agent Trace Debugging View
+
+Adds a read-only trace debugger for every litigation workflow run. Surfaces agent events, tool inputs/outputs, artifacts, citation reports, and a replay context snapshot.
+
+### New modules (`lib/traces/`)
+
+| Path | Purpose |
+|---|---|
+| `types.ts` | `TraceEvent`, `TraceArtifactLink`, `TraceCitationLink`, `AgentTraceGroup`, `TraceDebugSummary`, `TraceReplaySnapshot`, `TraceTimeline` |
+| `buildWorkflowTrace.ts` | Loads workflow, events (with details), artifacts, citation reports; groups by agent; computes debug summary and replay snapshot |
+
+### DB changes
+
+No migration required. `litigation_agent_events` already has `tool_input`, `tool_output`, `metadata` columns.
+
+- New `WorkflowEventDetailRow` interface (extends `WorkflowEventRow` with `tool_input`, `tool_output`, `metadata`)
+- New `getLitigationWorkflowEventsWithDetails` DB function (separate from `getLitigationWorkflowEvents` used by the live feed)
+- `AgentEventRecord.metadata` field added; `logAgentEvent` now passes it to the DB insert
+- Orchestrator events in `runLitigationWorkflow` now include `stepIndex` in metadata
+
+### API route
+
+`GET /api/traces/[id]` -- returns `TraceTimeline` as JSON. 404 if workflow not found. 500 on failure. No stack traces.
+
+### UI route (`app/traces/[id]/page.tsx`)
+
+Six sections using the established design system:
+- § 01 Trace Summary -- status, counts, latency, tokens, cost, slowest agent, first error
+- § 02 Timeline -- chronological events with collapsible tool input/output/metadata via `<details>`/`<summary>`
+- § 03 Agent Breakdown -- per-agent status, latency, artifact count
+- § 04 Artifacts Created -- type, version, verification status, content preview, link to draft workspace
+- § 05 Citation Reports -- per-citation existence/proposition status
+- § 06 Replay Snapshot -- workflow context snapshot; note that replay execution is not active
+
+### Components (`components/traces/`)
+
+| Component | Purpose |
+|---|---|
+| `JsonDetails.tsx` | Safe JSON pretty-print with 2,000-char truncation; uses native `<details>`/`<summary>` |
+| `TraceSummaryPanel.tsx` | Stats grid and first-error callout |
+| `TraceEventCard.tsx` | Single event row with collapsible details |
+| `TraceTimeline.tsx` | Chronological event list |
+| `AgentBreakdownPanel.tsx` | Per-agent status and latency grid |
+| `TraceArtifactPanel.tsx` | Artifact cards with content preview and draft workspace link |
+| `TraceCitationPanel.tsx` | Citation report list with status badges |
+| `ReplaySnapshotPanel.tsx` | Snapshot context + replay-not-active notice |
+
+### Cross-links added
+
+"Trace" link added to the breadcrumb of `/draft/[id]`, `/workflows/[id]`, and `/evals/[id]`.
+
+### Smoke command
+
+```bash
+npm run smoke:trace-builder   # degrades gracefully without DB; verifies all type contracts
+```
+
+### Limitations
+
+- Traces are read-only; replay execution is not implemented
+- `tool_input`/`tool_output` fields are empty for most current agent events (agents log events via `makeEvent` without tool detail); they will populate for tool_call/tool_result events as agents are enriched
+- The trace page requires Supabase; without DB it shows "database not configured" state
+
+---
+
 ## Design System — "Federal Court Documents meets Financial Terminal"
 
 True black aesthetic. Every new UI component must follow this:

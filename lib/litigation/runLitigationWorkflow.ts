@@ -64,7 +64,7 @@ export async function runLitigationWorkflow(
   const allEvents: AgentEventRecord[] = [];
 
   // Step 2: log workflow started
-  const startEvent = makeEvent("Orchestrator", "run_started", `Workflow ${workflowRunId} started`);
+  const startEvent = makeEvent("Orchestrator", "run_started", `Workflow ${workflowRunId} started`, { metadata: { stepIndex: 0 } });
   allEvents.push(startEvent);
   await logAgentEvent(workflowRunId, startEvent);
 
@@ -184,7 +184,7 @@ export async function runLitigationWorkflow(
 
     // Step 11: Save draft artifacts
     const savedArtifact = await saveDraftArtifact(workflowRunId, draft, "DraftingAgent");
-    const artifactEvent = makeEvent("Orchestrator", "draft_chunk", savedArtifact.title);
+    const artifactEvent = makeEvent("Orchestrator", "draft_chunk", savedArtifact.title, { metadata: { stepIndex: 11, artifactIds: [savedArtifact.artifactId] } });
     allEvents.push(artifactEvent);
     await logAgentEvent(workflowRunId, artifactEvent);
 
@@ -222,7 +222,7 @@ export async function runLitigationWorkflow(
       citationPassRate: evalOutput.citationPassRate,
     });
 
-    const completedEvent = makeEvent("Orchestrator", "run_completed", `Workflow ${workflowRunId} completed`);
+    const completedEvent = makeEvent("Orchestrator", "run_completed", `Workflow ${workflowRunId} completed`, { metadata: { stepIndex: 12 } });
     allEvents.push(completedEvent);
     await logAgentEvent(workflowRunId, completedEvent);
 

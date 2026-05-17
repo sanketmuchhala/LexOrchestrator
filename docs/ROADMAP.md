@@ -93,19 +93,22 @@ Phases 0-12 are complete. This document covers the planned next phases.
 
 ---
 
-## Phase 18: Agent Trace Replay and Debugging View
+## Phase 18: Agent Trace Debugging View (Complete)
 
-**Goal:** Replay any agent run step-by-step with full input/output at each stage.
+**Goal:** Inspectable trace view for every litigation workflow run.
 
-**Why it matters:** Debugging agent pipelines currently requires reading raw event rows. A replay UI lets developers and reviewers understand exactly what each agent received and produced.
+**Why it matters:** Debugging agent pipelines requires readable access to what each agent received, produced, and how long it took. The trace view surfaces this without requiring DB access.
 
 **Deliverables:**
-- Step-through UI on `/workflows/[id]`
-- Per-step view: agent name, inputs, LLM prompt (if applicable), raw output, latency
-- Diff view between successive drafting iterations
-- Export trace as JSON for offline analysis
+- `/traces/[id]` -- six-section trace page: summary, timeline, agent breakdown, artifacts, citation reports, replay snapshot
+- `GET /api/traces/[id]` -- JSON trace endpoint returning full TraceTimeline
+- `buildWorkflowTrace` library function in `lib/traces/`
+- `tool_input`, `tool_output`, `metadata` now surfaced on events via `getLitigationWorkflowEventsWithDetails`
+- `stepIndex` metadata on orchestrator-level events
+- Cross-links from `/draft/[id]`, `/workflows/[id]`, `/evals/[id]` to `/traces/[id]`
+- Collapsible JSON details panels via native `<details>`/`<summary>` (no client-side JS required)
 
-**Not included:** Live breakpoints, interactive prompt editing.
+**Not included:** Live replay execution, interactive prompt editing, diff view between iterations.
 
 ---
 

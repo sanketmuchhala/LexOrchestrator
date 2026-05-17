@@ -52,6 +52,7 @@ async function main() {
       "check:demo",
       "smoke:demo-path",
       "smoke:draft-export",
+      "smoke:trace-builder",
     ]) {
       report(scripts[script] ? "pass" : "fail", `script ${script}`, scripts[script] ?? "missing");
     }
@@ -68,6 +69,10 @@ async function main() {
   requireFile("DOCX export module", "lib/exports/exportDocx.ts");
   requireFile("export API route", "app/api/drafts/[id]/export/route.ts");
   requireFile("DraftExportControls", "components/draft/DraftExportControls.tsx");
+  requireFile("trace page", "app/traces/[id]/page.tsx");
+  requireFile("trace API route", "app/api/traces/[id]/route.ts");
+  requireFile("buildWorkflowTrace", "lib/traces/buildWorkflowTrace.ts");
+  requireFile("TraceSummaryPanel", "components/traces/TraceSummaryPanel.tsx");
 
   if (exists("lib/litigation/localRules/rules.ts")) {
     const rules = read("lib/litigation/localRules/rules.ts");

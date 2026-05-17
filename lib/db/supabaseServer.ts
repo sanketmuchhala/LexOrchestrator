@@ -861,6 +861,12 @@ export interface WorkflowEventRow {
   created_at: string;
 }
 
+export interface WorkflowEventDetailRow extends WorkflowEventRow {
+  tool_input: Record<string, unknown> | null;
+  tool_output: Record<string, unknown> | null;
+  metadata: Record<string, unknown>;
+}
+
 export interface WorkflowArtifactRow {
   id: string;
   workflow_run_id: string;
@@ -937,6 +943,30 @@ export async function getLitigationWorkflowEvents(
     return [];
   }
   return (data ?? []) as WorkflowEventRow[];
+}
+
+export async function getLitigationWorkflowEventsWithDetails(
+  workflowRunId: string
+): Promise<WorkflowEventDetailRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  const { data, error } = await client
+    .from("litigation_agent_events")
+    .select("id, workflow_run_id, agent_name, event_type, event_status, message, tool_name, latency_ms, token_count, cost_usd, tool_input, tool_output, metadata, created_at")
+    .eq("workflow_run_id", workflowRunId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.warn("[DB] getLitigationWorkflowEventsWithDetails failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => ({
+    ...row,
+    tool_input: (row.tool_input as Record<string, unknown>) ?? null,
+    tool_output: (row.tool_output as Record<string, unknown>) ?? null,
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
+  })) as WorkflowEventDetailRow[];
 }
 
 export async function getLitigationWorkflowArtifacts(

@@ -26,6 +26,7 @@ export interface AgentEventRecord {
   toolInput?: Record<string, unknown>;
   toolOutput?: Record<string, unknown>;
   latencyMs?: number;
+  metadata?: Record<string, unknown>;
 }
 
 export interface LitigationWorkflowInput {
