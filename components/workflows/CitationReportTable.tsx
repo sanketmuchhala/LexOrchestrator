@@ -7,18 +7,18 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#404040",
+          color: "var(--text-3)",
           letterSpacing: "0.2em",
         }}
       >
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -86,7 +86,7 @@ export default function CitationReportTable({
       <SectionTitle n="04">Citation Verification</SectionTitle>
 
       {reports.length === 0 ? (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
           No citation verification reports recorded.
         </p>
       ) : (
@@ -98,7 +98,7 @@ export default function CitationReportTable({
                 key={report.id}
                 style={{
                   padding: "1rem 0",
-                  borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
+                  borderBottom: isLast ? "none" : "1px solid rgba(0,0,0,0.05)",
                   display: "grid",
                   gridTemplateColumns: "1fr auto",
                   gap: "1.5rem",
@@ -133,7 +133,7 @@ export default function CitationReportTable({
                   style={{
                     fontFamily: "var(--font-mono)",
                     fontSize: "10px",
-                    color: "#404040",
+                    color: "var(--text-3)",
                     whiteSpace: "nowrap",
                   }}
                 >

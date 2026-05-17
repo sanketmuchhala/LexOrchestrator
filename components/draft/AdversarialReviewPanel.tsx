@@ -4,7 +4,7 @@ function riskColor(content: string): string {
   if (content.includes("ADVERSARIAL RISK: HIGH")) return "#f87171";
   if (content.includes("ADVERSARIAL RISK: MEDIUM")) return "#fbbf24";
   if (content.includes("ADVERSARIAL RISK: LOW")) return "#34d399";
-  return "#737373";
+  return "var(--text-2)";
 }
 
 function riskBadge(content: string): string {
@@ -42,7 +42,7 @@ export default function AdversarialReviewPanel({
 }) {
   if (!artifact) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
         No adversarial review artifact recorded for this workflow run.
       </p>
     );
@@ -61,7 +61,7 @@ export default function AdversarialReviewPanel({
       {/* Risk header */}
       <div
         className="mb-4 flex items-center gap-3 px-4 py-3"
-        style={{ borderLeft: `3px solid ${color}`, background: "#0a0a0a" }}
+        style={{ borderLeft: `3px solid ${color}`, background: "var(--s1)" }}
       >
         <span className={`badge ${badgeClass}`}>
           {content.includes("HIGH")
@@ -77,7 +77,7 @@ export default function AdversarialReviewPanel({
             fontFamily: "var(--font-serif), Georgia, serif",
             fontSize: "13px",
             lineHeight: "1.6",
-            color: "#a3a3a3",
+            color: "var(--text-2)",
           }}
         >
           {memo.slice(0, 200)}
@@ -96,7 +96,7 @@ export default function AdversarialReviewPanel({
                   fontFamily: "var(--font-serif), Georgia, serif",
                   fontSize: "14px",
                   lineHeight: "1.7",
-                  color: "#d4d4d4",
+                  color: "var(--text-2)",
                   paddingLeft: "1rem",
                   borderLeft: "2px solid rgba(248,113,113,0.3)",
                 }}
@@ -118,7 +118,7 @@ export default function AdversarialReviewPanel({
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: "11px",
-                  color: "#737373",
+                  color: "var(--text-2)",
                   paddingLeft: "0.875rem",
                 }}
               >
@@ -140,7 +140,7 @@ export default function AdversarialReviewPanel({
                   fontFamily: "var(--font-serif), Georgia, serif",
                   fontSize: "14px",
                   lineHeight: "1.7",
-                  color: "#a3a3a3",
+                  color: "var(--text-2)",
                   paddingLeft: "1rem",
                   borderLeft: "2px solid rgba(251,191,36,0.25)",
                 }}

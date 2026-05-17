@@ -19,13 +19,13 @@ export default async function MattersPage() {
         <div>
           <p className="label mb-2" style={{ letterSpacing: "0.28em" }}>Workspaces</p>
           <h1
-            className="text-3xl font-semibold tracking-tight text-[#f4f4f4]"
+            className="text-3xl font-semibold tracking-tight text-[var(--text-1)]"
             style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
           >
             Matters
           </h1>
           <p
-            className="mt-2 text-xs text-[#737373]"
+            className="mt-2 text-xs text-[var(--text-2)]"
             style={{ fontFamily: "var(--font-mono), monospace" }}
           >
             Group workflow runs, drafts, uploads, and evaluations under a single matter workspace.
@@ -40,8 +40,8 @@ export default async function MattersPage() {
             letterSpacing: "0.2em",
             textTransform: "uppercase",
             padding: "0.5rem 1.25rem",
-            background: "#f4f4f4",
-            color: "#000",
+            background: "var(--text-1)",
+            color: "#000000",
             textDecoration: "none",
           }}
           className="transition-opacity hover:opacity-80"
@@ -54,10 +54,10 @@ export default async function MattersPage() {
 
       {matters.length === 0 && !process.env.NEXT_PUBLIC_SUPABASE_URL ? (
         <div className="py-24 text-center">
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#737373" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-2)" }}>
             Database not configured. Matters require Supabase to persist.
           </p>
-          <p className="mt-2" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+          <p className="mt-2" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
             Create a matter to verify the form works in demo mode, but it will not persist.
           </p>
         </div>

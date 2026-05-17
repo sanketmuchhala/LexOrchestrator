@@ -16,9 +16,9 @@ const MATTER_TYPES = [
 const inputBase: React.CSSProperties = {
   fontFamily: "var(--font-mono), monospace",
   fontSize: "12px",
-  color: "#f4f4f4",
-  background: "#0a0a0a",
-  border: "1px solid rgba(255,255,255,0.08)",
+  color: "var(--text-1)",
+  background: "var(--s1)",
+  border: "1px solid rgba(0,0,0,0.09)",
   padding: "0.5rem 0.75rem",
   width: "100%",
   outline: "none",
@@ -28,7 +28,7 @@ const inputBase: React.CSSProperties = {
 function Field({ label, children, optional }: { label: string; children: React.ReactNode; optional?: boolean }) {
   return (
     <div>
-      <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
+      <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
         {label}{optional && <span style={{ color: "#2a2a2a", marginLeft: "0.5rem" }}>(optional)</span>}
       </label>
       {children}
@@ -137,8 +137,8 @@ export default function MatterForm() {
           letterSpacing: "0.2em",
           textTransform: "uppercase",
           padding: "0.5rem 1.25rem",
-          background: submitting ? "#1a1a1a" : "#f4f4f4",
-          color: submitting ? "#404040" : "#000",
+          background: submitting ? "var(--s2)" : "var(--text-1)",
+          color: submitting ? "var(--text-3)" : "#000000",
           border: "none",
           cursor: submitting ? "default" : "pointer",
         }}

@@ -8,7 +8,7 @@ function CheckRow({ label, present }: { label: string; present: boolean }) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "11px",
-          color: present ? "#737373" : "#404040",
+          color: present ? "var(--text-2)" : "var(--text-3)",
         }}
       >
         {label}
@@ -23,7 +23,7 @@ function CheckRow({ label, present }: { label: string; present: boolean }) {
 export default function ArtifactQualityPanel({ metrics }: { metrics: ArtifactQualityMetrics }) {
   return (
     <div className="space-y-4">
-      <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.5rem 0.875rem" }}>
+      <div style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "0.5rem 0.875rem" }}>
         <CheckRow label="Draft Artifact" present={metrics.hasDraft} />
         <CheckRow label="Adversarial Review" present={metrics.hasAdversarialReview} />
         <CheckRow label="Local Rules Review" present={metrics.hasLocalRulesReview} />

@@ -15,13 +15,13 @@ export default function DraftPage() {
           Motion Drafting
         </p>
         <h1
-          className="text-3xl font-semibold tracking-tight text-[#f4f4f4]"
+          className="text-3xl font-semibold tracking-tight text-[var(--text-1)]"
           style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
         >
           New Draft Workflow
         </h1>
         <p
-          className="mt-2 text-xs text-[#737373]"
+          className="mt-2 text-xs text-[var(--text-2)]"
           style={{ fontFamily: "var(--font-mono), monospace" }}
         >
           Provide facts and motion parameters. Eight agents will retrieve authority, draft a
@@ -37,7 +37,7 @@ export default function DraftPage() {
 
       <div
         className="mt-12 pt-8"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
+        style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
       >
         <p className="label mb-4">Recent Drafts</p>
         <Link
@@ -45,10 +45,10 @@ export default function DraftPage() {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "11px",
-            color: "#737373",
+            color: "var(--text-2)",
             letterSpacing: "0.14em",
           }}
-          className="transition-colors hover:text-white"
+          className="transition-colors hover:text-black"
         >
           View all workflow runs &rarr;
         </Link>

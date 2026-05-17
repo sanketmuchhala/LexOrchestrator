@@ -10,13 +10,13 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
   return (
     <div className="mb-6 flex items-center gap-4">
       <span
-        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.2em" }}
+        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.2em" }}
       >
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
-        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#737373", letterSpacing: "0.24em" }}
+        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)", letterSpacing: "0.24em" }}
         className="uppercase"
       >
         {children}
@@ -49,7 +49,7 @@ function MetricCell({
   return (
     <div
       className="flex-1 px-5 py-5"
-      style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
+      style={{ borderRight: "1px solid rgba(0,0,0,0.07)" }}
     >
       <p className="label mb-3">{label}</p>
       <div className="flex items-baseline gap-1">
@@ -59,7 +59,7 @@ function MetricCell({
         >
           {pct}
         </span>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>%</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>%</span>
       </div>
       {bottomTag && <div className="mt-2">{bottomTag}</div>}
     </div>
@@ -94,10 +94,10 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
       <section>
         <SectionTitle n="01">Reliability Metrics</SectionTitle>
         <div
-          style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ border: "1px solid rgba(0,0,0,0.07)" }}
         >
           {/* Score row */}
-          <div className="flex" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="flex" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
             <MetricCell label="Groundedness"     value={groundedness}  />
             <MetricCell label="Citation Acc."    value={citationAcc}   />
             <MetricCell label="Retrieval Cov."   value={retrieval}     />
@@ -121,20 +121,20 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
           {/* Run metadata bar */}
           <div
             className="flex flex-wrap items-center gap-x-8 gap-y-1 px-5 py-3"
-            style={{ background: "#0a0a0a" }}
+            style={{ background: "var(--s1)" }}
           >
             <span className="label">Run</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
               {run.id.slice(0, 16)}...
             </span>
             {run.model && <>
               <span className="label">Model</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
                 {run.model}
               </span>
             </>}
             <span className="label">Time</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
               {new Date(run.created_at).toISOString().replace("T", " ").slice(0, 19)} UTC
             </span>
           </div>
@@ -154,7 +154,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
                     fontFamily: "var(--font-serif), Georgia, serif",
                     fontSize: "17px",
                     lineHeight: "1.85",
-                    color: "#d4d4d4",
+                    color: "var(--text-2)",
                     letterSpacing: "0.01em",
                   }}
                 >
@@ -163,7 +163,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
               ))}
             </div>
             {citations.length > 0 && (
-              <div className="mt-8" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.25rem" }}>
+              <div className="mt-8" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "1.25rem" }}>
                 <p className="label mb-3">Citations Used</p>
                 <div className="flex flex-wrap gap-2">
                   {citations.map((c) => (
@@ -179,7 +179,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
             )}
           </div>
         ) : (
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
             No final answer recorded for this run.
           </p>
         )}
@@ -189,15 +189,15 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
       <section>
         <SectionTitle n="03">Agent Execution Timeline</SectionTitle>
         {traces.length === 0 ? (
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>No trace data recorded.</p>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>No trace data recorded.</p>
         ) : (
           <div>
             {traces.map((trace, idx) => {
               const s = (trace.status ?? "complete").toLowerCase();
               const isDone = s === "complete" || s === "completed";
               const isFail = s === "error" || s === "failed";
-              const borderColor = isDone ? "#34d399" : isFail ? "#f87171" : "#404040";
-              const numColor   = isDone ? "#34d399" : isFail ? "#f87171" : "#737373";
+              const borderColor = isDone ? "#34d399" : isFail ? "#f87171" : "var(--text-3)";
+              const numColor   = isDone ? "#34d399" : isFail ? "#f87171" : "var(--text-2)";
               const isLast = idx === traces.length - 1;
               return (
                 <div
@@ -209,7 +209,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
                     padding: "1rem 0",
                     borderLeft: `2px solid ${borderColor}`,
                     paddingLeft: "1.25rem",
-                    borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
+                    borderBottom: isLast ? "none" : "1px solid rgba(0,0,0,0.05)",
                     marginBottom: isLast ? 0 : undefined,
                   }}
                 >
@@ -231,7 +231,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
                         fontFamily: "var(--font-mono)",
                         fontSize: "12px",
                         fontWeight: 600,
-                        color: isDone ? "#737373" : "#f4f4f4",
+                        color: isDone ? "var(--text-3)" : "var(--text-1)",
                         textDecoration: isDone ? "line-through" : "none",
                       }}
                     >
@@ -250,7 +250,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
                           fontFamily: "var(--font-serif), Georgia, serif",
                           fontSize: "13px",
                           lineHeight: "1.65",
-                          color: isDone ? "#737373" : "#a3a3a3",
+                          color: isDone ? "var(--text-3)" : "var(--text-2)",
                         }}
                       >
                         {trace.output_summary}
@@ -276,11 +276,11 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
       <section>
         <SectionTitle n="04">Citation Validation</SectionTitle>
         {citationValidations.length === 0 ? (
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>No citation validation data.</p>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>No citation validation data.</p>
         ) : (
           <table className="w-full border-collapse">
             <thead>
-              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
                 <th className="pb-3 pr-6 text-left"><span className="label">Claim</span></th>
                 <th className="pb-3 pr-6 text-left"><span className="label">Citation</span></th>
                 <th className="pb-3 pr-6 text-left"><span className="label">Status</span></th>
@@ -291,7 +291,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
               {citationValidations.map((cv, i) => (
                 <tr
                   key={cv.id}
-                  style={{ borderBottom: i < citationValidations.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
+                  style={{ borderBottom: i < citationValidations.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none" }}
                   className="align-top"
                 >
                   <td className="py-3.5 pr-6" style={{ maxWidth: "26rem" }}>
@@ -300,7 +300,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
                         fontFamily: "var(--font-serif), Georgia, serif",
                         fontSize: "14px",
                         lineHeight: "1.65",
-                        color: "#d4d4d4",
+                        color: "var(--text-2)",
                       }}
                     >
                       {cv.claim}
@@ -316,7 +316,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
                   <td className="py-3.5 pr-6">
                     <StatusBadge status={cv.support_status} />
                   </td>
-                  <td className="py-3.5 text-right tabular-nums" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#737373" }}>
+                  <td className="py-3.5 text-right tabular-nums" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-2)" }}>
                     {Math.round(normalizedScore(cv.support_score) * 100)}%
                   </td>
                 </tr>
@@ -330,13 +330,13 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
       <section>
         <SectionTitle n="05">Retrieved Sources</SectionTitle>
         {retrievalResults.length === 0 ? (
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>No retrieval data recorded.</p>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>No retrieval data recorded.</p>
         ) : (
           <div>
             {retrievalResults.map((rr, idx) => {
               const isPrimary = rr.citation_id.startsWith("CONST-");
               const score = normalizedScore(rr.final_score, 0);
-              const scoreColor = score >= 0.7 ? "#34d399" : score >= 0.4 ? "#fbbf24" : "#737373";
+              const scoreColor = score >= 0.7 ? "#34d399" : score >= 0.4 ? "#fbbf24" : "var(--text-2)";
               return (
                 <div
                   key={rr.id}
@@ -346,7 +346,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
                     gap: "1.25rem",
                     padding: "0.875rem 0",
                     borderBottom: idx < retrievalResults.length - 1
-                      ? "1px solid rgba(255,255,255,0.04)"
+                      ? "1px solid rgba(0,0,0,0.05)"
                       : "none",
                     borderLeft: isPrimary ? "2px solid rgba(96,165,250,0.4)" : "2px solid transparent",
                     paddingLeft: isPrimary ? "1rem" : "0",
@@ -357,7 +357,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
                       fontFamily: "var(--font-mono)",
                       fontSize: "10px",
                       fontWeight: 700,
-                      color: "#404040",
+                      color: "var(--text-3)",
                       minWidth: "1.5rem",
                       paddingTop: "2px",
                       flexShrink: 0,
@@ -381,7 +381,7 @@ export default function RunDetailView({ detail }: { detail: RunDetail }) {
                           fontFamily: "var(--font-serif), Georgia, serif",
                           fontSize: "13px",
                           lineHeight: "1.6",
-                          color: "#737373",
+                          color: "var(--text-2)",
                         }}
                       >
                         {rr.reason}

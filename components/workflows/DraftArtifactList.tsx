@@ -7,18 +7,18 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#404040",
+          color: "var(--text-3)",
           letterSpacing: "0.2em",
         }}
       >
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -46,7 +46,7 @@ export default function DraftArtifactList({ artifacts }: { artifacts: WorkflowAr
       <SectionTitle n="03">Draft Artifacts</SectionTitle>
 
       {artifacts.length === 0 ? (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
           No draft artifacts recorded.
         </p>
       ) : (
@@ -61,18 +61,18 @@ export default function DraftArtifactList({ artifacts }: { artifacts: WorkflowAr
             return (
               <div
                 key={artifact.id}
-                style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+                style={{ border: "1px solid rgba(0,0,0,0.07)" }}
               >
                 {/* Header */}
                 <div
                   className="flex flex-wrap items-start gap-3 px-5 py-4"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "#0a0a0a" }}
+                  style={{ borderBottom: "1px solid rgba(0,0,0,0.07)", background: "var(--s1)" }}
                 >
                   <span
                     style={{
                       fontFamily: "var(--font-mono)",
                       fontSize: "10px",
-                      color: "#404040",
+                      color: "var(--text-3)",
                       paddingTop: "3px",
                     }}
                   >
@@ -84,7 +84,7 @@ export default function DraftArtifactList({ artifacts }: { artifacts: WorkflowAr
                         fontFamily: "var(--font-serif), Georgia, serif",
                         fontSize: "15px",
                         fontWeight: 500,
-                        color: "#f4f4f4",
+                        color: "var(--text-1)",
                         lineHeight: 1.4,
                       }}
                     >
@@ -109,7 +109,7 @@ export default function DraftArtifactList({ artifacts }: { artifacts: WorkflowAr
                           style={{
                             fontFamily: "var(--font-mono)",
                             fontSize: "10px",
-                            color: "#404040",
+                            color: "var(--text-3)",
                           }}
                         >
                           by {artifact.created_by_agent}
@@ -126,13 +126,13 @@ export default function DraftArtifactList({ artifacts }: { artifacts: WorkflowAr
                       fontFamily: "var(--font-serif), Georgia, serif",
                       fontSize: "14px",
                       lineHeight: "1.75",
-                      color: "#a3a3a3",
+                      color: "var(--text-2)",
                       whiteSpace: "pre-wrap",
                     }}
                   >
                     {preview}
                     {truncated && (
-                      <span style={{ color: "#404040" }}>
+                      <span style={{ color: "var(--text-3)" }}>
                         {"\n\n"}[{artifact.content.length - CONTENT_PREVIEW_CHARS} more characters]
                       </span>
                     )}

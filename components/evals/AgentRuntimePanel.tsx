@@ -2,11 +2,11 @@ import type { AgentRuntimeMetrics } from "@/lib/litigation/evals/types";
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ padding: "0.625rem 0.875rem", border: "1px solid rgba(255,255,255,0.06)" }}>
+    <div style={{ padding: "0.625rem 0.875rem", border: "1px solid rgba(0,0,0,0.07)" }}>
       <p className="label mb-1">{label}</p>
       <p
         className="tabular-nums"
-        style={{ fontFamily: "var(--font-mono)", fontSize: "18px", fontWeight: 700, color: "#f4f4f4" }}
+        style={{ fontFamily: "var(--font-mono)", fontSize: "18px", fontWeight: 700, color: "var(--text-1)" }}
       >
         {value}
       </p>
@@ -35,7 +35,7 @@ export default function AgentRuntimePanel({ metrics }: { metrics: AgentRuntimeMe
         <Stat label="Estimated Cost" value={costStr} />
       </div>
       <p
-        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
       >
         Token counts and cost estimates are only available when the LLM client reports them.
         Most local/mock runs show zero values.

@@ -33,18 +33,18 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#404040",
+          color: "var(--text-3)",
           letterSpacing: "0.2em",
         }}
       >
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -58,7 +58,7 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
 function PanelCard({ children }: { children: React.ReactNode }) {
   return (
     <div
-      style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}
+      style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "1.25rem" }}
     >
       {children}
     </div>
@@ -85,11 +85,11 @@ export default async function DraftWorkspacePage({ params }: Props) {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "11px",
-            color: "#404040",
+            color: "var(--text-3)",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
           }}
-          className="transition-colors hover:text-white"
+          className="transition-colors hover:text-black"
         >
           &larr; New Draft
         </Link>
@@ -97,8 +97,8 @@ export default async function DraftWorkspacePage({ params }: Props) {
           {workflow?.matter_id && (
             <Link
               href={`/matters/${workflow.matter_id}`}
-              style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-              className="transition-colors hover:text-white"
+              style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+              className="transition-colors hover:text-black"
             >
               Matter &rarr;
             </Link>
@@ -108,11 +108,11 @@ export default async function DraftWorkspacePage({ params }: Props) {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
-              color: "#404040",
+              color: "var(--text-3)",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
-            className="transition-colors hover:text-white"
+            className="transition-colors hover:text-black"
           >
             Technical Inspection &rarr;
           </Link>
@@ -121,11 +121,11 @@ export default async function DraftWorkspacePage({ params }: Props) {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
-              color: "#404040",
+              color: "var(--text-3)",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
-            className="transition-colors hover:text-white"
+            className="transition-colors hover:text-black"
           >
             Eval &rarr;
           </Link>
@@ -134,11 +134,11 @@ export default async function DraftWorkspacePage({ params }: Props) {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
-              color: "#404040",
+              color: "var(--text-3)",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
-            className="transition-colors hover:text-white"
+            className="transition-colors hover:text-black"
           >
             Trace &rarr;
           </Link>
@@ -149,8 +149,8 @@ export default async function DraftWorkspacePage({ params }: Props) {
               fontSize: "11px",
               fontWeight: 700,
               letterSpacing: "0.2em",
-              color: "#000",
-              background: "#f4f4f4",
+              color: "#000000",
+              background: "var(--text-1)",
               padding: "0.375rem 0.875rem",
               textTransform: "uppercase",
               textDecoration: "none",
@@ -165,7 +165,7 @@ export default async function DraftWorkspacePage({ params }: Props) {
       {workflow === null ? (
         <div className="py-24 text-center">
           <p
-            style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#737373" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-2)" }}
           >
             {process.env.NEXT_PUBLIC_SUPABASE_URL
               ? "Draft workflow not found."
@@ -173,7 +173,7 @@ export default async function DraftWorkspacePage({ params }: Props) {
           </p>
           <p
             className="mt-2"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}
           >
             Run ID: {id}
           </p>
@@ -192,7 +192,7 @@ export default async function DraftWorkspacePage({ params }: Props) {
                   fontSize: "clamp(1.1rem, 2.5vw, 1.5rem)",
                   fontWeight: 500,
                   lineHeight: 1.5,
-                  color: "#f4f4f4",
+                  color: "var(--text-1)",
                   maxWidth: "52rem",
                   marginBottom: "1rem",
                 }}
@@ -211,7 +211,29 @@ export default async function DraftWorkspacePage({ params }: Props) {
             {/* ── Left: Editor ── */}
             <div className="space-y-8 min-w-0">
               <section>
-                <SectionTitle n="02">Motion Draft</SectionTitle>
+                <div className="mb-5 flex items-center gap-4">
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.2em" }}>
+                    § 02
+                  </span>
+                  <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
+                  {!["completed", "failed", "cancelled"].includes(workflow.status) && (
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex items-center justify-center" style={{ width: 24, height: 24 }}>
+                        <div className="agent-orb" style={{ width: 16, height: 16 }} aria-hidden="true" />
+                        <div className="agent-orb-ring" style={{ inset: "-4px", animationDelay: "0s" }} aria-hidden="true" />
+                        <div className="agent-orb-ring" style={{ inset: "-4px", animationDelay: "0.7s" }} aria-hidden="true" />
+                      </div>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)", letterSpacing: "0.16em", textTransform: "uppercase" }}>
+                        Drafting
+                      </span>
+                    </div>
+                  )}
+                  {["completed", "failed", "cancelled"].includes(workflow.status) && (
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)", letterSpacing: "0.24em", textTransform: "uppercase" }}>
+                      Motion Draft
+                    </span>
+                  )}
+                </div>
                 {primaryDraft ? (
                   <EditableMotionEditor
                     initialContent={primaryDraft.content}
@@ -220,7 +242,7 @@ export default async function DraftWorkspacePage({ params }: Props) {
                     workflow={workflow}
                   />
                 ) : (
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
                     No draft artifact available for this workflow run.
                   </p>
                 )}
@@ -233,7 +255,7 @@ export default async function DraftWorkspacePage({ params }: Props) {
                     initialRevisions={initialRevisions}
                   />
                 ) : (
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
                     No revisions yet.
                   </p>
                 )}
@@ -257,7 +279,7 @@ export default async function DraftWorkspacePage({ params }: Props) {
             <div className="space-y-6" style={{ minWidth: 0 }}>
               <section>
                 <SectionTitle n="05">Verification Inspector</SectionTitle>
-                <div style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
                   <VerificationInspector
                     reports={citationReports}
                     artifact={primaryDraft}

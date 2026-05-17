@@ -13,17 +13,17 @@ function HotspotRow({ label, value, href }: { label: string; value: string; href
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
+        borderBottom: "1px solid rgba(0,0,0,0.05)",
         padding: "0.625rem 0",
         gap: "1rem",
       }}
     >
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
         {label}
       </span>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#f4f4f4" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-1)" }}>
         {href ? (
-          <Link href={href} className="transition-colors hover:text-white" style={{ color: "#60a5fa" }}>
+          <Link href={href} className="transition-colors hover:text-black" style={{ color: "#60a5fa" }}>
             {value}
           </Link>
         ) : value}
@@ -43,7 +43,7 @@ export default function ObservabilityHotspots({ stats }: Props) {
   ).length;
 
   return (
-    <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
+    <div style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "1.25rem" }}>
       <HotspotRow
         label="Slowest Run"
         value={

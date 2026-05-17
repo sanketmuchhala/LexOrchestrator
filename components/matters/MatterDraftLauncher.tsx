@@ -7,9 +7,9 @@ import type { MatterRow } from "@/lib/matters/types";
 const inputBase: React.CSSProperties = {
   fontFamily: "var(--font-mono), monospace",
   fontSize: "12px",
-  color: "#f4f4f4",
-  background: "#0a0a0a",
-  border: "1px solid rgba(255,255,255,0.08)",
+  color: "var(--text-1)",
+  background: "var(--s1)",
+  border: "1px solid rgba(0,0,0,0.09)",
   padding: "0.5rem 0.75rem",
   width: "100%",
   outline: "none",
@@ -67,7 +67,7 @@ export default function MatterDraftLauncher({ matter }: Props) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
         <div>
-          <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
+          <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
             Motion Type
           </label>
           <select style={{ ...inputBase, cursor: "pointer" }} value={motionType} onChange={(e) => setMotionType(e.target.value)}>
@@ -80,15 +80,15 @@ export default function MatterDraftLauncher({ matter }: Props) {
           </select>
         </div>
         <div>
-          <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
+          <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
             Jurisdiction
           </label>
-          <input style={{ ...inputBase, color: "#404040" }} value={matter.jurisdiction ?? "Federal"} readOnly />
+          <input style={{ ...inputBase, color: "var(--text-3)" }} value={matter.jurisdiction ?? "Federal"} readOnly />
         </div>
       </div>
 
       <div>
-        <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
+        <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
           Facts / Key Issues
         </label>
         <textarea
@@ -100,7 +100,7 @@ export default function MatterDraftLauncher({ matter }: Props) {
       </div>
 
       <div>
-        <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
+        <label style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", letterSpacing: "0.2em", textTransform: "uppercase", display: "block", marginBottom: "0.375rem" }}>
           Desired Output <span style={{ color: "#2a2a2a", marginLeft: "0.5rem" }}>(optional)</span>
         </label>
         <input
@@ -125,8 +125,8 @@ export default function MatterDraftLauncher({ matter }: Props) {
           letterSpacing: "0.2em",
           textTransform: "uppercase",
           padding: "0.5rem 1.25rem",
-          background: running ? "#1a1a1a" : "#f4f4f4",
-          color: running ? "#404040" : "#000",
+          background: running ? "var(--s2)" : "var(--text-1)",
+          color: running ? "var(--text-3)" : "#000000",
           border: "none",
           cursor: running ? "default" : "pointer",
         }}

@@ -26,10 +26,10 @@ export default function LoadingState() {
     <div className="appear">
       <div
         className="mb-6 flex items-center justify-between"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "1rem" }}
+        style={{ borderBottom: "1px solid rgba(0,0,0,0.07)", paddingBottom: "1rem" }}
       >
         <p
-          className="text-xs font-semibold uppercase tracking-[0.2em] text-[#f4f4f4]"
+          className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-1)]"
           style={{ fontFamily: "var(--font-mono), monospace" }}
         >
           Pipeline Running
@@ -40,7 +40,7 @@ export default function LoadingState() {
             style={{ background: "#34d399" }}
           />
           <span
-            className="text-[10px] text-[#737373] uppercase tracking-[0.16em]"
+            className="text-[10px] text-[var(--text-2)] uppercase tracking-[0.16em]"
             style={{ fontFamily: "var(--font-mono), monospace" }}
           >
             Processing
@@ -70,7 +70,7 @@ export default function LoadingState() {
                 className="shrink-0 text-[11px] font-bold tabular-nums"
                 style={{
                   fontFamily: "var(--font-mono), monospace",
-                  color: isDone ? "#34d399" : isActive ? "#f4f4f4" : "#404040",
+                  color: isDone ? "var(--emerald)" : isActive ? "var(--text-1)" : "var(--text-3)",
                   width: "1.75rem",
                   paddingTop: "1px",
                 }}
@@ -82,7 +82,7 @@ export default function LoadingState() {
                   className="text-[13px] font-semibold"
                   style={{
                     fontFamily: "var(--font-mono), monospace",
-                    color: isDone ? "#737373" : isActive ? "#f4f4f4" : "#404040",
+                    color: isDone ? "var(--text-2)" : isActive ? "var(--text-1)" : "var(--text-3)",
                     textDecoration: isDone ? "line-through" : "none",
                   }}
                 >
@@ -92,7 +92,7 @@ export default function LoadingState() {
                   className="mt-0.5 text-xs"
                   style={{
                     fontFamily: "var(--font-mono), monospace",
-                    color: isActive ? "#737373" : "#404040",
+                    color: isActive ? "var(--text-2)" : "var(--text-3)",
                   }}
                 >
                   {desc}
@@ -118,7 +118,7 @@ export default function LoadingState() {
       </div>
 
       <p
-        className="mt-6 text-[10px] text-[#404040]"
+        className="mt-6 text-[10px] text-[var(--text-3)]"
         style={{ fontFamily: "var(--font-mono), monospace" }}
       >
         Results will open automatically upon completion.

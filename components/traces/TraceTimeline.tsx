@@ -8,7 +8,7 @@ interface Props {
 export default function TraceTimeline({ events }: Props) {
   if (events.length === 0) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
         No events recorded for this workflow run.
       </p>
     );

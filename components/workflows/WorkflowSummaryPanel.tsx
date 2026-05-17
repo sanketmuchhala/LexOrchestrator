@@ -8,18 +8,18 @@ function SectionTitle({ n, children }: { n: string; children: string }) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#404040",
+          color: "var(--text-3)",
           letterSpacing: "0.2em",
         }}
       >
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -43,12 +43,12 @@ function MetricCell({
   label: string;
   value: number | null;
 }) {
-  const color = value != null ? scoreColor(value) : "#404040";
+  const color = value != null ? scoreColor(value) : "var(--text-3)";
 
   return (
     <div
       className="flex-1 px-5 py-5"
-      style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
+      style={{ borderRight: "1px solid rgba(0,0,0,0.07)" }}
     >
       <p className="label mb-3">{label}</p>
       {value != null ? (
@@ -65,12 +65,12 @@ function MetricCell({
           >
             {formatPercent(value).replace("%", "")}
           </span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
             %
           </span>
         </div>
       ) : (
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "20px", color: "#404040" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "20px", color: "var(--text-3)" }}>
           —
         </span>
       )}
@@ -84,8 +84,8 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
       <SectionTitle n="01">Workflow Summary</SectionTitle>
 
       {/* Score grid */}
-      <div style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="flex" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
+        <div className="flex" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
           <MetricCell label="Confidence" value={workflow.confidence} />
           <MetricCell label="Faithfulness" value={workflow.faithfulness_score} />
           <MetricCell label="Citation Pass Rate" value={workflow.citation_pass_rate} />
@@ -106,10 +106,10 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
         {/* Metadata bar */}
         <div
           className="flex flex-wrap items-center gap-x-8 gap-y-2 px-5 py-3"
-          style={{ background: "#0a0a0a" }}
+          style={{ background: "var(--s1)" }}
         >
           <span className="label">Run</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
             {workflow.id.slice(0, 16)}…
           </span>
 
@@ -119,7 +119,7 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
           </span>
 
           <span className="label">Type</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}>
             {workflow.workflow_type}
           </span>
 
@@ -127,7 +127,7 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
             <>
               <span className="label">Motion</span>
               <span
-                style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}
+                style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}
               >
                 {workflow.motion_type.replace(/_/g, " ")}
               </span>
@@ -138,7 +138,7 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
             <>
               <span className="label">Jurisdiction</span>
               <span
-                style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}
+                style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}
               >
                 {workflow.jurisdiction}
                 {workflow.court ? ` / ${workflow.court}` : ""}
@@ -150,7 +150,7 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "11px",
-              color: "#404040",
+              color: "var(--text-3)",
               marginLeft: "auto",
             }}
           >
@@ -163,7 +163,7 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
       {workflow.input_summary && (
         <div
           className="mt-4 px-5 py-4"
-          style={{ border: "1px solid rgba(255,255,255,0.06)", borderTop: "none" }}
+          style={{ border: "1px solid rgba(0,0,0,0.07)", borderTop: "none" }}
         >
           <p className="label mb-2">Query</p>
           <p
@@ -171,7 +171,7 @@ export default function WorkflowSummaryPanel({ workflow }: { workflow: WorkflowR
               fontFamily: "var(--font-serif), Georgia, serif",
               fontSize: "15px",
               lineHeight: "1.7",
-              color: "#d4d4d4",
+              color: "var(--text-2)",
             }}
           >
             {workflow.input_summary}

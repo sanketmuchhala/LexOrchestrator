@@ -13,15 +13,15 @@ export const dynamic = "force-dynamic";
 function SectionTitle({ n, children }: { n: string; children: string }) {
   return (
     <div className="mb-6 flex items-center gap-4">
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.2em" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.2em" }}>
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -43,13 +43,13 @@ export default async function EvalsPage() {
           Quality Metrics
         </p>
         <h1
-          className="text-3xl font-semibold tracking-tight text-[#f4f4f4]"
+          className="text-3xl font-semibold tracking-tight text-[var(--text-1)]"
           style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
         >
           Workflow Evals
         </h1>
         <p
-          className="mt-2 text-xs text-[#737373]"
+          className="mt-2 text-xs text-[var(--text-2)]"
           style={{ fontFamily: "var(--font-mono), monospace" }}
         >
           Internal quality signals across completed litigation workflow runs.
@@ -58,8 +58,8 @@ export default async function EvalsPage() {
         <div style={{ marginTop: "0.75rem" }}>
           <Link
             href="/observability"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-            className="transition-colors hover:text-white"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-black"
           >
             Performance Observability &rarr;
           </Link>
@@ -75,7 +75,7 @@ export default async function EvalsPage() {
           <SectionTitle n="01">Quality Overview</SectionTitle>
           {stats.totalWorkflows === 0 ? (
             <div className="py-12 text-center">
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#737373" }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-2)" }}>
                 {process.env.NEXT_PUBLIC_SUPABASE_URL
                   ? "No workflow runs recorded yet."
                   : "Database not configured. Run a workflow via /draft to generate eval data."}
@@ -97,7 +97,7 @@ export default async function EvalsPage() {
           <SectionTitle n="03">Reliability Notes</SectionTitle>
           <div
             className="space-y-3 px-5 py-4"
-            style={{ border: "1px solid rgba(255,255,255,0.06)", background: "#0a0a0a" }}
+            style={{ border: "1px solid rgba(0,0,0,0.07)", background: "var(--s1)" }}
           >
             {[
               "Scores shown here are internal quality signals derived from workflow outputs. They are not independent legal assessments.",
@@ -113,7 +113,7 @@ export default async function EvalsPage() {
                   fontFamily: "var(--font-serif), Georgia, serif",
                   fontSize: "14px",
                   lineHeight: "1.75",
-                  color: "#737373",
+                  color: "var(--text-2)",
                 }}
               >
                 {note}

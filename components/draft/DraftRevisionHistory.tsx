@@ -40,7 +40,7 @@ export default function DraftRevisionHistory({ initialRevisions }: Props) {
 
   if (initialRevisions.length === 0) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
         No manual revisions yet. Save a change to create the first revision.
       </p>
     );
@@ -60,7 +60,7 @@ export default function DraftRevisionHistory({ initialRevisions }: Props) {
             key={rev.id}
             style={{
               paddingBottom: isLast ? 0 : "0.75rem",
-              borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
+              borderBottom: isLast ? "none" : "1px solid rgba(0,0,0,0.05)",
               display: "flex",
               flexDirection: "column",
               gap: "0.25rem",
@@ -71,7 +71,7 @@ export default function DraftRevisionHistory({ initialRevisions }: Props) {
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: "11px",
-                  color: "#f4f4f4",
+                  color: "var(--text-1)",
                   fontWeight: 600,
                 }}
               >
@@ -84,7 +84,7 @@ export default function DraftRevisionHistory({ initialRevisions }: Props) {
               )}
               {rev.citationSummary.total > 0 && (
                 <span
-                  style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#737373" }}
+                  style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)" }}
                 >
                   {passRateLabel(rev.citationSummary)}
                 </span>
@@ -94,7 +94,7 @@ export default function DraftRevisionHistory({ initialRevisions }: Props) {
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "10px",
-                color: "#404040",
+                color: "var(--text-3)",
               }}
             >
               {formatDate(rev.createdAt)} &middot; {rev.createdBy}
@@ -104,7 +104,7 @@ export default function DraftRevisionHistory({ initialRevisions }: Props) {
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: "10px",
-                  color: "#737373",
+                  color: "var(--text-2)",
                   fontStyle: "italic",
                 }}
               >
@@ -121,7 +121,7 @@ export default function DraftRevisionHistory({ initialRevisions }: Props) {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "10px",
-            color: "#737373",
+            color: "var(--text-2)",
             background: "none",
             border: "none",
             cursor: "pointer",

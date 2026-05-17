@@ -16,15 +16,15 @@ export const dynamic = "force-dynamic";
 function SectionTitle({ n, children }: { n: string; children: string }) {
   return (
     <div className="mb-5 flex items-center gap-4">
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.2em" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.2em" }}>
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -50,7 +50,7 @@ export default async function ObservabilityPage() {
               fontFamily: "var(--font-serif), Georgia, serif",
               fontSize: "clamp(1.1rem, 2.5vw, 1.5rem)",
               fontWeight: 500,
-              color: "#f4f4f4",
+              color: "var(--text-1)",
               lineHeight: 1.4,
             }}
           >
@@ -60,15 +60,15 @@ export default async function ObservabilityPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/workflows"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-            className="transition-colors hover:text-white"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-black"
           >
             Workflows &rarr;
           </Link>
           <Link
             href="/evals"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-            className="transition-colors hover:text-white"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-black"
           >
             Evals &rarr;
           </Link>
@@ -77,7 +77,7 @@ export default async function ObservabilityPage() {
 
       {stats.totalWorkflows === 0 && (
         <div className="py-24 text-center">
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#737373" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-2)" }}>
             {process.env.NEXT_PUBLIC_SUPABASE_URL
               ? "No workflow runs found. Run a draft workflow to begin collecting metrics."
               : "Database not configured. Observability metrics require Supabase."}

@@ -1,7 +1,7 @@
 import type { EvalDashboardStats } from "@/lib/litigation/evals/types";
 
 function scoreColor(v: number | null): string {
-  if (v === null) return "#404040";
+  if (v === null) return "var(--text-3)";
   if (v >= 0.7) return "#34d399";
   if (v >= 0.4) return "#fbbf24";
   return "#f87171";
@@ -20,7 +20,7 @@ function StatCard({
 }) {
   return (
     <div
-      style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}
+      style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "1.25rem" }}
     >
       <p className="label mb-3">{label}</p>
       <p
@@ -29,7 +29,7 @@ function StatCard({
           fontFamily: "var(--font-mono)",
           fontSize: "28px",
           fontWeight: 700,
-          color: color ?? "#f4f4f4",
+          color: color ?? "var(--text-1)",
           lineHeight: 1,
         }}
       >
@@ -38,7 +38,7 @@ function StatCard({
       {sub && (
         <p
           className="mt-2"
-          style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+          style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
         >
           {sub}
         </p>
@@ -64,8 +64,8 @@ export default function EvalOverviewCards({ stats }: { stats: EvalDashboardStats
       className="grid gap-px"
       style={{
         gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))",
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "rgba(0,0,0,0.05)",
+        border: "1px solid rgba(0,0,0,0.07)",
       }}
     >
       <StatCard
@@ -91,7 +91,7 @@ export default function EvalOverviewCards({ stats }: { stats: EvalDashboardStats
         color={scoreColor(stats.averageFaithfulnessScore)}
         sub="grounded citations"
       />
-      <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem", background: "#0a0a0a" }}>
+      <div style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "1.25rem", background: "var(--s1)" }}>
         <p className="label mb-3">Verdicts</p>
         <div className="flex gap-3 flex-wrap">
           <span>

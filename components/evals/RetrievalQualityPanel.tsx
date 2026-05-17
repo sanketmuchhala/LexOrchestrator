@@ -30,12 +30,12 @@ export default function RetrievalQualityPanel({ metrics }: { metrics: RetrievalQ
         ].map(({ label, value }) => (
           <div
             key={label}
-            style={{ padding: "0.625rem 0.875rem", border: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ padding: "0.625rem 0.875rem", border: "1px solid rgba(0,0,0,0.07)" }}
           >
             <p className="label mb-1">{label}</p>
             <p
               className="tabular-nums"
-              style={{ fontFamily: "var(--font-mono)", fontSize: "18px", fontWeight: 700, color: "#f4f4f4" }}
+              style={{ fontFamily: "var(--font-mono)", fontSize: "18px", fontWeight: 700, color: "var(--text-1)" }}
             >
               {value}
             </p>
@@ -44,7 +44,7 @@ export default function RetrievalQualityPanel({ metrics }: { metrics: RetrievalQ
       </div>
 
       <p
-        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
       >
         Retrieval coverage is estimated from citation count in the draft artifact.
         This is an approximation, not ground-truth retrieval recall.

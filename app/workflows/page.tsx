@@ -23,13 +23,13 @@ export default async function WorkflowsPage() {
             Litigation
           </p>
           <h1
-            className="text-3xl font-semibold tracking-tight text-[#f4f4f4]"
+            className="text-3xl font-semibold tracking-tight text-[var(--text-1)]"
             style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
           >
             Workflow Runs
           </h1>
           <p
-            className="mt-2 text-xs text-[#737373]"
+            className="mt-2 text-xs text-[var(--text-2)]"
             style={{ fontFamily: "var(--font-mono), monospace" }}
           >
             Eight-agent litigation pipeline. Intake, retrieval, drafting, citation
@@ -39,8 +39,8 @@ export default async function WorkflowsPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/observability"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-            className="transition-colors hover:text-white"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-black"
           >
             Observe &rarr;
           </Link>
@@ -53,7 +53,7 @@ export default async function WorkflowsPage() {
       {runs.length === 0 ? (
         <div className="py-24 text-center">
           <p
-            className="text-sm text-[#737373]"
+            className="text-sm text-[var(--text-2)]"
             style={{ fontFamily: "var(--font-mono), monospace" }}
           >
             {process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -61,7 +61,7 @@ export default async function WorkflowsPage() {
               : "Database not configured. Run a demo workflow to see results here."}
           </p>
           <p
-            className="mt-3 text-xs text-[#404040]"
+            className="mt-3 text-xs text-[var(--text-3)]"
             style={{ fontFamily: "var(--font-mono), monospace" }}
           >
             Use the Run Demo Workflow button above to launch a test run.

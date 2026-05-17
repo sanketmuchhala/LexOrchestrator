@@ -57,9 +57,9 @@ export default function MatterFilesPanel({ matterId, initialFiles }: Props) {
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             padding: "0.375rem 0.875rem",
-            border: "1px solid rgba(255,255,255,0.12)",
-            color: uploading ? "#404040" : "#d4d4d4",
-            background: "#0a0a0a",
+            border: "1px solid rgba(0,0,0,0.12)",
+            color: uploading ? "var(--text-3)" : "var(--text-2)",
+            background: "var(--s1)",
             cursor: uploading ? "default" : "pointer",
             display: "inline-block",
           }}
@@ -73,7 +73,7 @@ export default function MatterFilesPanel({ matterId, initialFiles }: Props) {
           />
           {uploading ? "Uploading..." : "Upload .txt or .md"}
         </label>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}>
           .txt and .md only. Max 5 MB.
         </span>
       </div>
@@ -85,23 +85,23 @@ export default function MatterFilesPanel({ matterId, initialFiles }: Props) {
       )}
 
       {initialFiles.length === 0 ? (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#404040" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-3)" }}>
           No files attached to this matter.
         </p>
       ) : (
         <div className="space-y-2">
           {initialFiles.map((f) => (
-            <div key={f.id} style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.875rem" }}>
+            <div key={f.id} style={{ border: "1px solid rgba(0,0,0,0.07)", padding: "0.875rem" }}>
               <div className="flex items-center gap-3 flex-wrap mb-1">
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#f4f4f4", fontWeight: 600 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-1)", fontWeight: 600 }}>
                   {f.title}
                 </span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.12em" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.12em" }}>
                   {f.file_role.replace(/_/g, " ")}
                 </span>
               </div>
               {f.extracted_text_preview && (
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
                   {f.extracted_text_preview}
                   {f.extracted_text_preview.length >= 400 ? " ..." : ""}
                 </p>

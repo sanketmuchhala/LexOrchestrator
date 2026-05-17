@@ -27,7 +27,7 @@ export default function JsonDetails({ label, value }: Props) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "9px",
-          color: "#404040",
+          color: "var(--text-3)",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           cursor: "pointer",
@@ -41,9 +41,9 @@ export default function JsonDetails({ label, value }: Props) {
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
-          background: "#0a0a0a",
-          border: "1px solid rgba(255,255,255,0.04)",
+          color: "var(--text-2)",
+          background: "var(--s1)",
+          border: "1px solid rgba(0,0,0,0.05)",
           padding: "0.75rem",
           marginTop: "0.375rem",
           overflowX: "auto",

@@ -13,7 +13,7 @@ export default function AuthorityPanel({
 
   if (citations.length === 0) {
     return (
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#404040" }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-3)" }}>
         No authority artifacts stored for this workflow yet. Authority is retrieved during the
         drafting run and ground citations in the document above.
       </p>
@@ -30,14 +30,14 @@ export default function AuthorityPanel({
             alignItems: "baseline",
             gap: "0.875rem",
             padding: "0.625rem 0",
-            borderBottom: "1px solid rgba(255,255,255,0.04)",
+            borderBottom: "1px solid rgba(0,0,0,0.05)",
           }}
         >
           <span
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
-              color: "#404040",
+              color: "var(--text-3)",
               flexShrink: 0,
             }}
           >
@@ -56,7 +56,7 @@ export default function AuthorityPanel({
       ))}
       <p
         className="pt-2"
-        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040" }}
+        style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}
       >
         Full opinion text and metadata are stored in legal_opinion_chunks when seeded.
         Run npm run seed:litigation-demo to populate demo opinions.

@@ -24,15 +24,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function SectionTitle({ n, children }: { n: string; children: string }) {
   return (
     <div className="mb-5 flex items-center gap-4">
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.2em" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.2em" }}>
         § {n}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ flex: 1, height: "1px", background: "rgba(0,0,0,0.07)" }} />
       <span
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: "10px",
-          color: "#737373",
+          color: "var(--text-2)",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
         }}
@@ -57,11 +57,11 @@ export default async function EvalDetailPage({ params }: Props) {
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "11px",
-            color: "#404040",
+            color: "var(--text-3)",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
           }}
-          className="transition-colors hover:text-white"
+          className="transition-colors hover:text-black"
         >
           &larr; Evals
         </Link>
@@ -71,8 +71,8 @@ export default async function EvalDetailPage({ params }: Props) {
               {workflow.matter_id && (
                 <Link
                   href={`/matters/${workflow.matter_id}`}
-                  style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
-                  className="transition-colors hover:text-white"
+                  style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                  className="transition-colors hover:text-black"
                 >
                   Matter &rarr;
                 </Link>
@@ -82,11 +82,11 @@ export default async function EvalDetailPage({ params }: Props) {
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: "10px",
-                  color: "#404040",
+                  color: "var(--text-3)",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                 }}
-                className="transition-colors hover:text-white"
+                className="transition-colors hover:text-black"
               >
                 Draft Workspace &rarr;
               </Link>
@@ -95,11 +95,11 @@ export default async function EvalDetailPage({ params }: Props) {
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: "10px",
-                  color: "#404040",
+                  color: "var(--text-3)",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                 }}
-                className="transition-colors hover:text-white"
+                className="transition-colors hover:text-black"
               >
                 Inspection &rarr;
               </Link>
@@ -108,11 +108,11 @@ export default async function EvalDetailPage({ params }: Props) {
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: "10px",
-                  color: "#404040",
+                  color: "var(--text-3)",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                 }}
-                className="transition-colors hover:text-white"
+                className="transition-colors hover:text-black"
               >
                 Trace &rarr;
               </Link>
@@ -123,12 +123,12 @@ export default async function EvalDetailPage({ params }: Props) {
 
       {workflow === null ? (
         <div className="py-24 text-center">
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "#737373" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-2)" }}>
             {process.env.NEXT_PUBLIC_SUPABASE_URL
               ? "Workflow run not found."
               : "Database not configured. Eval data requires Supabase."}
           </p>
-          <p className="mt-2" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+          <p className="mt-2" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
             Run ID: {id}
           </p>
         </div>
@@ -164,18 +164,18 @@ export default async function EvalDetailPage({ params }: Props) {
                     {formatPercent(summary.overallConfidence)} confidence
                   </span>
                   {workflow.motion_type && (
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}>
                       {workflow.motion_type.replace(/_/g, " ")}
                     </span>
                   )}
                   {workflow.jurisdiction && (
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#737373" }}>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)" }}>
                       {workflow.jurisdiction}
                       {workflow.court ? ` / ${workflow.court}` : ""}
                     </span>
                   )}
                 </div>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#404040" }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-3)" }}>
                   {workflow.id}
                 </p>
               </div>
@@ -230,9 +230,9 @@ export default async function EvalDetailPage({ params }: Props) {
                 {/* Disclaimer */}
                 <div
                   className="px-5 py-4"
-                  style={{ border: "1px solid rgba(255,255,255,0.04)", background: "#0a0a0a" }}
+                  style={{ border: "1px solid rgba(0,0,0,0.05)", background: "var(--s1)" }}
                 >
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", lineHeight: "1.7" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", lineHeight: "1.7" }}>
                     Scores shown here are internal quality signals derived from workflow outputs.
                     They do not constitute legal advice, a compliance certification, or a guarantee of accuracy.
                     Citation pass rate depends on the indexed corpus. Retrieval coverage is estimated from citation count.
