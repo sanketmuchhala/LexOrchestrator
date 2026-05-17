@@ -68,6 +68,19 @@ export default async function WorkflowDetailPage({ params }: Props) {
             Eval &rarr;
           </Link>
           <Link
+            href={`/traces/${id}`}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: "#404040",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+            }}
+            className="transition-colors hover:text-white"
+          >
+            Trace &rarr;
+          </Link>
+          <Link
             href="/workflows"
             style={{
               fontFamily: "var(--font-mono)",

@@ -194,6 +194,29 @@ GET /api/drafts/[id]/export?format=pdf&...
 
 `pdfkit` is dynamically imported (`const PDFDocument = (await import("pdfkit")).default`) to prevent it from being bundled into client-side code. Export routes must not use `export const runtime = "edge"`.
 
+---
+
+## Agent Trace Topology (Phase 18)
+
+The trace view reads from the same tables as the workflow inspection surface, but uses a detail-level DB query:
+
+```
+GET /api/traces/[id]  (or /traces/[id] server render)
+  -> buildWorkflowTrace(workflowRunId)
+       -> getLitigationWorkflowRun(id)
+       -> getLitigationWorkflowEventsWithDetails(id)   // includes tool_input, tool_output, metadata
+       -> getLitigationWorkflowArtifacts(id)
+       -> getLitigationWorkflowCitationReports(id)
+       -> groupByAgent(events)
+       -> buildDebugSummary(events, groups)
+       -> buildReplaySnapshot(workflow, artifacts, citationReports)
+       -> TraceTimeline
+```
+
+The trace is read-only. Replay execution is not implemented. The `TraceTimeline.replaySnapshot` records the context snapshot needed to reproduce or debug a workflow run.
+
+`getLitigationWorkflowEventsWithDetails` is a separate query from `getLitigationWorkflowEvents` (used by the real-time event feed). The detail query adds `tool_input`, `tool_output`, and `metadata` columns which are omitted from the feed to keep live polling responses small.
+
 ## Key Files
 
 ```
