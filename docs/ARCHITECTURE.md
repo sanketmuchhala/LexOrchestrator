@@ -173,6 +173,27 @@ App code (route, agent, MCP tool)
 
 Worker health: `GET /api/citations/worker-health`
 
+---
+
+## Draft Export Topology (Phase 17)
+
+All export requests flow through `lib/exports/exportDraft.ts`:
+
+```
+GET /api/drafts/[id]/export?format=pdf&...
+  -> exportDraft({ workflowRunId, format, options })
+       -> buildDraftExportPayload(workflowRunId)
+            -> getDraftWorkspace(id)   (workspace + artifacts)
+            -> getEditableDraft(id)    (latest revision content)
+            Content priority: latestRevision -> primaryDraft -> workflow.final_output -> ""
+       -> exportTxt(payload, options)   returns Buffer (sync)
+       -> exportDocx(payload, options)  returns Promise<Buffer> (docx package)
+       -> exportPdf(payload, options)   returns Promise<Buffer> (pdfkit, dynamic import)
+  -> new Response(buffer, { Content-Type, Content-Disposition: attachment })
+```
+
+`pdfkit` is dynamically imported (`const PDFDocument = (await import("pdfkit")).default`) to prevent it from being bundled into client-side code. Export routes must not use `export const runtime = "edge"`.
+
 ## Key Files
 
 ```

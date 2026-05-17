@@ -16,6 +16,8 @@ This is a portfolio project demonstrating multi-agent orchestration, hybrid RAG 
 
 **Draft editing.** The draft workspace (`/draft/[id]`) is editable. Save a revision with Cmd/Ctrl+S or the Save button. Click "Save + Verify" to re-run citation verification on the edited text. Revision history is tracked and displayed.
 
+**Draft export.** The § 04 Export section on the draft workspace provides one-click download as PDF, DOCX, or TXT. Optional appendices (Judge Brief, Local Rules, Adversarial Review) can be toggled via checkboxes. Exports use the latest saved revision. Cover page and citation summary are always included. Demo-grade only -- not guaranteed court-filing ready.
+
 **Citation verification.** Every citation in the draft is checked against indexed opinions for existence, quote accuracy, pin cite, proposition support, and treatment status. An optional Python worker using eyecite can be enabled for improved extraction (see [workers/citation/README.md](workers/citation/README.md)); the app falls back to the built-in regex extractor when the worker is unavailable.
 
 **Judge brief.** If a judge name is provided, the system looks up cached profile data derived from indexed opinions and returns style notes, citation preferences, and argument guidance. Preparation signal only -- not outcome prediction.
@@ -229,7 +231,7 @@ npm run check:all
 - Judge Brief output is argument preparation signal only. It does not predict outcomes or reflect current judicial preferences.
 - File upload supports `.txt` and `.md` only. PDF and DOCX are planned (Phase 15).
 - Uploaded case files are factual source material only -- not legal authority and not cited as such.
-- No PDF or DOCX export yet.
+- PDF and DOCX exports are demo-grade. They are not formatted to court-specific filing standards (no CM/ECF, no e-filing integration).
 - No lawyer-grade validation or legal advice claim.
 - No live CourtListener dependency required for the demo.
 - The seven-agent research pipeline (`/research`) and the litigation workflow (`/draft`) are separate; research runs do not appear in the workflow dashboard.
@@ -240,12 +242,11 @@ npm run check:all
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the phased plan through Phase 22.
 
-Next priorities:
-- PDF and DOCX upload (Phase 15 -- Phase 13 added .txt/.md intake)
+Completed through Phase 17 (Draft Export). Next priorities:
 - Real CourtListener / CAP ingestion (Phase 14)
-- Citation verification upgrade with eyecite or Python worker (Phase 15)
-- Editable motion editor (Phase 16)
-- PDF / DOCX export (Phase 17)
+- PDF and DOCX file upload for case files (planned)
+- Agent trace replay and debugging view (Phase 18)
+- Auth and multi-matter support (Phase 19+)
 
 ---
 
