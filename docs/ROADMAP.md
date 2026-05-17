@@ -156,21 +156,23 @@ Phases 0-12 are complete. This document covers the planned next phases.
 
 ---
 
-## Phase 21: Deployment Hardening
+## Phase 21: Deployment Hardening (Complete)
 
-**Goal:** Production-grade deployment configuration.
+**Goal:** Production-grade deployment readiness without adding new product features.
 
-**Why it matters:** The current setup runs on `npm run dev`. A portfolio demo benefits from a publicly accessible deployment.
+**Why it matters:** A portfolio demo that can be publicly deployed needs env validation, health routes, no local-only assumptions, and deployment documentation.
 
 **Deliverables:**
-- Vercel or Railway deployment configuration
-- Environment variable management via Vercel env or Railway secrets
-- Migration runner on deploy
-- Health check endpoint (`/api/health`)
-- Rate limiting on `/api/litigation/workflows` to prevent abuse
-- `npm run build` enforced in CI
+- `GET /api/health` -- lightweight health check with db and worker reachability
+- `GET /api/health/env` -- env configuration status (no secret values)
+- `lib/env/validateEnv.ts` -- `getEnvStatus()` and `assertProductionEnvSafe()` with masked availability
+- `lib/utils/logger.ts` -- structured logger (console.warn/error, NODE_ENV-aware, no secret output)
+- `scripts/check-deployment-readiness.ts` + `npm run check:deployment`
+- `.env.example` with placeholder-only values and comments
+- `docs/DEPLOYMENT.md` -- full deployment guide (Vercel + Supabase + optional worker)
+- `check:all` updated to include `check:demo`, `check:deployment`, lint, tsc, build
 
-**Not included:** Kubernetes, custom CDN, WAF.
+**Not included:** Rate limiting, Kubernetes, CDN, migration runner on deploy, CI/CD pipeline.
 
 ---
 

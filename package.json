@@ -31,7 +31,8 @@
     "worker:citation": "uvicorn workers.citation.app:app --host 127.0.0.1 --port 8015",
     "check:safety": "tsx scripts/check-safety.ts",
     "check:demo": "tsx scripts/check-demo-readiness.ts",
-    "check:all": "npm run check:safety && npm run lint && npx tsc --noEmit && npm run build && npm run check:demo"
+    "check:deployment": "tsx scripts/check-deployment-readiness.ts",
+    "check:all": "npm run check:safety && npm run check:demo && npm run check:deployment && npm run lint && npx tsc --noEmit && npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
