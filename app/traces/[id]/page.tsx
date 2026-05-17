@@ -100,6 +100,13 @@ export default async function TraceDetailPage({ params }: Props) {
           >
             Export TXT &rarr;
           </Link>
+          <Link
+            href="/observability"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-white"
+          >
+            Observe &rarr;
+          </Link>
         </div>
       </div>
 

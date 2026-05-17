@@ -363,6 +363,68 @@ npm run smoke:trace-builder   # degrades gracefully without DB; verifies all typ
 
 ---
 
+## Phase 19 Workflow Observability Dashboard
+
+Adds first-party performance observability for litigation workflows. No external tracing integration.
+
+### New modules (`lib/observability/`)
+
+| Path | Purpose |
+|---|---|
+| `types.ts` | `WorkflowPerformanceSummary`, `AgentPerformanceSummary`, `AgentBreakdownStat`, `ObservabilityDashboardStats` |
+| `metrics.ts` | `sumNumbers`, `average`, `percentile`, `clampNumber`, `safeMs`, `formatDurationMs`, `formatCost`, `formatTokens`, `estimateCostFromTokens` |
+| `buildWorkflowPerformance.ts` | Builds `WorkflowPerformanceSummary` from `WorkflowRunRow` + `WorkflowEventRow[]`. Groups by agent, finds slowest, sums latency/tokens/cost, estimates cost from tokens when actual cost is unavailable. |
+| `getObservabilityDashboardStats.ts` | Loads recent runs + batch events, builds per-run summaries, computes p50/p95, finds hotspots. |
+| `timedAgentStep.ts` | Utility for wrapping agent steps with automatic latency and error logging. Not wired into existing agents. |
+
+### DB changes
+
+- `insertLitigationAgentEvent` now inserts `token_count` and `cost_usd` (previously skipped)
+- `AgentEventRecord` gains `tokenCount?` and `costUsd?`
+- `logAgentEvent` passes them through
+- New `getLitigationWorkflowEventsBatch(ids[])` -- single `IN (...)` query for batch event loading
+
+### UI route (`app/observability/page.tsx`)
+
+Five sections:
+- § 01 Workflow Performance -- 8 metric cards (total runs, completed, failed, avg/p95 duration, avg tokens, avg cost, avg confidence)
+- § 02 Recent Workflows -- table with duration, events, tokens, cost, confidence, citation pass rate, trace link
+- § 03 Agent Breakdown -- aggregated by agent across all recent runs, sorted by total latency
+- § 04 Hotspots -- slowest run, most expensive run, most failure-prone agent, runs missing event data
+- § 05 Notes -- cost estimate disclaimer, latency explanation, no-external-telemetry notice
+
+### Components (`components/observability/`)
+
+MetricCard, ObservabilityOverviewCards, RecentWorkflowPerformanceTable, AgentPerformanceTable, ObservabilityHotspots, ObservabilityNotes.
+
+### Cross-links
+
+- "Observe" added to main navigation
+- "Observe" link in /traces/[id] breadcrumb
+- "Performance Observability" link on /evals page
+- "Observe" link on /workflows list page
+
+### Smoke command
+
+```bash
+npm run smoke:observability   # mock data tests + real DB if available
+```
+
+### Cost / token notes
+
+- `cost_usd` populated only when LLM provider returns it in API response
+- When absent but `token_count` is present, cost is estimated using a conservative placeholder rate
+- Estimates labeled with `~` prefix and "(est.)" in UI; `costIsEstimated: true` on `WorkflowPerformanceSummary`
+- `estimateCostFromTokens` uses 0.002 per 1k tokens as placeholder -- not guaranteed to match any provider's actual pricing
+
+### Limitations
+
+- No external telemetry integration (LangSmith, Langfuse, Datadog, OpenTelemetry)
+- Token counts are currently 0 for most events since agents don't capture LLM response token usage
+- Dashboard requires Supabase; without DB it shows "no data" state
+
+---
+
 ## Design System — "Federal Court Documents meets Financial Terminal"
 
 True black aesthetic. Every new UI component must follow this:

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getEvalDashboardStats } from "@/lib/litigation/evals/getEvalDashboardStats";
 import EvalOverviewCards from "@/components/evals/EvalOverviewCards";
 import RecentEvalTable from "@/components/evals/RecentEvalTable";
@@ -54,6 +55,15 @@ export default async function EvalsPage() {
           Internal quality signals across completed litigation workflow runs.
           Not a claim of legal accuracy or compliance.
         </p>
+        <div style={{ marginTop: "0.75rem" }}>
+          <Link
+            href="/observability"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "#404040", letterSpacing: "0.14em", textTransform: "uppercase" }}
+            className="transition-colors hover:text-white"
+          >
+            Performance Observability &rarr;
+          </Link>
+        </div>
       </div>
 
       <div className="rule mb-10" />

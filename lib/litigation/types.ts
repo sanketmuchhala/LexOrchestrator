@@ -26,6 +26,8 @@ export interface AgentEventRecord {
   toolInput?: Record<string, unknown>;
   toolOutput?: Record<string, unknown>;
   latencyMs?: number;
+  tokenCount?: number;
+  costUsd?: number;
   metadata?: Record<string, unknown>;
 }
 

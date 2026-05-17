@@ -25,6 +25,7 @@
     "smoke:demo-path": "tsx scripts/smoke-test-demo-path.ts",
     "smoke:draft-export": "tsx scripts/smoke-test-draft-export.ts",
     "smoke:trace-builder": "tsx scripts/smoke-test-trace-builder.ts",
+    "smoke:observability": "tsx scripts/smoke-test-observability.ts",
     "mcp:server": "tsx mcp/server.ts",
     "worker:citation": "uvicorn workers.citation.app:app --host 127.0.0.1 --port 8015",
     "check:safety": "tsx scripts/check-safety.ts",

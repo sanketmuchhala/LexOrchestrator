@@ -53,6 +53,7 @@ async function main() {
       "smoke:demo-path",
       "smoke:draft-export",
       "smoke:trace-builder",
+      "smoke:observability",
     ]) {
       report(scripts[script] ? "pass" : "fail", `script ${script}`, scripts[script] ?? "missing");
     }
@@ -73,6 +74,9 @@ async function main() {
   requireFile("trace API route", "app/api/traces/[id]/route.ts");
   requireFile("buildWorkflowTrace", "lib/traces/buildWorkflowTrace.ts");
   requireFile("TraceSummaryPanel", "components/traces/TraceSummaryPanel.tsx");
+  requireFile("observability page", "app/observability/page.tsx");
+  requireFile("observability metrics", "lib/observability/metrics.ts");
+  requireFile("buildWorkflowPerformance", "lib/observability/buildWorkflowPerformance.ts");
 
   if (exists("lib/litigation/localRules/rules.ts")) {
     const rules = read("lib/litigation/localRules/rules.ts");
