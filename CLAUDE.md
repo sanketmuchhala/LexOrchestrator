@@ -515,6 +515,69 @@ npm run smoke:matters   # ephemeral matter, createMatter, getMatterWorkspace, li
 
 ---
 
+## Phase 21 Deployment Hardening
+
+Adds production deployment readiness without new product features.
+
+### Env validation (`lib/env/validateEnv.ts`)
+
+- `getEnvStatus()` -- returns env availability flags (no secret values). Classifies vars into: `recommended_production`, `optional_ai`, `optional_db`, `optional_worker`, `optional_mcp`.
+- `assertProductionEnvSafe()` -- throws only if configuration is actively broken in production (e.g. Supabase URL set but service key missing). Does NOT throw for missing optional vars -- the app degrades gracefully.
+
+### Health routes
+
+- `GET /api/health` -- status, timestamp, version, lightweight DB and worker reachability checks (2s timeout each). Safe for uptime monitoring.
+- `GET /api/health/env` -- env configuration availability summary. No secret values, no stack traces.
+
+### Logger (`lib/utils/logger.ts`)
+
+Thin wrapper using `console.warn`/`console.error` per repo convention. NODE_ENV-aware: `info` is suppressed in production. Used in new health/deployment code.
+
+### Deployment readiness script
+
+`npm run check:deployment` via `scripts/check-deployment-readiness.ts`. Checks:
+- safety gate passes
+- .env files not committed to git
+- .env.example exists
+- health routes exist
+- all core and API routes exist
+- docs/DEPLOYMENT.md exists
+- MCP and citation worker READMEs exist (if those modules exist)
+- env validation and logger modules exist
+- required package scripts exist
+- key migrations exist
+
+### Env example
+
+`.env.example` -- placeholder-only, commented, lists all optional vars with explanations. Never commit `.env` or `.env.local`.
+
+### `check:all` updated
+
+```bash
+npm run check:all
+# now runs: check:safety, check:demo, check:deployment, lint, tsc, build
+```
+
+### Deployment guide
+
+`docs/DEPLOYMENT.md` covers Vercel + Supabase setup, env var table, migration sequence, optional citation worker deployment, post-deploy checks, rollback plan, and the pre-deploy checklist.
+
+### Server-only boundary audit
+
+Confirmed clean:
+- `lib/db/supabaseServer.ts` is imported in client components via `import type` only (type-only, erased at runtime)
+- No `process.env` secret access in any `"use client"` component
+- `lib/env/validateEnv.ts` is server-only
+- All export/upload/citation routes use Node.js runtime (no edge runtime)
+
+### Limitations
+
+- Rate limiting not implemented (future work)
+- Migration runner on deploy not implemented -- apply migrations manually via Supabase Dashboard
+- MCP server is stdio-only; no hosted SSE deployment path yet
+
+---
+
 ## Design System — "Federal Court Documents meets Financial Terminal"
 
 True black aesthetic. Every new UI component must follow this:

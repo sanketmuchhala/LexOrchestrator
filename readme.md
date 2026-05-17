@@ -16,6 +16,8 @@ This is a portfolio project demonstrating multi-agent orchestration, hybrid RAG 
 
 **Draft editing.** The draft workspace (`/draft/[id]`) is editable. Save a revision with Cmd/Ctrl+S or the Save button. Click "Save + Verify" to re-run citation verification on the edited text. Revision history is tracked and displayed.
 
+**Deployment.** The app is designed for Vercel + Supabase. All features degrade gracefully without environment variables -- no Supabase runs ephemeral in-memory mode; no LLM key uses deterministic fallback agents. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full setup guide.
+
 **Matter workspaces.** `/matters` groups related workflow runs, uploads, and drafts under a single matter. Create a matter, launch draft workflows from it, upload case files, and view all quality signals in one place. Workflows and uploads automatically link to the matter when `matterId` is provided. Auth is not required -- `user_id` and `organization_id` are nullable. Auth-gated per-user policies are future work.
 
 **Observability dashboard.** `/observability` aggregates performance across recent workflow runs: p50/p95 duration, average token count, agent breakdown, and hotspots (slowest run, most failure-prone agent). Token and cost values depend on provider response data; estimates are labeled as such. No external tracing integration is active.
@@ -248,7 +250,7 @@ npm run check:all
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the phased plan through Phase 22.
 
-Completed through Phase 20 (Matters and Saved Workspaces). Next priorities:
+Completed through Phase 21 (Deployment Hardening). See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full deployment guide. Next priorities:
 - Real CourtListener / CAP ingestion (Phase 14)
 - PDF and DOCX file upload for case files (planned)
 - Agent trace replay and debugging view (Phase 18)

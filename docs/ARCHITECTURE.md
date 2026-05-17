@@ -283,3 +283,23 @@ lib/demo/litigationDemoFixture.ts        Canonical demo fixture constants
 mcp/server.ts                            MCP stdio server
 mcp/tools/                               Nine tool modules
 ```
+
+---
+
+## Deployment and Health (Phase 21)
+
+```
+GET /api/health
+  -> getEnvStatus()              // reads env var availability (no secret values)
+  -> checkDatabaseReachable()    // lightweight SELECT with 2s timeout
+  -> checkCitationWorkerReachable() // GET /health on worker URL with 2s timeout
+  -> { status, timestamp, checks: { env, databaseReachable, citationWorkerReachable } }
+
+GET /api/health/env
+  -> getEnvStatus()
+  -> { status, environment, database.configured, ai.*, citationWorker.configured, persistenceMode, warnings }
+```
+
+Both health routes return availability flags only. No secret values are returned. `databaseReachable` and `citationWorkerReachable` return `"not_configured"` when the respective service is not set up.
+
+Server-only boundary: `lib/db/supabaseServer.ts` and `lib/env/validateEnv.ts` are server-only. Client components import only types (`import type`) from supabaseServer, which are erased at runtime and create no browser bundle dependency.
