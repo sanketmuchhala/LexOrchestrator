@@ -143,6 +143,19 @@ export default async function DraftWorkspacePage({ params }: Props) {
             Trace &rarr;
           </Link>
           <Link
+            href={`/jury?legalQuestion=${encodeURIComponent(workflow?.input_summary?.slice(0, 200) ?? "")}&jurisdiction=${encodeURIComponent(workflow?.jurisdiction ?? "")}&motionType=${encodeURIComponent(workflow?.motion_type ?? "")}&confidence=${encodeURIComponent(workflow?.confidence != null ? Math.round(workflow.confidence * 100) + "%" : "")}`}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: "var(--text-3)",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+            }}
+            className="transition-colors hover:text-black"
+          >
+            Jury &rarr;
+          </Link>
+          <Link
             href="/draft"
             style={{
               fontFamily: "var(--font-mono)",
