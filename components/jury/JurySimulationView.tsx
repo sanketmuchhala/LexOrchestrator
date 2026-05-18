@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { JurySimulationResult } from "@/lib/jury/types";
 import JurorGrid from "./JurorGrid";
+import JuryDiscussionFeed from "./JuryDiscussionFeed";
 import SentimentBar from "./SentimentBar";
 import NarrativePanel from "./NarrativePanel";
 import InfluentialVoices from "./InfluentialVoices";
@@ -18,16 +19,29 @@ interface PollResponse {
   rounds: number;
 }
 
-function SectionTitle({ n, label }: { n: string; label: string }) {
+function SectionTitle({ n, label, live }: { n: string; label: string; live?: boolean }) {
   return (
     <div className="mb-5 flex items-center gap-4">
       <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", letterSpacing: "0.2em" }}>
         § {n}
       </span>
       <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)", letterSpacing: "0.24em", textTransform: "uppercase" }}>
-        {label}
-      </span>
+      <div className="flex items-center gap-2">
+        {live && (
+          <span
+            style={{
+              display: "inline-block",
+              width: 6, height: 6,
+              borderRadius: "50%",
+              background: "#6366f1",
+              animation: "pulse-dot 1.4s ease-in-out infinite",
+            }}
+          />
+        )}
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-2)", letterSpacing: "0.24em", textTransform: "uppercase" }}>
+          {label}
+        </span>
+      </div>
     </div>
   );
 }
@@ -46,6 +60,7 @@ interface JurySimulationViewProps {
 export default function JurySimulationView({ id, initialNumAgents, initialRounds }: JurySimulationViewProps) {
   const [data, setData] = useState<PollResponse | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
   const startRef = useRef(Date.now());
 
   const poll = useCallback(async () => {
@@ -61,52 +76,58 @@ export default function JurySimulationView({ id, initialNumAgents, initialRounds
 
   useEffect(() => {
     poll();
-    const pollInterval = setInterval(() => {
-      setData((prev) => {
-        if (prev?.status === "completed" || prev?.status === "failed") {
-          clearInterval(pollInterval);
-          return prev;
-        }
-        return prev;
-      });
-      poll();
-    }, 3000);
-
+    const pollInterval = setInterval(poll, 3000);
     const elapsedInterval = setInterval(() => {
       setElapsed(Math.floor((Date.now() - startRef.current) / 1000));
     }, 1000);
-
     return () => {
       clearInterval(pollInterval);
       clearInterval(elapsedInterval);
     };
   }, [poll]);
 
-  const status = data?.status ?? "running";
-  const result = data?.result ?? null;
+  // Cycle through jurors while deliberating to show who's "speaking"
   const numAgents = data?.numAgents ?? initialNumAgents;
+  const status = data?.status ?? "running";
+
+  useEffect(() => {
+    if (status !== "running") {
+      setSpeakingIndex(null);
+      return;
+    }
+    // Each juror "speaks" for ~2.5s before passing to next
+    const cycle = setInterval(() => {
+      setSpeakingIndex((prev) => {
+        const next = prev === null ? 0 : (prev + 1) % numAgents;
+        return next;
+      });
+    }, 2500);
+    return () => clearInterval(cycle);
+  }, [status, numAgents]);
+
+  const result = data?.result ?? null;
   const rounds = data?.rounds ?? initialRounds;
 
   return (
     <div>
-      {/* ── Juror Grid ─────────────────────────────────────────────── */}
-      <section className="mb-12">
-        <SectionTitle n="01" label="Jury Panel" />
+
+      {/* ── Jury Panel ─────────────────────────────────────────────────── */}
+      <section className="mb-10">
+        <SectionTitle n="01" label="Jury Panel" live={status === "running"} />
 
         {status === "running" && (
-          <div className="mb-6 flex items-center gap-3">
-            <span className="pulse-dot" style={{ width: 8, height: 8, borderRadius: "50%", background: "#6366f1", display: "inline-block" }} />
+          <div className="mb-5 flex items-center gap-3">
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)", letterSpacing: "0.14em" }}>
-              Deliberating · {formatElapsed(elapsed)} elapsed
+              {numAgents} jurors deliberating · {formatElapsed(elapsed)} elapsed
             </span>
           </div>
         )}
 
         {status === "completed" && result && (
-          <div className="mb-4 flex items-center gap-3">
+          <div className="mb-5 flex items-center gap-3 flex-wrap">
             <span className="badge badge-pass">Verdict reached</span>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}>
-              {numAgents} jurors · {rounds} rounds · {result.durationSeconds.toFixed(1)}s
+              {numAgents} jurors · {rounds} rounds · {result.durationSeconds.toFixed(1)}s · {result.totalActions} actions
             </span>
           </div>
         )}
@@ -116,28 +137,50 @@ export default function JurySimulationView({ id, initialNumAgents, initialRounds
           mode={status === "completed" ? "verdict" : "deliberating"}
           sentimentDistribution={result?.sentimentDistribution}
           sampleActions={result?.sampleActions}
+          speakingIndex={status === "running" ? speakingIndex : null}
         />
       </section>
 
-      {/* ── Running state ──────────────────────────────────────────── */}
-      {status === "running" && (
-        <div className="py-12 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <div className="relative flex items-center justify-center mx-auto mb-6" style={{ width: 72, height: 72 }}>
-            <div className="agent-orb" style={{ width: 48, height: 48 }} aria-hidden="true" />
-            <div className="agent-orb-ring" style={{ inset: "-12px", animationDelay: "0s" }} aria-hidden="true" />
-            <div className="agent-orb-ring" style={{ inset: "-12px", animationDelay: "0.6s" }} aria-hidden="true" />
-            <div className="agent-orb-ring" style={{ inset: "-12px", animationDelay: "1.2s" }} aria-hidden="true" />
+      {/* ── Discussion ─────────────────────────────────────────────────── */}
+      {status !== "failed" && (
+        <section className="mb-10">
+          <SectionTitle n="02" label={status === "running" ? "Jury Room" : "Full Deliberation"} live={status === "running"} />
+
+          {status === "running" && (
+            <div
+              className="mb-4 px-4 py-3"
+              style={{
+                border: "1px solid rgba(99,102,241,0.2)",
+                background: "rgba(99,102,241,0.04)",
+                fontFamily: "var(--font-mono)",
+                fontSize: "10px",
+                color: "var(--text-3)",
+                letterSpacing: "0.12em",
+              }}
+            >
+              Simulation in progress — results arrive all at once after {numAgents >= 15 ? "90-120" : "40-60"}s.
+              Discussion below is a preview of deliberation activity.
+            </div>
+          )}
+
+          <div
+            style={{
+              border: "1px solid rgba(255,255,255,0.06)",
+              padding: "1.25rem",
+              minHeight: "12rem",
+            }}
+          >
+            <JuryDiscussionFeed
+              status={status}
+              actions={result?.sampleActions ?? []}
+              numAgents={numAgents}
+              elapsed={elapsed}
+            />
           </div>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-2)", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-            Swarm deliberating...
-          </p>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", marginTop: "0.5rem" }}>
-            This takes {numAgents >= 15 ? "90-120" : "40-60"} seconds. The page updates automatically.
-          </p>
-        </div>
+        </section>
       )}
 
-      {/* ── Failed state ───────────────────────────────────────────── */}
+      {/* ── Failed ─────────────────────────────────────────────────────── */}
       {status === "failed" && (
         <div style={{ border: "1px solid rgba(248,113,113,0.3)", padding: "1.25rem", marginTop: "1rem" }}>
           <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--red)", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
@@ -149,13 +192,12 @@ export default function JurySimulationView({ id, initialNumAgents, initialRounds
         </div>
       )}
 
-      {/* ── Completed results ──────────────────────────────────────── */}
+      {/* ── Completed results ──────────────────────────────────────────── */}
       {status === "completed" && result && (
-        <div className="space-y-10" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "2.5rem" }}>
+        <div className="space-y-10">
 
-          {/* Sentiment */}
           <section>
-            <SectionTitle n="02" label="Verdict Distribution" />
+            <SectionTitle n="03" label="Verdict Distribution" />
             <SentimentBar
               positive={result.sentimentDistribution.positive}
               negative={result.sentimentDistribution.negative}
@@ -163,24 +205,21 @@ export default function JurySimulationView({ id, initialNumAgents, initialRounds
             />
           </section>
 
-          {/* Narratives */}
           <section>
-            <SectionTitle n="03" label="Swarm Consensus" />
+            <SectionTitle n="04" label="Swarm Consensus" />
             <NarrativePanel
               narratives={result.topNarratives}
               trends={result.emergingTrends}
             />
           </section>
 
-          {/* Influential voices */}
           <section>
-            <SectionTitle n="04" label="Influential Voices" />
+            <SectionTitle n="05" label="Influential Voices" />
             <InfluentialVoices actions={result.sampleActions} />
           </section>
 
-          {/* Full report */}
           <section>
-            <SectionTitle n="05" label="Full Report" />
+            <SectionTitle n="06" label="Full Report" />
             <details>
               <summary
                 style={{
@@ -203,14 +242,12 @@ export default function JurySimulationView({ id, initialNumAgents, initialRounds
             </details>
           </section>
 
-          {/* Meta */}
           <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1rem" }}>
             <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)" }}>
-              Simulation ID: {result.predictionId} · {result.totalActions} total actions ·{" "}
-              {result.durationSeconds.toFixed(1)}s
+              Simulation ID: {result.predictionId} · {result.totalActions} actions · {result.durationSeconds.toFixed(1)}s
             </p>
             <p style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-3)", marginTop: "0.25rem" }}>
-              Swarm intelligence output only. Not legal advice. Not a prediction of actual jury behavior.
+              Swarm intelligence only. Not legal advice. Not a prediction of actual jury behavior.
             </p>
           </div>
         </div>
