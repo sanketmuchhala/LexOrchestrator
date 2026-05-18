@@ -27,3 +27,6 @@ docs/private-notes/
 venv/
 __pycache__/
 *.pyc
+
+#login details
+login.md
