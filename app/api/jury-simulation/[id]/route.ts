@@ -16,6 +16,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
   return NextResponse.json({
     id: record.id,
     status: record.status,
+    actionsReceivedSoFar: record.actionsReceivedSoFar,
     result: record.result,
     error: record.error,
     createdAt: record.createdAt,

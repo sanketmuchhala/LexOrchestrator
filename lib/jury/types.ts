@@ -39,6 +39,7 @@ export interface JurySimulationRecord {
   id: string;
   input: JurySimulationInput;
   status: JurySimulationStatus;
+  actionsReceivedSoFar: JurorAction[];
   result: JurySimulationResult | null;
   error: string | null;
   createdAt: string;
