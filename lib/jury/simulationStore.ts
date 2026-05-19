@@ -1,4 +1,4 @@
-import type { JurySimulationRecord } from "./types";
+import type { JurorAction, JurySimulationRecord } from "./types";
 
 const MAX_ENTRIES = 100;
 const store = new Map<string, JurySimulationRecord>();
@@ -13,6 +13,15 @@ export function setSimulation(id: string, record: JurySimulationRecord): void {
     insertOrder.push(id);
   }
   store.set(id, record);
+}
+
+export function pushAction(id: string, action: JurorAction): void {
+  const record = store.get(id);
+  if (!record) return;
+  store.set(id, {
+    ...record,
+    actionsReceivedSoFar: [...record.actionsReceivedSoFar, action],
+  });
 }
 
 export function getSimulation(id: string): JurySimulationRecord | null {

@@ -8,9 +8,12 @@ import SentimentBar from "./SentimentBar";
 import NarrativePanel from "./NarrativePanel";
 import InfluentialVoices from "./InfluentialVoices";
 
+import type { JurorAction } from "@/lib/jury/types";
+
 interface PollResponse {
   id: string;
   status: "running" | "completed" | "failed";
+  actionsReceivedSoFar: JurorAction[];
   result: JurySimulationResult | null;
   error: string | null;
   createdAt: string;
@@ -76,7 +79,7 @@ export default function JurySimulationView({ id, initialNumAgents, initialRounds
 
   useEffect(() => {
     poll();
-    const pollInterval = setInterval(poll, 3000);
+    const pollInterval = setInterval(poll, 2000);
     const elapsedInterval = setInterval(() => {
       setElapsed(Math.floor((Date.now() - startRef.current) / 1000));
     }, 1000);
@@ -107,6 +110,7 @@ export default function JurySimulationView({ id, initialNumAgents, initialRounds
 
   const result = data?.result ?? null;
   const rounds = data?.rounds ?? initialRounds;
+  const liveActions = data?.actionsReceivedSoFar ?? [];
 
   return (
     <div>
@@ -172,9 +176,8 @@ export default function JurySimulationView({ id, initialNumAgents, initialRounds
           >
             <JuryDiscussionFeed
               status={status}
-              actions={result?.sampleActions ?? []}
+              actions={status === "completed" ? (result?.sampleActions ?? []) : liveActions}
               numAgents={numAgents}
-              elapsed={elapsed}
             />
           </div>
         </section>
