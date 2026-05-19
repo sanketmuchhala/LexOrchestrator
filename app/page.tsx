@@ -112,7 +112,7 @@ const EVAL_DIMENSIONS = [
   { label: "Judge alignment",          weight: "5%",  color: "#f43f5e" },
 ];
 
-const FEATURES = [
+/* const FEATURES = [
   {
     title: "Matter Workspaces",
     desc: "Organise drafts, uploads, and workflow runs under a named client matter. Full audit trail per case.",
@@ -161,7 +161,7 @@ const FEATURES = [
     href: "/workflows",
     stat: "9 MCP tools",
   },
-];
+]; */
 
 const SAMPLE_OUTPUT = `PRELIMINARY STATEMENT
 
@@ -237,13 +237,7 @@ export default function LandingPage() {
           >
             Start a Draft
           </Link>
-          <Link
-            href="/demo"
-            className="inline-block px-8 py-3 text-xs font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-70"
-            style={{ fontFamily: "var(--font-mono)", border: "1px solid rgba(255,255,255,0.15)", color: "var(--text-2)" }}
-          >
-            View Demos
-          </Link>
+          {/* <Link href="/demo" ...>View Demos</Link> */}
         </div>
 
         {/* Dot grid */}
@@ -610,8 +604,8 @@ export default function LandingPage() {
 
       <div className="rule" />
 
-      {/* ══ FEATURES ══════════════════════════════════════════════════════ */}
-      <section className="py-20">
+      {/* ══ FEATURES — commented out for now ═══════════════════════════ */}
+      {/* <section className="py-20">
         <div className="mb-12">
           <p className="label mb-3">Platform Features</p>
           <p
@@ -658,7 +652,7 @@ export default function LandingPage() {
             </Link>
           ))}
         </div>
-      </section>
+      </section> */}
 
       <div className="rule" />
 
@@ -684,13 +678,7 @@ export default function LandingPage() {
           >
             Start a Draft
           </Link>
-          <Link
-            href="/demo"
-            className="inline-block px-9 py-3 text-xs font-bold uppercase tracking-[0.2em] transition-opacity hover:opacity-70"
-            style={{ fontFamily: "var(--font-mono)", border: "1px solid rgba(255,255,255,0.15)", color: "var(--text-2)" }}
-          >
-            View Demos
-          </Link>
+          {/* <Link href="/demo" ...>View Demos</Link> */}
         </div>
         <p
           className="mt-10 text-[10px] leading-6 max-w-lg mx-auto"
